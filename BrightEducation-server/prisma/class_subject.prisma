@@ -1,0 +1,10 @@
+model ClassSubject {
+    id            String   @id @default(uuid())
+    classTenureId String
+    name          String   // "Mathematics", "English"
+    
+    classTenure   ClassTenure @relation(fields: [classTenureId], references: [id], onDelete: Cascade)
+    subjectTeacherTenures SubjectTeacherTenure[]
+    
+    @@unique([classTenureId, name])
+}

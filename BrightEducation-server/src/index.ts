@@ -1,0 +1,67 @@
+import express, { Request } from "express";
+import "dotenv/config";
+import logger from "./libs/logger";
+import { initializer } from "./config/Validation/Initializer";
+import { authRouter } from "./modules/Auth/auth.routes";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import { errorHandler } from "./config/middleware/errorHandler";
+import { notFound } from "./config/middleware/notFound";
+import { userRouter } from "./modules/User/user.routes";
+import { notificationRouter } from "./modules/Notification/notification.routes";
+
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+``;
+app.use(express.json());
+app.use(cookieParser());
+app.use((req: Request, res, next) => {
+  const { method, path, ip } = req;
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  logger.info(
+    `[REQUEST] ${method} ${path} | IP: ${ip} | User-Agent: ${userAgent}`,
+  );
+  next();
+});
+
+await initializer();
+
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/notifications", notificationRouter);
+
+
+app.get("/", (_req, res) => {
+  logger.info("[HOME] Root endpoint accessed");
+  res.json({
+    message: "Bright Education API Server",
+    version: "1.0.0",
+    status: "running",
+    endpoints: {
+      auth: "/api/v1/auth",
+      user: "/api/v1/user",
+    },
+  });
+});
+
+app.use(notFound);
+
+app.use(errorHandler);
+
+app.listen(PORT, () => {
+  logger.info(`[SERVER] Bright Education API started successfully`);
+  logger.info(`[SERVER] Port: ${PORT}`);
+  logger.info(`[SERVER] Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`[SERVER] Client URL: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
+  logger.info(`[SERVER] Ready to accept requests`);
+});

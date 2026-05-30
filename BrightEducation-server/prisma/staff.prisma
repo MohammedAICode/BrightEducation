@@ -1,0 +1,13 @@
+model Staff {
+    id String @id @default(uuid())
+
+    userId String @unique
+
+    employeeId      String    @unique
+    joiningDate     DateTime
+    expInYrs        Int       @default(0)
+    annualSalary    BigInt?
+    resignationDate DateTime?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

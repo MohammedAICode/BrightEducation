@@ -1,0 +1,1091 @@
+{
+  "info": {
+    "name": "Bright Education API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bright.com\",\n  \"password\": \"admin@2000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login (Invalid Email)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invalid@email.com\",\n  \"password\": \"admin@2000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login (Wrong Password)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bright.com\",\n  \"password\": \"wrongpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bright.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/me",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User (Unauthenticated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/me",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/logout",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Logout (Unauthenticated)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/auth/logout",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Create Management User (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "incharge@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "MANAGEMENT",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "John",
+                  "type": "text"
+                },
+                {
+                  "key": "lastname",
+                  "value": "Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "1990-01-15",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "123 Main St, Hyderabad",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-9876543210",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Father",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "91-9876543210",
+                  "type": "text"
+                },
+                {
+                  "key": "bloodGroup",
+                  "value": "O+",
+                  "type": "text"
+                },
+                {
+                  "key": "nationality",
+                  "value": "Indian",
+                  "type": "text"
+                },
+                {
+                  "key": "religion",
+                  "value": "Hindu",
+                  "type": "text"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "MGR001",
+                  "type": "text"
+                },
+                {
+                  "key": "manageType",
+                  "value": "INCHARGE",
+                  "type": "text"
+                },
+                {
+                  "key": "joiningDate",
+                  "value": "2024-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "expInYrs",
+                  "value": "10",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImg",
+                  "value": "",
+                  "type": "file",
+                  "src": "/C:/Users/zahoo/Downloads/man/image.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create Teacher User (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "teacher@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Sarah",
+                  "type": "text"
+                },
+                {
+                  "key": "lastname",
+                  "value": "Johnson",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "FEMALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "1988-03-22",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "456 School Rd, Hyderabad",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-9876543212",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Spouse",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "91-9876543212",
+                  "type": "text"
+                },
+                {
+                  "key": "bloodGroup",
+                  "value": "B+",
+                  "type": "text"
+                },
+                {
+                  "key": "nationality",
+                  "value": "Indian",
+                  "type": "text"
+                },
+                {
+                  "key": "religion",
+                  "value": "Christian",
+                  "type": "text"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "TCH001",
+                  "type": "text"
+                },
+                {
+                  "key": "joiningDate",
+                  "value": "2023-06-15",
+                  "type": "text"
+                },
+                {
+                  "key": "expInYrs",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "annualSalary",
+                  "value": "600000",
+                  "type": "text"
+                },
+                {
+                  "key": "qualification",
+                  "value": "M.Sc Mathematics",
+                  "type": "text"
+                },
+                {
+                  "key": "subjects",
+                  "value": "Mathematics, Physics",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImg",
+                  "value": "",
+                  "type": "file",
+                  "src": "/C:/Users/zahoo/Downloads/teacher/image.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create Staff User (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "staff@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "STAFF",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Rajesh",
+                  "type": "text"
+                },
+                {
+                  "key": "lastname",
+                  "value": "Kumar",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "1992-07-10",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "789 Office Lane, Hyderabad",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-9876543213",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Brother",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "91-9876543213",
+                  "type": "text"
+                },
+                {
+                  "key": "bloodGroup",
+                  "value": "AB+",
+                  "type": "text"
+                },
+                {
+                  "key": "nationality",
+                  "value": "Indian",
+                  "type": "text"
+                },
+                {
+                  "key": "religion",
+                  "value": "Hindu",
+                  "type": "text"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "STF001",
+                  "type": "text"
+                },
+                {
+                  "key": "joiningDate",
+                  "value": "2023-01-10",
+                  "type": "text"
+                },
+                {
+                  "key": "expInYrs",
+                  "value": "3",
+                  "type": "text"
+                },
+                {
+                  "key": "annualSalary",
+                  "value": "300000",
+                  "type": "text"
+                },
+                {
+                  "key": "designation",
+                  "value": "Office Assistant",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImg",
+                  "value": "",
+                  "type": "file",
+                  "src": "/C:/Users/zahoo/Downloads/staff/image.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create Student User (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "student@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "STUDENT",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Amit",
+                  "type": "text"
+                },
+                {
+                  "key": "lastname",
+                  "value": "Sharma",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "2010-04-15",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "321 Student St, Hyderabad",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-9876543214",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Father",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "91-9876543214",
+                  "type": "text"
+                },
+                {
+                  "key": "bloodGroup",
+                  "value": "A+",
+                  "type": "text"
+                },
+                {
+                  "key": "nationality",
+                  "value": "Indian",
+                  "type": "text"
+                },
+                {
+                  "key": "religion",
+                  "value": "Hindu",
+                  "type": "text"
+                },
+                {
+                  "key": "parentRelation",
+                  "value": "Father",
+                  "type": "text"
+                },
+                {
+                  "key": "parentName",
+                  "value": "Rajesh Sharma",
+                  "type": "text"
+                },
+                {
+                  "key": "parentPhone",
+                  "value": "91-9876543215",
+                  "type": "text"
+                },
+                {
+                  "key": "parentOccupation",
+                  "value": "Business",
+                  "type": "text"
+                },
+                {
+                  "key": "admissionNo",
+                  "value": "ADM2024001",
+                  "type": "text"
+                },
+                {
+                  "key": "admissionDate",
+                  "value": "2024-06-01",
+                  "type": "text"
+                },
+                {
+                  "key": "rollNumber",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "class",
+                  "value": "10",
+                  "type": "text"
+                },
+                {
+                  "key": "section",
+                  "value": "A",
+                  "type": "text"
+                },
+                {
+                  "key": "previousSchool",
+                  "value": "Delhi Public School",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImg",
+                  "value": "",
+                  "type": "file",
+                  "src": "/C:/Users/zahoo/Downloads/student/image.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create User (Duplicate Email)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "admin@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Test",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "1990-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Test Address",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Father",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create User (Missing Required Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "test@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create Student (Missing Parent Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "student2@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "STUDENT",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Test",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "2010-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Test Address",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Father",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create User (Invalid Email Format)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "invalid-email",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Test",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "1990-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Test Address",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Father",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Create User (Non-Admin Permission Denied)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "testuser@bright.com",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER",
+                  "type": "text"
+                },
+                {
+                  "key": "firstname",
+                  "value": "Test",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "MALE",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "1990-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Test Address",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContact",
+                  "value": "91-1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "emergencyContactRelation",
+                  "value": "Father",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "register"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/all?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (with Search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/all?page=1&limit=10&search=John",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "John"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (with Role Filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/all?page=1&limit=10&role=TEACHER",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User By ID (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User (Success)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "firstname",
+                  "value": "Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "lastname",
+                  "value": "Name",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User (Non-Admin Permission Denied)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "firstname",
+                  "value": "Updated",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User (Non-Admin Permission Denied)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/user/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "user", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

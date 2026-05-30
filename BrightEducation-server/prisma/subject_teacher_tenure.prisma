@@ -1,0 +1,16 @@
+model SubjectTeacherTenure {
+    id             String              @id @default(uuid())
+    academicYearId String
+    sectionTenureId String
+    classSubjectId String
+    teacherId      String
+    status         TENURE_STATUS       @default(ACTIVE)
+    
+    academicYear   AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+    sectionTenure  SectionTenure       @relation(fields: [sectionTenureId], references: [id], onDelete: Cascade)
+    classSubject   ClassSubject        @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+    teacher        User                @relation("SubjectTeacherTenure", fields: [teacherId], references: [id], onDelete: Cascade)
+    
+    @@unique([academicYearId, sectionTenureId, classSubjectId])
+    @@index([academicYearId, teacherId])
+}

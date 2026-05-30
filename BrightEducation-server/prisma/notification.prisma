@@ -1,0 +1,24 @@
+model Notification {
+    id          String   @id @default(uuid())
+    type        String   // PASSWORD_CHANGE, PROFILE_UPDATE, LOGIN_ALERT, etc.
+    status      String   // PENDING, APPROVED, REJECTED, COMPLETED
+    userId      String
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    relatedUserId String? // For notifications involving another user (e.g., admin approving request)
+    relatedUser User?    @relation("NotificationRelatedUser", fields: [relatedUserId], references: [id], onDelete: SetNull)
+    data        Json?    // Flexible field for type-specific data (e.g., newPassword, reason, etc.)
+    title       String   // Display title
+    message     String   // Display message
+    priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+    isRead      Boolean  @default(false)
+    readAt      DateTime?
+    createdAt   DateTime @default(now())
+    processedAt DateTime?
+    processedBy String?  // userId of who processed the notification
+    processor   User?    @relation("NotificationProcessor", fields: [processedBy], references: [id], onDelete: SetNull)
+
+    @@index([userId])
+    @@index([status])
+    @@index([type])
+    @@index([isRead])
+}

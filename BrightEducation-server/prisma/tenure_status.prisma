@@ -1,0 +1,6 @@
+enum TENURE_STATUS {
+    ACTIVE
+    TRANSFERRED
+    RESIGNED
+    RETIRED
+}

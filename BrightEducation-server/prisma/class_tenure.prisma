@@ -1,0 +1,11 @@
+model ClassTenure {
+    id             String       @id @default(uuid())
+    academicYearId String
+    name           String       // "Grade 1", "Kindergarten"
+    
+    academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+    sectionTenures SectionTenure[]
+    classSubjects  ClassSubject[]
+    
+    @@unique([academicYearId, name])
+}

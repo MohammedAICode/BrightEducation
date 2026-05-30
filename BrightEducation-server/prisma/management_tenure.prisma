@@ -1,0 +1,12 @@
+model ManagementTenure {
+    id             String              @id @default(uuid())
+    academicYearId String
+    managementId   String
+    status         TENURE_STATUS       @default(ACTIVE)
+    
+    academicYear   AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+    management     User                @relation("ManagementTenure", fields: [managementId], references: [id], onDelete: Cascade)
+    
+    @@unique([managementId, academicYearId])
+    @@index([academicYearId, status])
+}

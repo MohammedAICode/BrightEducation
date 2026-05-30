@@ -1,0 +1,14 @@
+model Student {
+    id String @id @default(uuid())
+
+    userId String @unique
+
+    admissionNo   String   @unique
+    admissionDate DateTime
+    rollNumber    String?
+    classGrade    String?
+    section       String   @default("A")
+    prevSchool     String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

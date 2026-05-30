@@ -1,0 +1,16 @@
+model SectionTenure {
+    id             String       @id @default(uuid())
+    academicYearId String
+    classTenureId  String
+    name           String       // "A", "B", "Morning"
+    capacity       Int         // Maximum students allowed
+    
+    academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+    classTenure    ClassTenure  @relation(fields: [classTenureId], references: [id], onDelete: Cascade)
+    
+    studentEnrollments StudentEnrollment[]
+    subjectTeacherTenures SubjectTeacherTenure[]
+    classTeacherTenure ClassTeacherTenure? @relation("ClassTeacherTenure")
+    
+    @@unique([academicYearId, classTenureId, name])
+}

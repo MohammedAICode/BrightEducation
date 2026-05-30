@@ -1,0 +1,75 @@
+model User {
+    id String @id @default(uuid())
+
+    firstname                String
+    lastname                 String?
+    gender                   Gender
+    dateOfBirth              DateTime
+    phone                    String?
+    address                  String
+    emergencyContactRelation String
+    emergencyContact         String
+    bloodGroup               String?
+    nationality              String   @default("Indian")
+    religion                 String?
+
+    // Parents
+    parentRelation   String?
+    parentName       String?
+    parentPhone      String?
+    parentOccupation String?
+
+    email    String  @unique
+    password String?
+
+    profileImg    Bytes?
+    profileImgKey String?
+
+    role ROLE_TYPE
+
+    isActive IS_ACTIVE @default(CREATED)
+
+    student    Student?
+    teacher    Teacher?
+    staff      Staff?
+    management Management?
+
+    studentEnrollments StudentEnrollment[] @relation("StudentEnrollment")
+    subjectTeacherTenures SubjectTeacherTenure[] @relation("SubjectTeacherTenure")
+    classTeacherTenures  ClassTeacherTenure[]  @relation("ClassTeacherTenure")
+    teacherTenures   TeacherTenure[] @relation("TeacherTenure")
+    staffTenures     StaffTenure[]    @relation("StaffTenure")
+    managementTenures ManagementTenure[] @relation("ManagementTenure")
+
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    lastLogin   DateTime?
+    createdById String?
+    createdBy   User?     @relation("userCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+    createdUsers User[]  @relation("userCreator")
+    tokens        Token[]
+    notifications Notification[]
+    relatedNotifications Notification[] @relation("NotificationRelatedUser")
+    processedNotifications Notification[] @relation("NotificationProcessor")
+}
+
+enum ROLE_TYPE {
+    ADMIN
+    MANAGEMENT
+    TEACHER
+    STUDENT
+    STAFF
+}
+
+enum IS_ACTIVE {
+    CREATED
+    ACTIVE
+    RESET
+    DELETED
+}
+
+enum Gender {
+    MALE
+    FEMALE
+}

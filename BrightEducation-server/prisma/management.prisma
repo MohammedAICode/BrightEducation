@@ -1,0 +1,18 @@
+model Management {
+    id String @id @default(uuid())
+
+    userId String @unique
+
+    employeeId  String      @unique
+    joiningDate DateTime
+    expInYrs    Int         @default(0)
+    manageType  MANAGE_TYPE
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum MANAGE_TYPE {
+    ACCOUNTS
+    CLASS_TEACHER
+    INCHARGE
+}

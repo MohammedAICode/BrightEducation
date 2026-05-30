@@ -1,0 +1,15 @@
+model Teacher {
+    id String @id @default(uuid())
+
+    userId String @unique
+
+    employeeId      String    @unique
+    joiningDate     DateTime
+    expInYrs        Int       @default(0)
+    annualSalary    BigInt?
+    qualification   String
+    subjects        String[]
+    resignationDate DateTime?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
