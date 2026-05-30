@@ -254,10 +254,7 @@ npm run build
 
 After seeding the database, you can use these credentials:
 
-- **Admin**: admin@bright.com / Admin@123
-- **Management**: management@bright.com / Management@123
-- **Teacher**: teacher@bright.com / Teacher@123
-- **Student**: student@bright.com / Student@123
+- **Admin**: admin@bright.com / bright@123
 
 ## Troubleshooting
 
