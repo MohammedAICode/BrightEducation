@@ -25,6 +25,7 @@ interface User {
   updatedAt: string;
   createdById: string;
   profileImg?: string;
+  isEnrolled: boolean
 }
 
 interface RoleData {
@@ -94,7 +95,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     setLoadingCreator(true);
     try {
       const response = await axiosInstance.get(`/user/${creatorId}`);
-      const creator = response.data.data.user;
+      const creator = response.data.body.user;
       setCreatorInfo({
         firstname: creator.firstname,
         lastname: creator.lastname,
@@ -165,7 +166,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       
       // Fetch updated user data to get new profile image URL
       const response = await axiosInstance.get(`/user/${user.id}`);
-      const updatedUser = response.data.data.user;
+      const updatedUser = response.data.body.user;
       
       if (onUserUpdated) onUserUpdated(updatedUser);
       if (onUpdate) onUpdate();
@@ -230,7 +231,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           
           // Fetch updated user data
           const response = await axiosInstance.get(`/user/${user.id}`);
-          const updatedUser = response.data.data.user;
+          const updatedUser = response.data.body.user;
           
           if (onUserUpdated) onUserUpdated(updatedUser);
           if (onUpdate) onUpdate();
@@ -387,6 +388,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 <span className="text-xs font-bold tracking-wide uppercase px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md border border-blue-200">
                   {user.role}
                 </span>
+                {
+                  user.isEnrolled ? <span className="text-xs font-bold tracking-wide uppercase px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md border border-blue-200">
+                  Enrolled
+                </span> : <></>
+                }
+                
                 {(() => {
                   switch (user.isActive) {
                     case 'CREATED':

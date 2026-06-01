@@ -53,7 +53,7 @@ const NotificationBell: React.FC = () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/notifications?unreadOnly=true');
-      const data = response.data.data;
+      const data = response.data.body;
       setNotifications(data);
       setUnreadCount(data.length);
     } catch (error) {
@@ -67,7 +67,7 @@ const NotificationBell: React.FC = () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/notifications');
-      setNotifications(response.data.data);
+      setNotifications(response.data.body);
     } catch (error) {
       // Silent fail
     } finally {

@@ -63,7 +63,7 @@ const Notifications: React.FC = () => {
       setLoading(true);
       const params = filter !== 'ALL' ? `?status=${filter}` : '';
       const response = await axiosInstance.get(`/notifications${params}`);
-      setNotifications(response.data.data);
+      setNotifications(response.data.body);
     } catch (error) {
       // Silent fail
     } finally {

@@ -9,6 +9,7 @@ import Students from '../components/dashboard/Students';
 import Profile from '../components/dashboard/Profile';
 import Attendance from '../components/dashboard/Attendance';
 import AcademicYear from '../components/dashboard/AcademicYear';
+import AcademicYearDetail from '../components/dashboard/AcademicYearDetail';
 import Management from '../components/dashboard/Management';
 import Staff from '../components/dashboard/Incharges';
 import UserAvatar from '../components/common/UserAvatar';
@@ -16,10 +17,26 @@ import NotificationBell from '../components/common/NotificationBell';
 import Notifications from '../components/dashboard/Notifications';
 
 /**
+ * Generate page title from active tab
+ */
+function getPageTitle(activeTab: string): string {
+  if (activeTab.startsWith('academic-year-')) {
+    return 'Academic Year Details';
+  }
+  return activeTab.replace('-', ' ');
+}
+
+/**
  * Content renderer for dashboard tabs.
  * Maps tab IDs to their corresponding components.
  */
 function renderContent(activeTab: string): React.ReactNode {
+  // Handle specific academic year tabs (e.g., academic-year-123)
+  if (activeTab.startsWith('academic-year-')) {
+    const yearId = activeTab.replace('academic-year-', '');
+    return <AcademicYearDetail yearId={yearId} />;
+  }
+
   switch (activeTab) {
     case 'overview':
       return <Overview />;
@@ -105,7 +122,7 @@ export default function AdminDashboardLayout() {
                 <FiMenu className="w-6 h-6" />
               </button>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-gray-900 capitalize tracking-tight">{activeTab.replace('-', ' ')}</h1>
+                <h1 className="text-2xl font-bold text-gray-900 capitalize tracking-tight">{getPageTitle(activeTab)}</h1>
               </div>
             </div>
 

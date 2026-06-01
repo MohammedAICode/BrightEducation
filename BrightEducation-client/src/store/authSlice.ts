@@ -56,7 +56,7 @@ export const getMe = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get('/auth/me');
-      const userData = response.data.data;
+      const userData = response.data.body;
       
       // Check if user is deleted - deny access
       if (userData.isActive === 'DELETED') {

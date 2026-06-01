@@ -47,9 +47,9 @@ const Students: React.FC = () => {
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
       const statusParam = statusFilter ? `&isActive=${encodeURIComponent(statusFilter)}` : '';
       const response = await axiosInstance.get(`/user/all?page=${page}&limit=${limit}&role=STUDENT${searchParam}${statusParam}`);
-      const usersData = response.data.data?.users || [];
+      const usersData = response.data.body?.users || [];
       setUsers(Array.isArray(usersData) ? usersData : []);
-      setTotalPages(response.data.data?.pagination?.totalPages || 1);
+      setTotalPages(response.data.body?.pagination?.totalPages || 1);
     } catch (err: any) {
       setError('Failed to fetch students');
     } finally {
@@ -60,8 +60,8 @@ const Students: React.FC = () => {
   const fetchUserDetails = async (userId: string) => {
     try {
       const response = await axiosInstance.get(`/user/${userId}`);
-      setSelectedUser(response.data.data.user);
-      setSelectedRoleData(response.data.data.roleData || null);
+      setSelectedUser(response.data.body.user);
+      setSelectedRoleData(response.data.body.roleData || null);
       setIsModalOpen(true);
     } catch (err: any) {
     }

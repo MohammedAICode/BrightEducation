@@ -6,10 +6,14 @@ import {
   FiClipboard,
   FiCalendar,
   FiBell,
+  FiChevronDown,
+  FiChevronRight,
 } from 'react-icons/fi';
 import { useAppSelector } from '../../store/hooks';
 import type { MenuItem } from '../../types';
 import logo from '/logo.svg';
+import { useState, useEffect } from 'react';
+import axiosInstance from '../../lib/axios';
 
 /**
  * Menu configuration per role.
@@ -57,18 +61,48 @@ interface SidebarProps {
   setIsMobileOpen: (open: boolean) => void;
 }
 
+interface AcademicYear {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+
 /**
  * Unified sidebar component that displays role-based menu items.
  * Uses Redux for authentication state.
  */
 export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen }: SidebarProps) {
   const user = useAppSelector((state) => state.auth.user);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+  const [isAcademicYearExpanded, setIsAcademicYearExpanded] = useState(false);
 
   const menuItems = user ? (menuConfig[user.role] || []) : [];
   const dashboardTitle = user && user.role ? `${user.role.charAt(0) + user.role.slice(1).toLowerCase()} Dashboard` : 'Dashboard';
 
+  useEffect(() => {
+    fetchAcademicYears();
+  }, []);
+
+  const fetchAcademicYears = async () => {
+    try {
+      const response = await axiosInstance.get('/academic-year');
+      setAcademicYears(response.data.body || []);
+    } catch (error) {
+      // Silent fail - don't show error for sidebar fetch
+    }
+  };
+
   const handleMenuClick = (id: string) => {
     setActiveTab(id);
+    setIsMobileOpen(false);
+  };
+
+  const handleToggleExpand = () => {
+    setIsAcademicYearExpanded(!isAcademicYearExpanded);
+  };
+
+  const handleAcademicYearClick = (yearId: string) => {
+    setActiveTab(`academic-year-${yearId}`);
     setIsMobileOpen(false);
   };
 
@@ -90,12 +124,36 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
-            <MenuButton
-              key={item.id}
-              item={item}
-              isActive={activeTab === item.id}
-              onClick={() => handleMenuClick(item.id)}
-            />
+            <div key={item.id}>
+              <MenuButton
+                item={item}
+                isActive={activeTab === item.id}
+                isExpanded={item.id === 'academic-year' ? isAcademicYearExpanded : false}
+                onClick={() => handleMenuClick(item.id)}
+                onToggleExpand={item.id === 'academic-year' ? handleToggleExpand : undefined}
+              />
+              {item.id === 'academic-year' && isAcademicYearExpanded && academicYears.length > 0 && (
+                <div className="ml-6 mt-1 space-y-1">
+                  {academicYears.map((year) => (
+                    <button
+                      key={year.id}
+                      onClick={() => handleAcademicYearClick(year.id)}
+                      className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-all text-sm ${
+                        activeTab === `academic-year-${year.id}`
+                          ? 'bg-blue-700 text-white'
+                          : 'text-blue-200 hover:bg-blue-700/50'
+                      }`}
+                    >
+                      <FiCalendar className="w-4 h-4" />
+                      <span>{year.name}</span>
+                      {year.isActive && (
+                        <span className="ml-auto w-2 h-2 bg-green-400 rounded-full"></span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
       </aside>
@@ -136,19 +194,35 @@ function SidebarHeader({ dashboardTitle, onClose }: SidebarHeaderProps) {
 interface MenuButtonProps {
   item: MenuItem;
   isActive: boolean;
+  isExpanded?: boolean;
   onClick: () => void;
+  onToggleExpand?: () => void;
 }
 
-function MenuButton({ item, isActive, onClick }: MenuButtonProps) {
+function MenuButton({ item, isActive, isExpanded = false, onClick, onToggleExpand }: MenuButtonProps) {
+  const hasExpandableChildren = item.id === 'academic-year';
+
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-        isActive ? 'bg-white text-blue-900 shadow-lg' : 'text-blue-100 hover:bg-blue-700'
-      }`}
-    >
-      {item.icon}
-      <span className="font-medium">{item.label}</span>
-    </button>
+    <div className="flex items-center space-x-1">
+      <button
+        onClick={onClick}
+        className={`flex-1 flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+          isActive ? 'bg-white text-blue-900 shadow-lg' : 'text-blue-100 hover:bg-blue-700'
+        }`}
+      >
+        <div className="flex items-center space-x-3">
+          {item.icon}
+          <span className="font-medium">{item.label}</span>
+        </div>
+      </button>
+      {hasExpandableChildren && onToggleExpand && (
+        <button
+          onClick={onToggleExpand}
+          className="p-3 rounded-lg transition-all text-blue-100 hover:bg-blue-700"
+        >
+          {isExpanded ? <FiChevronDown className="w-4 h-4" /> : <FiChevronRight className="w-4 h-4" />}
+        </button>
+      )}
+    </div>
   );
 }
