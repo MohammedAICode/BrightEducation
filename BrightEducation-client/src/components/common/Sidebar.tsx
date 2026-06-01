@@ -26,8 +26,10 @@ const menuConfig: Partial<Record<string, MenuItem[]>> = {
     { id: 'academic-year', label: 'Academic Year', icon: <FiCalendar className="w-5 h-5" /> },
     { id: 'attendance', label: 'Attendance', icon: <FiClipboard className="w-5 h-5" /> },
     { id: 'management', label: 'Management', icon: <FiUsers className="w-5 h-5" /> },
+    { id: 'teachers', label: 'Teachers', icon: <FiUsers className="w-5 h-5" /> },
     { id: 'students', label: 'Students', icon: <FiUser className="w-5 h-5" /> },
     { id: 'staff', label: 'Staff', icon: <FiUsers className="w-5 h-5" /> },
+    { id: 'profile-update-requests', label: 'Profile Updates', icon: <FiUser className="w-5 h-5" /> },
   ],
   MANAGEMENT: [
     { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
@@ -81,6 +83,17 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
 
   useEffect(() => {
     fetchAcademicYears();
+    
+    // Listen for academic year refresh events
+    const handleRefresh = () => {
+      fetchAcademicYears();
+    };
+    
+    window.addEventListener('academic-year-refresh', handleRefresh);
+    
+    return () => {
+      window.removeEventListener('academic-year-refresh', handleRefresh);
+    };
   }, []);
 
   const fetchAcademicYears = async () => {

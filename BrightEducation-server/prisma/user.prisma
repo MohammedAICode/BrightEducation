@@ -53,6 +53,9 @@ model User {
     notifications Notification[]
     relatedNotifications Notification[] @relation("NotificationRelatedUser")
     processedNotifications Notification[] @relation("NotificationProcessor")
+    
+    profileUpdateRequests       ProfileUpdateRequest[] @relation("ProfileUpdateRequester")
+    approvedProfileUpdateRequests ProfileUpdateRequest[] @relation("ProfileUpdateApprover")
 }
 
 enum ROLE_TYPE {

@@ -13,11 +13,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Only call getMe if we don't already know the auth state
-    if (!isAuthenticated && !isLoading) {
-      dispatch(getMe());
-    }
-  }, [dispatch, isAuthenticated, isLoading]);
+    // Always call getMe on mount to check authentication status
+    dispatch(getMe());
+  }, [dispatch]);
 
   if (isLoading) {
     return (

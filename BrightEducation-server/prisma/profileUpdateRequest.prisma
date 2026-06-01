@@ -1,0 +1,46 @@
+model ProfileUpdateRequest {
+    id String @id @default(uuid())
+
+    // User who requested the update
+    userId String
+    user   User   @relation("ProfileUpdateRequester", fields: [userId], references: [id], onDelete: Cascade)
+
+    // Fields that can be updated (all optional, only changed fields will be included)
+    firstname                String?
+    lastname                 String?
+    gender                   Gender?
+    dateOfBirth              DateTime?
+    phone                    String?
+    address                  String?
+    emergencyContactRelation String?
+    emergencyContact         String?
+    bloodGroup               String?
+    nationality              String?
+    religion                 String?
+    parentRelation           String?
+    parentName               String?
+    parentPhone              String?
+    parentOccupation         String?
+
+    // Approval status
+    status REQUEST_STATUS @default(PENDING)
+
+    // Admin who approved/rejected
+    approvedById String?
+    approvedBy   User?      @relation("ProfileUpdateApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+    // Rejection reason
+    rejectionReason String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+    @@index([status])
+}
+
+enum REQUEST_STATUS {
+    PENDING
+    APPROVED
+    REJECTED
+}

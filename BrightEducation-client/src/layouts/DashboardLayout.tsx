@@ -6,7 +6,9 @@ import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { logout } from '../store/authSlice';
 import Overview from '../components/dashboard/Overview';
 import Students from '../components/dashboard/Students';
+import Teachers from '../components/dashboard/Teachers';
 import Profile from '../components/dashboard/Profile';
+import ProfileUpdateRequests from '../components/dashboard/ProfileUpdateRequests';
 import Attendance from '../components/dashboard/Attendance';
 import AcademicYear from '../components/dashboard/AcademicYear';
 import AcademicYearDetail from '../components/dashboard/AcademicYearDetail';
@@ -46,6 +48,8 @@ function renderContent(activeTab: string): React.ReactNode {
       return <Attendance />;
     case 'management':
       return <Management />;
+    case 'teachers':
+      return <Teachers />;
     case 'students':
       return <Students />;
     case 'staff':
@@ -54,6 +58,8 @@ function renderContent(activeTab: string): React.ReactNode {
       return <AcademicYear />;
     case 'profile':
       return <Profile />;
+    case 'profile-update-requests':
+      return <ProfileUpdateRequests />;
     default:
       return <Overview />;
   }

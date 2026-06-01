@@ -23,6 +23,9 @@ notificationRouter.post("/", createNotificationHandler);
 // Get all notifications for current user (with optional filters)
 notificationRouter.get("/", getNotificationsHandler);
 
+// Mark all notifications as read
+notificationRouter.put("/read-all", markAllAsReadHandler);
+
 // Get notification by ID
 notificationRouter.get("/:id", getNotificationByIdHandler);
 
@@ -37,9 +40,6 @@ notificationRouter.put("/:id/reject", rejectNotificationHandler);
 
 // Mark notification as read
 notificationRouter.put("/:id/read", markAsReadHandler);
-
-// Mark all notifications as read
-notificationRouter.put("/read-all", markAllAsReadHandler);
 
 // Delete notification
 notificationRouter.delete("/:id", deleteNotificationHandler);

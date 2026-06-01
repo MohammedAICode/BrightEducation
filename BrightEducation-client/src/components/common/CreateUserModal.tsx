@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiX, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiDroplet, FiGlobe, FiAlertCircle, FiShield, FiBriefcase } from 'react-icons/fi';
+import { FiX, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiDroplet, FiGlobe, FiAlertCircle, FiShield, FiBriefcase, FiChevronDown } from 'react-icons/fi';
 import axiosInstance from '../../lib/axios';
 
 interface CreateUserModalProps {
@@ -19,15 +19,39 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [profileImg, setProfileImg] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [educationLevel, setEducationLevel] = useState<string>('');
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
     
-    // Auto-generate email when firstname changes
-    if (field === 'firstname' && value) {
-      const email = `${value.toLowerCase()}@bright.com`;
-      setFormData((prev) => ({ ...prev, email }));
+    // Auto-generate email based on role and ID
+    if (field === 'firstname' || field === 'admissionNo' || field === 'employeeId') {
+      setFormData((prev) => {
+        const firstname = field === 'firstname' ? value : prev.firstname;
+        const admissionNo = field === 'admissionNo' ? value : prev.admissionNo;
+        const employeeId = field === 'employeeId' ? value : prev.employeeId;
+        
+        let email = '';
+        
+        if (role === 'STUDENT' && firstname && admissionNo) {
+          email = `${firstname.toLowerCase()}.${admissionNo}@bright.com`;
+        } else if ((role === 'MANAGEMENT' || role === 'STAFF') && firstname && employeeId) {
+          email = `${firstname.toLowerCase()}.${employeeId}@bright.com`;
+        } else if (role === 'TEACHER' && firstname && employeeId) {
+          email = `${firstname.toLowerCase()}.${employeeId}@bright.com`;
+        }
+        
+        return email ? { ...prev, email } : prev;
+      });
     }
   };
 
@@ -47,6 +71,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setFieldErrors({});
 
     try {
       const data = new FormData();
@@ -118,8 +143,19 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       onClose();
       setFormData({});
       setProfileImg(null);
+      setFieldErrors({});
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create user');
+      if (err.response?.data?.validationErrors) {
+        // Handle field-specific validation errors
+        const errors: Record<string, string> = {};
+        err.response.data.validationErrors.forEach((validationError: any) => {
+          errors[validationError.field] = validationError.message;
+        });
+        setFieldErrors(errors);
+        setError('Please fix the validation errors below');
+      } else {
+        setError(err.response?.data?.message || 'Failed to create user');
+      }
     } finally {
       setLoading(false);
     }
@@ -180,8 +216,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   required
                   value={formData.firstname || ''}
                   onChange={(e) => handleChange('firstname', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.firstname ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
+                {fieldErrors.firstname && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.firstname}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -192,8 +231,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   type="text"
                   value={formData.lastname || ''}
                   onChange={(e) => handleChange('lastname', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.lastname ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
+                {fieldErrors.lastname && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.lastname}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -204,9 +246,17 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   type="email"
                   required
                   value={formData.email || ''}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed focus:outline-none"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {role === 'STUDENT' 
+                    ? 'Auto-generated: firstname.admissionNo@bright.com' 
+                    : 'Auto-generated: firstname.employeeId@bright.com'}
+                </p>
+                {fieldErrors.email && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -217,12 +267,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   required
                   value={formData.gender || ''}
                   onChange={(e) => handleChange('gender', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.gender ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 >
                   <option value="">Select Gender</option>
                   <option value="MALE">Male</option>
                   <option value="FEMALE">Female</option>
                 </select>
+                {fieldErrors.gender && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.gender}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -234,8 +287,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   required
                   value={formData.dateOfBirth || ''}
                   onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.dateOfBirth ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
+                {fieldErrors.dateOfBirth && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.dateOfBirth}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -259,8 +315,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   required
                   value={formData.address || ''}
                   onChange={(e) => handleChange('address', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.address ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
+                {fieldErrors.address && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.address}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -272,8 +331,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   required
                   value={formData.emergencyContact || ''}
                   onChange={(e) => handlePhoneChange('emergencyContact', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.emergencyContact ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
+                {fieldErrors.emergencyContact && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.emergencyContact}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -284,7 +346,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   required
                   value={formData.emergencyContactRelation || ''}
                   onChange={(e) => handleChange('emergencyContactRelation', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.emergencyContactRelation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 >
                   <option value="">Select Relation</option>
                   <option value="Father">Father</option>
@@ -294,6 +356,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   <option value="Spouse">Spouse</option>
                   <option value="Other">Other</option>
                 </select>
+                {fieldErrors.emergencyContactRelation && (
+                  <p className="text-xs text-red-600 mt-1">{fieldErrors.emergencyContactRelation}</p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -334,7 +399,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   Religion
                 </label>
                 <select
-                  value={formData.religion || ''}
+                  value={formData.religion || 'Muslim'}
                   onChange={(e) => handleChange('religion', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -367,8 +432,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.employeeId || ''}
                       onChange={(e) => handleChange('employeeId', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.employeeId && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.employeeId}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -380,8 +448,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.joiningDate || ''}
                       onChange={(e) => handleChange('joiningDate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.joiningDate && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.joiningDate}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -392,8 +463,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="number"
                       value={formData.expInYrs || '0'}
                       onChange={(e) => handleChange('expInYrs', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.expInYrs && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.expInYrs}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -404,13 +478,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.manageType || ''}
                       onChange={(e) => handleChange('manageType', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.manageType ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     >
                       <option value="">Select Type</option>
                       <option value="ACCOUNTS">Accounts</option>
                       <option value="CLASS_TEACHER">Class Teacher</option>
                       <option value="INCHARGE">Incharge</option>
                     </select>
+                    {fieldErrors.manageType && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.manageType}</p>
+                    )}
                   </div>
                 </>
               )}
@@ -427,8 +504,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.employeeId || ''}
                       onChange={(e) => handleChange('employeeId', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.employeeId && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.employeeId}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -440,8 +520,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.joiningDate || ''}
                       onChange={(e) => handleChange('joiningDate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.joiningDate && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.joiningDate}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -452,8 +535,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="number"
                       value={formData.expInYrs || '0'}
                       onChange={(e) => handleChange('expInYrs', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.expInYrs && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.expInYrs}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -464,35 +550,197 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="number"
                       value={formData.annualSalary || ''}
                       onChange={(e) => handleChange('annualSalary', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.annualSalary ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.annualSalary && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.annualSalary}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                       <FiBriefcase className="w-4 h-4" />
                       Qualification *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
                       value={formData.qualification || ''}
                       onChange={(e) => handleChange('qualification', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.qualification ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                    >
+                      <option value="">Select Qualification</option>
+                      <optgroup label="School Level">
+                        <option value="10th Pass">10th Pass</option>
+                        <option value="12th Pass">12th Pass</option>
+                      </optgroup>
+                      <optgroup label="Diploma">
+                        <option value="Diploma">Diploma</option>
+                        <option value="D.Ed">D.Ed (Diploma in Education)</option>
+                        <option value="D.El.Ed">D.El.Ed (Diploma in Elementary Education)</option>
+                      </optgroup>
+                      <optgroup label="Bachelor's Degree">
+                        <option value="B.A">B.A (Bachelor of Arts)</option>
+                        <option value="B.Sc">B.Sc (Bachelor of Science)</option>
+                        <option value="B.Com">B.Com (Bachelor of Commerce)</option>
+                        <option value="B.Tech">B.Tech (Bachelor of Technology)</option>
+                        <option value="B.E">B.E (Bachelor of Engineering)</option>
+                        <option value="BBA">BBA (Bachelor of Business Administration)</option>
+                        <option value="BCA">BCA (Bachelor of Computer Applications)</option>
+                        <option value="B.Ed">B.Ed (Bachelor of Education)</option>
+                        <option value="B.P.Ed">B.P.Ed (Bachelor of Physical Education)</option>
+                        <option value="B.El.Ed">B.El.Ed (Bachelor of Elementary Education)</option>
+                        <option value="LLB">LLB (Bachelor of Laws)</option>
+                      </optgroup>
+                      <optgroup label="Master's Degree">
+                        <option value="M.A">M.A (Master of Arts)</option>
+                        <option value="M.Sc">M.Sc (Master of Science)</option>
+                        <option value="M.Com">M.Com (Master of Commerce)</option>
+                        <option value="M.Tech">M.Tech (Master of Technology)</option>
+                        <option value="M.E">M.E (Master of Engineering)</option>
+                        <option value="MBA">MBA (Master of Business Administration)</option>
+                        <option value="MCA">MCA (Master of Computer Applications)</option>
+                        <option value="M.Ed">M.Ed (Master of Education)</option>
+                        <option value="M.P.Ed">M.P.Ed (Master of Physical Education)</option>
+                        <option value="LLM">LLM (Master of Laws)</option>
+                      </optgroup>
+                      <optgroup label="Doctorate">
+                        <option value="Ph.D">Ph.D (Doctor of Philosophy)</option>
+                        <option value="D.Litt">D.Litt (Doctor of Literature)</option>
+                      </optgroup>
+                      <optgroup label="Professional Qualifications">
+                        <option value="B.Ed + M.Ed">B.Ed + M.Ed</option>
+                        <option value="NET">NET (National Eligibility Test)</option>
+                        <option value="SET">SET (State Eligibility Test)</option>
+                        <option value="CTET">CTET (Central Teacher Eligibility Test)</option>
+                        <option value="TET">TET (Teacher Eligibility Test)</option>
+                      </optgroup>
+                      <option value="Other">Other</option>
+                    </select>
+                    {fieldErrors.qualification && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.qualification}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                       <FiBriefcase className="w-4 h-4" />
-                      Subjects * (comma separated)
+                      Subjects *
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.subjects || ''}
-                      onChange={(e) => handleChange('subjects', e.target.value)}
-                      placeholder="Math, Science, English"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const dropdown = document.getElementById('subjects-dropdown');
+                          if (dropdown) {
+                            dropdown.classList.toggle('hidden');
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-left flex items-center justify-between ${fieldErrors.subjects ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      >
+                        <span className="text-sm text-gray-700">
+                          {formData.subjects ? `${formData.subjects.split(',').length} selected` : 'Select subjects'}
+                        </span>
+                        <FiChevronDown className="w-4 h-4 text-gray-400" />
+                      </button>
+                      <div
+                        id="subjects-dropdown"
+                        className="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto"
+                      >
+                        {[
+                          {
+                            label: 'Core Subjects',
+                            subjects: ['Mathematics', 'English', 'Hindi', 'Science', 'Social Studies', 'Social Science']
+                          },
+                          {
+                            label: 'Languages',
+                            subjects: ['Sanskrit', 'Telugu', 'Tamil', 'Kannada', 'Malayalam', 'Marathi', 'Bengali', 'Gujarati', 'Urdu', 'Punjabi', 'French', 'German', 'Spanish']
+                          },
+                          {
+                            label: 'Sciences',
+                            subjects: ['Physics', 'Chemistry', 'Biology', 'Botany', 'Zoology', 'Environmental Science']
+                          },
+                          {
+                            label: 'Mathematics & Computer',
+                            subjects: ['Advanced Mathematics', 'Statistics', 'Computer Science', 'Information Technology', 'Artificial Intelligence']
+                          },
+                          {
+                            label: 'Commerce & Economics',
+                            subjects: ['Accountancy', 'Business Studies', 'Economics', 'Commerce', 'Entrepreneurship']
+                          },
+                          {
+                            label: 'Humanities & Social Sciences',
+                            subjects: ['History', 'Geography', 'Political Science', 'Sociology', 'Psychology', 'Philosophy', 'Civics']
+                          },
+                          {
+                            label: 'Arts & Physical Education',
+                            subjects: ['Physical Education', 'Art & Craft', 'Music', 'Dance', 'Drawing', 'Painting']
+                          },
+                          {
+                            label: 'Vocational & Others',
+                            subjects: ['Home Science', 'Agriculture', 'Library Science', 'Moral Science', 'General Knowledge', 'Yoga']
+                          }
+                        ].map((category, idx) => (
+                          <div key={idx} className="border-b border-gray-100 last:border-b-0">
+                            <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                              {category.label}
+                            </div>
+                            <div className="p-2">
+                              {category.subjects.map((subject) => {
+                                const selectedSubjects = formData.subjects ? formData.subjects.split(',').map(s => s.trim()) : [];
+                                const isChecked = selectedSubjects.includes(subject);
+                                return (
+                                  <label
+                                    key={subject}
+                                    className="flex items-center px-2 py-1.5 hover:bg-blue-50 rounded cursor-pointer transition-colors"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const currentSubjects = formData.subjects ? formData.subjects.split(',').map(s => s.trim()) : [];
+                                        let newSubjects;
+                                        if (e.target.checked) {
+                                          newSubjects = [...currentSubjects, subject];
+                                        } else {
+                                          newSubjects = currentSubjects.filter(s => s !== subject);
+                                        }
+                                        handleChange('subjects', newSubjects.join(', '));
+                                      }}
+                                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="ml-2 text-sm text-gray-700">{subject}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {formData.subjects && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {formData.subjects.split(',').map((subject, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
+                          >
+                            {subject.trim()}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentSubjects = formData.subjects.split(',').map(s => s.trim());
+                                const newSubjects = currentSubjects.filter(s => s !== subject.trim());
+                                handleChange('subjects', newSubjects.join(', '));
+                              }}
+                              className="hover:text-blue-900"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {fieldErrors.subjects && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.subjects}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -521,8 +769,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.admissionNo || ''}
                       onChange={(e) => handleChange('admissionNo', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.admissionNo ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.admissionNo && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.admissionNo}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -534,8 +785,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.admissionDate || ''}
                       onChange={(e) => handleChange('admissionDate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.admissionDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.admissionDate && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.admissionDate}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -546,8 +800,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="text"
                       value={formData.rollNumber || ''}
                       onChange={(e) => handleChange('rollNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.rollNumber ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.rollNumber && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.rollNumber}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -561,7 +818,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                         setEducationLevel(e.target.value);
                         handleChange('classGrade', e.target.value);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.classGrade ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     >
                       <option value="">Select Class Grade</option>
                       <option value="Pre-Primary">Pre-Primary</option>
@@ -578,6 +835,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       <option value="Intermediate">Intermediate</option>
                       <option value="Degree">Degree</option>
                     </select>
+                    {fieldErrors.classGrade && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.classGrade}</p>
+                    )}
                   </div>
                   {educationLevel === 'Intermediate' && (
                     <div>
@@ -655,38 +915,50 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                       <FiUser className="w-4 h-4" />
-                      Parent Relation
+                      Parent Relation *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={formData.parentRelation || ''}
                       onChange={(e) => handleChange('parentRelation', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.parentRelation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                    >
+                      <option value="">Select Relation</option>
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                    </select>
+                    {fieldErrors.parentRelation && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentRelation}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                       <FiUser className="w-4 h-4" />
-                      Parent Name
+                      Parent Name *
                     </label>
                     <input
                       type="text"
                       value={formData.parentName || ''}
                       onChange={(e) => handleChange('parentName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.parentName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.parentName && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentName}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                       <FiPhone className="w-4 h-4" />
-                      Parent Phone
+                      Parent Phone *
                     </label>
                     <input
                       type="text"
                       value={formData.parentPhone || ''}
                       onChange={(e) => handlePhoneChange('parentPhone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.parentPhone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.parentPhone && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentPhone}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -697,8 +969,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="text"
                       value={formData.parentOccupation || ''}
                       onChange={(e) => handleChange('parentOccupation', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.parentOccupation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.parentOccupation && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentOccupation}</p>
+                    )}
                   </div>
                 </>
               )}
@@ -715,8 +990,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.employeeId || ''}
                       onChange={(e) => handleChange('employeeId', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.employeeId && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.employeeId}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -728,8 +1006,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       required
                       value={formData.joiningDate || ''}
                       onChange={(e) => handleChange('joiningDate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.joiningDate && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.joiningDate}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -740,8 +1021,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="number"
                       value={formData.expInYrs || '0'}
                       onChange={(e) => handleChange('expInYrs', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.expInYrs && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.expInYrs}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -752,8 +1036,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       type="number"
                       value={formData.annualSalary || ''}
                       onChange={(e) => handleChange('annualSalary', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.annualSalary ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {fieldErrors.annualSalary && (
+                      <p className="text-xs text-red-600 mt-1">{fieldErrors.annualSalary}</p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">

@@ -19,6 +19,8 @@ import subjectTeacherTenureRouter from "./modules/SubjectTeacherTenure/subjectTe
 import teacherTenureRouter from "./modules/TeacherTenure/teacherTenure.routes";
 import staffTenureRouter from "./modules/StaffTenure/staffTenure.routes";
 import managementTenureRouter from "./modules/ManagementTenure/managementTenure.routes";
+import profileUpdateRouter from "./modules/ProfileUpdate/profileUpdate.routes";
+import sectionManagementRouter from "./modules/SectionManagement/sectionManagement.routes";
 
 
 const app = express();
@@ -59,6 +61,8 @@ app.use("/api/v1/subject-teacher-tenure", subjectTeacherTenureRouter);
 app.use("/api/v1/teacher-tenure", teacherTenureRouter);
 app.use("/api/v1/staff-tenure", staffTenureRouter);
 app.use("/api/v1/management-tenure", managementTenureRouter);
+app.use("/api/v1/profile-update", profileUpdateRouter);
+app.use("/api/v1/section-management", sectionManagementRouter);
 
 
 app.get("/", (_req, res) => {

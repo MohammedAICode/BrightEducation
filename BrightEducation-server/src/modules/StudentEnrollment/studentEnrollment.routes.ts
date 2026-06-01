@@ -25,6 +25,9 @@ router.get('/:id', getStudentEnrollmentByIdHandler);
 // PUT /api/v1/student-enrollment/:id - Update a student enrollment (Admin only)
 router.put('/:id', updateStudentEnrollmentHandler);
 
+// PATCH /api/v1/student-enrollment/:id - Partially update a student enrollment (Admin only)
+router.patch('/:id', updateStudentEnrollmentHandler);
+
 // DELETE /api/v1/student-enrollment/:id - Delete a student enrollment (Admin only)
 router.delete('/:id', deleteStudentEnrollmentHandler);
 

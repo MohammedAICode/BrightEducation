@@ -10,7 +10,34 @@ interface AuthState {
   error: string | null;
 }
 
-const initialState: AuthState = {
+// Load state from localStorage
+const loadState = () => {
+  try {
+    const serializedState = localStorage.getItem('authState');
+    if (serializedState === null) {
+      return undefined;
+    }
+    return JSON.parse(serializedState);
+  } catch (err) {
+    return undefined;
+  }
+};
+
+// Save state to localStorage
+const saveState = (state: AuthState) => {
+  try {
+    const serializedState = JSON.stringify({
+      user: state.user,
+      token: state.token,
+      isAuthenticated: state.isAuthenticated,
+    });
+    localStorage.setItem('authState', serializedState);
+  } catch (err) {
+    // Ignore write errors
+  }
+};
+
+const initialState: AuthState = loadState() || {
   user: null,
   token: null,
   isLoading: false,
@@ -104,6 +131,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.error = null;
+        saveState(state);
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -114,6 +142,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
+        localStorage.removeItem('authState');
       })
       .addCase(getMe.pending, (state) => {
         state.isLoading = true;
@@ -122,11 +151,13 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.user;
         state.isAuthenticated = true;
+        saveState(state);
       })
       .addCase(getMe.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+        localStorage.removeItem('authState');
       });
   },
 });

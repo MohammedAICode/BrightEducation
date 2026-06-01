@@ -221,7 +221,7 @@ export const getStudentEnrollmentById = async (id: string) => {
 export const updateStudentEnrollment = async (id: string, data: { 
   sectionTenureId?: string; 
   rollNumber?: string; 
-  status?: 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'WITHDRAWN';
+  status?: 'ACTIVE' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT';
 }) => {
   try {
     const existingEnrollment = await prisma.studentEnrollment.findUnique({
@@ -302,6 +302,21 @@ export const updateStudentEnrollment = async (id: string, data: {
         },
       },
     });
+
+    // If status changed from ACTIVE to something else, update user's isEnrolled to false
+    if (data.status && data.status !== 'ACTIVE' && existingEnrollment.status === 'ACTIVE') {
+      await prisma.user.update({
+        where: { id: existingEnrollment.studentId },
+        data: { isEnrolled: false },
+      });
+    }
+    // If status changed to ACTIVE from something else, update user's isEnrolled to true
+    else if (data.status === 'ACTIVE' && existingEnrollment.status !== 'ACTIVE') {
+      await prisma.user.update({
+        where: { id: existingEnrollment.studentId },
+        data: { isEnrolled: true },
+      });
+    }
 
     return updatedEnrollment;
   } catch (error) {

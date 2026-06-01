@@ -53,10 +53,14 @@ async function createUser(req: Request, res: Response) {
       logger.error(
         `[CREATE_USER] Validation failed for email: ${email}. Errors: ${JSON.stringify(validateUser.error.issues)}`,
       );
-      throw new AppError(
-        USER_ERROR_MESSAGES.USER_CREATE_INVALID,
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        error: true,
+        message: "Validation failed",
+        validationErrors: validateUser.error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+        })),
+      });
     }
 
     logger.info(
@@ -131,10 +135,14 @@ async function createUser(req: Request, res: Response) {
             logger.error(
               `[CREATE_USER] Management validation failed for email: ${userData.email}. Errors: ${JSON.stringify(validateManagement.error.issues)}`,
             );
-            throw new AppError(
-              USER_ERROR_MESSAGES.USER_CREATE_INVALID,
-              HTTP_STATUS.BAD_REQUEST,
-            );
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              error: true,
+              message: "Validation failed",
+              validationErrors: validateManagement.error.issues.map((issue) => ({
+                field: issue.path.join('.'),
+                message: issue.message,
+              })),
+            });
           }
           result = await createUserWithManagement(
             userData,
@@ -149,10 +157,14 @@ async function createUser(req: Request, res: Response) {
             logger.error(
               `[CREATE_USER] Teacher validation failed for email: ${userData.email}. Errors: ${JSON.stringify(validateTeacher.error.issues)}`,
             );
-            throw new AppError(
-              USER_ERROR_MESSAGES.USER_CREATE_INVALID,
-              HTTP_STATUS.BAD_REQUEST,
-            );
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              error: true,
+              message: "Validation failed",
+              validationErrors: validateTeacher.error.issues.map((issue) => ({
+                field: issue.path.join('.'),
+                message: issue.message,
+              })),
+            });
           }
           const teacherData = {
             ...validateTeacher.data,
@@ -172,10 +184,14 @@ async function createUser(req: Request, res: Response) {
             logger.error(
               `[CREATE_USER] Staff validation failed for email: ${userData.email}. Errors: ${JSON.stringify(validateStaff.error.issues)}`,
             );
-            throw new AppError(
-              USER_ERROR_MESSAGES.USER_CREATE_INVALID,
-              HTTP_STATUS.BAD_REQUEST,
-            );
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              error: true,
+              message: "Validation failed",
+              validationErrors: validateStaff.error.issues.map((issue) => ({
+                field: issue.path.join('.'),
+                message: issue.message,
+              })),
+            });
           }
           const staffData = {
             ...validateStaff.data,
@@ -195,20 +211,28 @@ async function createUser(req: Request, res: Response) {
             logger.error(
               `[CREATE_USER] Student user validation failed for email: ${userData.email}. Errors: ${JSON.stringify(validateStudentUser.error.issues)}`,
             );
-            throw new AppError(
-              USER_ERROR_MESSAGES.USER_CREATE_INVALID,
-              HTTP_STATUS.BAD_REQUEST,
-            );
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              error: true,
+              message: "Validation failed",
+              validationErrors: validateStudentUser.error.issues.map((issue) => ({
+                field: issue.path.join('.'),
+                message: issue.message,
+              })),
+            });
           }
           const validateStudent = studentCreateInput.safeParse(req.body);
           if (!validateStudent.success) {
             logger.error(
               `[CREATE_USER] Student profile validation failed for email: ${userData.email}. Errors: ${JSON.stringify(validateStudent.error.issues)}`,
             );
-            throw new AppError(
-              USER_ERROR_MESSAGES.USER_CREATE_INVALID,
-              HTTP_STATUS.BAD_REQUEST,
-            );
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              error: true,
+              message: "Validation failed",
+              validationErrors: validateStudent.error.issues.map((issue) => ({
+                field: issue.path.join('.'),
+                message: issue.message,
+              })),
+            });
           }
           result = await createUserWithStudent(userData, validateStudent.data);
           break;

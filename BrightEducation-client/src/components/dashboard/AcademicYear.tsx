@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCalendar, FiUsers, FiBookOpen, FiEdit2, FiTrash2, FiPower, FiCheckCircle } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiUsers, FiBookOpen, FiEdit2, FiTrash2, FiPower, FiCheckCircle, FiX } from 'react-icons/fi';
 import axiosInstance from '../../lib/axios';
 import ToastModal from '../common/ToastModal';
 import { useAppSelector } from '../../store/hooks';
@@ -318,6 +318,8 @@ const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ academicYear, o
       onConfirm: async () => {
         try {
           await axiosInstance.delete(`/academic-year/${academicYear.id}`);
+          // Dispatch event to refresh sidebar
+          window.dispatchEvent(new Event('academic-year-refresh'));
           onUpdate();
           onClose();
           setToastModal({
@@ -357,7 +359,7 @@ const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ academicYear, o
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <FiCalendar className="w-5 h-5" />
+            <FiX className="w-5 h-5" />
           </button>
         </div>
 
@@ -545,53 +547,37 @@ const CreateAcademicYearModal: React.FC<CreateAcademicYearModalProps> = ({ onClo
     endDate: '',
   });
   const [loading, setLoading] = useState(false);
-  const [toastModal, setToastModal] = useState<{
-    isOpen: boolean;
-    type: 'info' | 'success' | 'warning' | 'error' | 'confirm';
-    title?: string;
-    message: string;
-    showConfirm: boolean;
-    onConfirm?: () => void;
-  }>({
-    isOpen: false,
-    type: 'info',
-    message: '',
-    showConfirm: false,
-  });
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.startDate || !formData.endDate) {
-      setToastModal({
-        isOpen: true,
-        type: 'error',
-        title: 'Error',
-        message: 'Please fill in all fields',
-        showConfirm: false,
-      });
+    setError(null);
+    
+    // Validate each field with specific error messages
+    const missingFields = [];
+    if (!formData.name) missingFields.push('Name');
+    if (!formData.startDate) missingFields.push('Start Date');
+    if (!formData.endDate) missingFields.push('End Date');
+    
+    if (missingFields.length > 0) {
+      setError(`Please fill in the following required field(s): ${missingFields.join(', ')}`);
       return;
     }
 
     try {
       setLoading(true);
       await axiosInstance.post('/academic-year', formData);
-      onSuccess();
-      onClose();
-      setToastModal({
-        isOpen: true,
-        type: 'success',
-        title: 'Success',
-        message: 'Academic year created successfully',
-        showConfirm: false,
-      });
+      setSuccess(true);
+      // Dispatch event to refresh sidebar
+      window.dispatchEvent(new Event('academic-year-refresh'));
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+        setSuccess(false);
+      }, 1500);
     } catch (error: any) {
-      setToastModal({
-        isOpen: true,
-        type: 'error',
-        title: 'Error',
-        message: error.response?.data?.message || 'Failed to create academic year',
-        showConfirm: false,
-      });
+      setError(error.response?.data?.message || 'Failed to create academic year');
     } finally {
       setLoading(false);
     }
@@ -606,11 +592,23 @@ const CreateAcademicYearModal: React.FC<CreateAcademicYearModalProps> = ({ onClo
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <FiCalendar className="w-5 h-5" />
+            <FiX className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+              Academic year created successfully!
+            </div>
+          )}
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
             <input
@@ -656,16 +654,6 @@ const CreateAcademicYearModal: React.FC<CreateAcademicYearModalProps> = ({ onClo
             </button>
           </div>
         </form>
-
-        <ToastModal
-          isOpen={toastModal.isOpen}
-          onClose={() => setToastModal({ ...toastModal, isOpen: false })}
-          title={toastModal.title}
-          message={toastModal.message}
-          type={toastModal.type}
-          showConfirm={toastModal.showConfirm}
-          onConfirm={toastModal.onConfirm}
-        />
       </div>
     </div>
   );

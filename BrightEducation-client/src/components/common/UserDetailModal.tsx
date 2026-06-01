@@ -267,6 +267,143 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     }
     
     if (isEditing) {
+      // Special handling for dropdown fields
+      if (field === 'gender') {
+        return (
+          <div className="bg-gray-50/50 p-3.5 rounded-xl border border-gray-100/50">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+              <span className="text-gray-400">{icon}</span>
+              {label}
+            </label>
+            <select
+              value={editData[field] || ''}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-800 transition-all shadow-2xs"
+            >
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </select>
+          </div>
+        );
+      }
+      
+      if (field === 'religion') {
+        return (
+          <div className="bg-gray-50/50 p-3.5 rounded-xl border border-gray-100/50">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+              <span className="text-gray-400">{icon}</span>
+              {label}
+            </label>
+            <select
+              value={editData[field] || ''}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-800 transition-all shadow-2xs"
+            >
+              <option value="">Select Religion</option>
+              <option value="Hindu">Hindu</option>
+              <option value="Muslim">Muslim</option>
+              <option value="Christian">Christian</option>
+              <option value="Sikh">Sikh</option>
+              <option value="Buddhist">Buddhist</option>
+              <option value="Jain">Jain</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        );
+      }
+      
+      if (field === 'bloodGroup') {
+        return (
+          <div className="bg-gray-50/50 p-3.5 rounded-xl border border-gray-100/50">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+              <span className="text-gray-400">{icon}</span>
+              {label}
+            </label>
+            <select
+              value={editData[field] || ''}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-800 transition-all shadow-2xs"
+            >
+              <option value="">Select Blood Group</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+        );
+      }
+      
+      if (field === 'qualification') {
+        return (
+          <div className="bg-gray-50/50 p-3.5 rounded-xl border border-gray-100/50">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+              <span className="text-gray-400">{icon}</span>
+              {label}
+            </label>
+            <select
+              value={editData[field] || ''}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-800 transition-all shadow-2xs"
+            >
+              <option value="">Select Qualification</option>
+              <optgroup label="School Level">
+                <option value="10th Pass">10th Pass</option>
+                <option value="12th Pass">12th Pass</option>
+              </optgroup>
+              <optgroup label="Diploma">
+                <option value="Diploma">Diploma</option>
+                <option value="D.Ed">D.Ed (Diploma in Education)</option>
+                <option value="D.El.Ed">D.El.Ed (Diploma in Elementary Education)</option>
+              </optgroup>
+              <optgroup label="Bachelor's Degree">
+                <option value="B.A">B.A (Bachelor of Arts)</option>
+                <option value="B.Sc">B.Sc (Bachelor of Science)</option>
+                <option value="B.Com">B.Com (Bachelor of Commerce)</option>
+                <option value="B.Tech">B.Tech (Bachelor of Technology)</option>
+                <option value="B.E">B.E (Bachelor of Engineering)</option>
+                <option value="BBA">BBA (Bachelor of Business Administration)</option>
+                <option value="BCA">BCA (Bachelor of Computer Applications)</option>
+                <option value="B.Ed">B.Ed (Bachelor of Education)</option>
+                <option value="B.P.Ed">B.P.Ed (Bachelor of Physical Education)</option>
+                <option value="B.El.Ed">B.El.Ed (Bachelor of Elementary Education)</option>
+                <option value="LLB">LLB (Bachelor of Laws)</option>
+              </optgroup>
+              <optgroup label="Master's Degree">
+                <option value="M.A">M.A (Master of Arts)</option>
+                <option value="M.Sc">M.Sc (Master of Science)</option>
+                <option value="M.Com">M.Com (Master of Commerce)</option>
+                <option value="M.Tech">M.Tech (Master of Technology)</option>
+                <option value="M.E">M.E (Master of Engineering)</option>
+                <option value="MBA">MBA (Master of Business Administration)</option>
+                <option value="MCA">MCA (Master of Computer Applications)</option>
+                <option value="M.Ed">M.Ed (Master of Education)</option>
+                <option value="M.P.Ed">M.P.Ed (Master of Physical Education)</option>
+                <option value="LLM">LLM (Master of Laws)</option>
+              </optgroup>
+              <optgroup label="Doctorate">
+                <option value="Ph.D">Ph.D (Doctor of Philosophy)</option>
+                <option value="D.Litt">D.Litt (Doctor of Literature)</option>
+              </optgroup>
+              <optgroup label="Professional Qualifications">
+                <option value="B.Ed + M.Ed">B.Ed + M.Ed</option>
+                <option value="NET">NET (National Eligibility Test)</option>
+                <option value="SET">SET (State Eligibility Test)</option>
+                <option value="CTET">CTET (Central Teacher Eligibility Test)</option>
+                <option value="TET">TET (Teacher Eligibility Test)</option>
+              </optgroup>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        );
+      }
+      
+      // Default text input for other fields
       return (
         <div className="bg-gray-50/50 p-3.5 rounded-xl border border-gray-100/50">
           <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
