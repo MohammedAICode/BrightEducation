@@ -70,7 +70,7 @@ async function createUser(req: Request, res: Response) {
       );
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
-        data: null,
+        body: null,
         message: "User already exists with this email",
       });
     }
@@ -255,7 +255,7 @@ async function createUser(req: Request, res: Response) {
     );
     return res.status(HTTP_STATUS.CREATED).json({
       error: false,
-      data: result,
+      body: result,
       message: "User created successfully",
     });
   } catch (err: any) {
@@ -281,7 +281,7 @@ export async function getAllUsersController(req: Request, res: Response) {
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: result,
+      body: result,
       message: "Users fetched successfully",
     });
   } catch (err: any) {
@@ -303,7 +303,7 @@ export async function softDeleteUserController(req: Request, res: Response) {
       logger.warn(`[SOFT_DELETE_USER] Permission denied. RequesterRole: ${requesterRole}`);
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         error: true,
-        data: null,
+        body: null,
         message: "Invalid permission. Only admin can delete users.",
       });
     }
@@ -316,7 +316,7 @@ export async function softDeleteUserController(req: Request, res: Response) {
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: deletedUser,
+      body: deletedUser,
       message: "User deleted successfully",
     });
   } catch (err: any) {
@@ -339,7 +339,7 @@ export async function updateUserController(req: Request, res: Response) {
       logger.warn(`[UPDATE_USER] Permission denied. RequesterRole: ${requesterRole}`);
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         error: true,
-        data: null,
+        body: null,
         message: "Invalid permission. Only admin can update users.",
       });
     }
@@ -358,7 +358,7 @@ export async function updateUserController(req: Request, res: Response) {
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: updatedUser,
+      body: updatedUser,
       message: "User updated successfully",
     });
   } catch (err: any) {
@@ -382,7 +382,7 @@ export async function getUserByIdController(req: Request, res: Response) {
       logger.warn(`[GET_USER_BY_ID] User not found. ID: ${userIdStr}`);
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         error: true,
-        data: null,
+        body: null,
         message: "User not found",
       });
     }
@@ -391,7 +391,7 @@ export async function getUserByIdController(req: Request, res: Response) {
 
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: result,
+      body: result,
       message: "User details fetched successfully",
     });
   } catch (err: any) {
@@ -421,7 +421,7 @@ export async function getProfileImageController(req: Request, res: Response) {
       logger.warn(`[GET_PROFILE_IMAGE] Image not found. Path: ${imagePath}`);
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         error: true,
-        data: null,
+        body: null,
         message: "Image not found",
       });
     }

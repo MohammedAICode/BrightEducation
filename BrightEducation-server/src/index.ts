@@ -9,6 +9,16 @@ import { errorHandler } from "./config/middleware/errorHandler";
 import { notFound } from "./config/middleware/notFound";
 import { userRouter } from "./modules/User/user.routes";
 import { notificationRouter } from "./modules/Notification/notification.routes";
+import { academicYearRouter } from "./modules/AcademicYear/academicYear.routes";
+import classTenureRouter from "./modules/ClassTenure/classTenure.routes";
+import sectionTenureRouter from "./modules/SectionTenure/sectionTenure.routes";
+import classSubjectRouter from "./modules/ClassSubject/classSubject.routes";
+import studentEnrollmentRouter from "./modules/StudentEnrollment/studentEnrollment.routes";
+import classTeacherTenureRouter from "./modules/ClassTeacherTenure/classTeacherTenure.routes";
+import subjectTeacherTenureRouter from "./modules/SubjectTeacherTenure/subjectTeacherTenure.routes";
+import teacherTenureRouter from "./modules/TeacherTenure/teacherTenure.routes";
+import staffTenureRouter from "./modules/StaffTenure/staffTenure.routes";
+import managementTenureRouter from "./modules/ManagementTenure/managementTenure.routes";
 
 
 const app = express();
@@ -39,6 +49,16 @@ await initializer();
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/academic-year", academicYearRouter);
+app.use("/api/v1/class-tenure", classTenureRouter);
+app.use("/api/v1/section-tenure", sectionTenureRouter);
+app.use("/api/v1/class-subject", classSubjectRouter);
+app.use("/api/v1/student-enrollment", studentEnrollmentRouter);
+app.use("/api/v1/class-teacher-tenure", classTeacherTenureRouter);
+app.use("/api/v1/subject-teacher-tenure", subjectTeacherTenureRouter);
+app.use("/api/v1/teacher-tenure", teacherTenureRouter);
+app.use("/api/v1/staff-tenure", staffTenureRouter);
+app.use("/api/v1/management-tenure", managementTenureRouter);
 
 
 app.get("/", (_req, res) => {

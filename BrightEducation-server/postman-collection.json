@@ -1086,6 +1086,2119 @@
           }
         }
       ]
+    },
+    {
+      "name": "Academic Year",
+      "item": [
+        {
+          "name": "Create Academic Year (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2024-2025\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2025-03-31\",\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year"]
+            }
+          }
+        },
+        {
+          "name": "Create Academic Year (Active)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2024-2025\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2025-03-31\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year"]
+            }
+          }
+        },
+        {
+          "name": "Create Academic Year (Duplicate Name)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2024-2025\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2025-03-31\",\n  \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year"]
+            }
+          }
+        },
+        {
+          "name": "Create Academic Year (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2024-2025\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year"]
+            }
+          }
+        },
+        {
+          "name": "Get All Academic Years",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Academic Year",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/active",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get Academic Year By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/{{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "{{academicYearId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Academic Year",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2024-2025 Updated\",\n  \"startDate\": \"2024-06-15\",\n  \"endDate\": \"2025-04-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/{{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "{{academicYearId}}"]
+            }
+          }
+        },
+        {
+          "name": "Activate Academic Year",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/{{academicYearId}}/activate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "{{academicYearId}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Deactivate Academic Year",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/{{academicYearId}}/deactivate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "{{academicYearId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Delete Academic Year (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/{{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "{{academicYearId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Academic Year (With Data - Should Fail)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/v1/academic-year/{{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "v1", "academic-year", "{{academicYearId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Class Tenure",
+      "item": [
+        {
+          "name": "Create Class Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"name\": \"Grade 1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Tenure (Duplicate Name)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"name\": \"Grade 1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Tenure (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Tenure (Invalid Academic Year ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"invalid-id\",\n  \"name\": \"Grade 2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Tenures (with academicYearId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure?academicYearId={{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure"],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Class Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure/{{classTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure", "{{classTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Class Tenure",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grade 1 Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure/{{classTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure", "{{classTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Class Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure/{{classTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure", "{{classTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Class Tenure (With Sections/Subjects - Should Fail)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-tenure/{{classTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-tenure", "{{classTenureId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Section Tenure",
+      "item": [
+        {
+          "name": "Create Section Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classTenureId\": \"{{classTenureId}}\",\n  \"name\": \"A\",\n  \"capacity\": 40\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Section Tenure (Duplicate Name)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classTenureId\": \"{{classTenureId}}\",\n  \"name\": \"A\",\n  \"capacity\": 40\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Section Tenure (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classTenureId\": \"{{classTenureId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Section Tenure (Invalid Class Tenure ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classTenureId\": \"invalid-id\",\n  \"name\": \"B\",\n  \"capacity\": 35\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Section Tenure (Class Tenure from Different Academic Year)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"classTenureId\": \"{{otherClassTenureId}}\",\n  \"name\": \"C\",\n  \"capacity\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Section Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Section Tenures (with academicYearId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure?academicYearId={{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Section Tenures (with classTenureId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure?classTenureId={{classTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure"],
+              "query": [
+                {
+                  "key": "classTenureId",
+                  "value": "{{classTenureId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Section Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure/{{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure", "{{sectionTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Section Tenure (Name)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"A Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure/{{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure", "{{sectionTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Section Tenure (Capacity)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"capacity\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure/{{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure", "{{sectionTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Section Tenure (Capacity Below Enrollment - Should Fail)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"capacity\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure/{{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure", "{{sectionTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Section Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure/{{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure", "{{sectionTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Section Tenure (With Students/Teachers - Should Fail)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/section-tenure/{{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "section-tenure", "{{sectionTenureId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Class Subject",
+      "item": [
+        {
+          "name": "Create Class Subject (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classTenureId\": \"{{classTenureId}}\",\n  \"name\": \"Mathematics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Subject (Duplicate Name)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classTenureId\": \"{{classTenureId}}\",\n  \"name\": \"Mathematics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Subject (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classTenureId\": \"{{classTenureId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Subject (Invalid Class Tenure ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classTenureId\": \"invalid-id\",\n  \"name\": \"English\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject"]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject"]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Subjects (with classTenureId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject?classTenureId={{classTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject"],
+              "query": [
+                {
+                  "key": "classTenureId",
+                  "value": "{{classTenureId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Class Subject By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject/{{classSubjectId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject", "{{classSubjectId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Class Subject",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mathematics Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject/{{classSubjectId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject", "{{classSubjectId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Class Subject (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject/{{classSubjectId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject", "{{classSubjectId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Class Subject (With Teachers - Should Fail)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-subject/{{classSubjectId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-subject", "{{classSubjectId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student Enrollment",
+      "item": [
+        {
+          "name": "Create Student Enrollment (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"rollNumber\": \"1\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Create Student Enrollment (Duplicate Academic Year)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Create Student Enrollment (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Create Student Enrollment (Invalid Student ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"invalid-id\",\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Create Student Enrollment (Section at Capacity - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Create Student Enrollment (Duplicate Roll Number - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{otherStudentId}}\",\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"rollNumber\": \"1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Get All Student Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"]
+            }
+          }
+        },
+        {
+          "name": "Get All Student Enrollments (with academicYearId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment?academicYearId={{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Student Enrollments (with sectionTenureId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment?sectionTenureId={{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"],
+              "query": [
+                {
+                  "key": "sectionTenureId",
+                  "value": "{{sectionTenureId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Student Enrollments (with status filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment?status=ACTIVE",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Student Enrollment By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment/{{studentEnrollmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment", "{{studentEnrollmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Student Enrollment (Section)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sectionTenureId\": \"{{otherSectionTenureId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment/{{studentEnrollmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment", "{{studentEnrollmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Student Enrollment (Roll Number)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rollNumber\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment/{{studentEnrollmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment", "{{studentEnrollmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Student Enrollment (Status)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment/{{studentEnrollmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment", "{{studentEnrollmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Student Enrollment (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/student-enrollment/{{studentEnrollmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "student-enrollment", "{{studentEnrollmentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Class Teacher Tenure",
+      "item": [
+        {
+          "name": "Create Class Teacher Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Teacher Tenure (Section Already Has Teacher - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"teacherId\": \"{{otherTeacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Teacher Tenure (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Teacher Tenure (Invalid Teacher ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"teacherId\": \"invalid-id\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Class Teacher Tenure (Section from Different Academic Year - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{otherSectionTenureId}}\",\n  \"teacherId\": \"{{teacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Teacher Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Teacher Tenures (with academicYearId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure?academicYearId={{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Teacher Tenures (with sectionTenureId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure?sectionTenureId={{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"],
+              "query": [
+                {
+                  "key": "sectionTenureId",
+                  "value": "{{sectionTenureId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Class Teacher Tenures (with teacherId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure?teacherId={{teacherId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure"],
+              "query": [
+                {
+                  "key": "teacherId",
+                  "value": "{{teacherId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Class Teacher Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure/{{classTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure", "{{classTeacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Class Teacher Tenure (Teacher)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherId\": \"{{otherTeacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure/{{classTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure", "{{classTeacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Class Teacher Tenure (Status)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure/{{classTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure", "{{classTeacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Class Teacher Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/class-teacher-tenure/{{classTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "class-teacher-tenure", "{{classTeacherTenureId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subject Teacher Tenure",
+      "item": [
+        {
+          "name": "Create Subject Teacher Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"classSubjectId\": \"{{classSubjectId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Subject Teacher Tenure (Duplicate Assignment - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"classSubjectId\": \"{{classSubjectId}}\",\n  \"teacherId\": \"{{otherTeacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Subject Teacher Tenure (Missing Fields)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Subject Teacher Tenure (Invalid Teacher ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{sectionTenureId}}\",\n  \"classSubjectId\": \"{{classSubjectId}}\",\n  \"teacherId\": \"invalid-id\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Subject Teacher Tenure (Section from Different Academic Year - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"sectionTenureId\": \"{{otherSectionTenureId}}\",\n  \"classSubjectId\": \"{{classSubjectId}}\",\n  \"teacherId\": \"{{teacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subject Teacher Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subject Teacher Tenures (with academicYearId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure?academicYearId={{academicYearId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"],
+              "query": [
+                {
+                  "key": "academicYearId",
+                  "value": "{{academicYearId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Subject Teacher Tenures (with sectionTenureId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure?sectionTenureId={{sectionTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"],
+              "query": [
+                {
+                  "key": "sectionTenureId",
+                  "value": "{{sectionTenureId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Subject Teacher Tenures (with classSubjectId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure?classSubjectId={{classSubjectId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"],
+              "query": [
+                {
+                  "key": "classSubjectId",
+                  "value": "{{classSubjectId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Subject Teacher Tenures (with teacherId filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure?teacherId={{teacherId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure"],
+              "query": [
+                {
+                  "key": "teacherId",
+                  "value": "{{teacherId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Subject Teacher Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure/{{subjectTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure", "{{subjectTeacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Subject Teacher Tenure (Teacher)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherId\": \"{{otherTeacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure/{{subjectTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure", "{{subjectTeacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Subject Teacher Tenure (Status)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure/{{subjectTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure", "{{subjectTeacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Subject Teacher Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/subject-teacher-tenure/{{subjectTeacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "subject-teacher-tenure", "{{subjectTeacherTenureId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teacher Tenure",
+      "item": [
+        {
+          "name": "Create Teacher Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"teacherId\": \"{{teacherId}}\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Teacher Tenure (Duplicate - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"teacherId\": \"{{teacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Teacher Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/teacher-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "teacher-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get Teacher Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/teacher-tenure/{{teacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "teacher-tenure", "{{teacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Teacher Tenure (Status)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/teacher-tenure/{{teacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "teacher-tenure", "{{teacherTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Teacher Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/teacher-tenure/{{teacherTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "teacher-tenure", "{{teacherTenureId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Staff Tenure",
+      "item": [
+        {
+          "name": "Create Staff Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"staffId\": \"{{staffId}}\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/staff-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "staff-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Staff Tenure (Duplicate - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"staffId\": \"{{staffId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/staff-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "staff-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Staff Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/staff-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "staff-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get Staff Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/staff-tenure/{{staffTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "staff-tenure", "{{staffTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Staff Tenure (Status)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/staff-tenure/{{staffTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "staff-tenure", "{{staffTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Staff Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/staff-tenure/{{staffTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "staff-tenure", "{{staffTenureId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Management Tenure",
+      "item": [
+        {
+          "name": "Create Management Tenure (Success)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"managementId\": \"{{managementId}}\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/management-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "management-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Create Management Tenure (Duplicate - Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academicYearId\": \"{{academicYearId}}\",\n  \"managementId\": \"{{managementId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/management-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "management-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get All Management Tenures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/management-tenure",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "management-tenure"]
+            }
+          }
+        },
+        {
+          "name": "Get Management Tenure By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/management-tenure/{{managementTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "management-tenure", "{{managementTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Management Tenure (Status)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/api/v1/management-tenure/{{managementTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "management-tenure", "{{managementTenureId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Management Tenure (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/v1/management-tenure/{{managementTenureId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "v1", "management-tenure", "{{managementTenureId}}"]
+            }
+          }
+        }
+      ]
     }
   ]
 }

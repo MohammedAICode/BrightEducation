@@ -37,7 +37,7 @@ async function createNotificationHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Notification created: ${notification.id}`);
     return res.status(HTTP_STATUS.CREATED).json({
       error: false,
-      data: notification,
+      body: notification,
       message: "Notification created successfully",
     });
   } catch (err: any) {
@@ -65,7 +65,7 @@ async function getNotificationsHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Retrieved ${notifications.length} notifications`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: notifications,
+      body: notifications,
       message: "Notifications retrieved successfully",
     });
   } catch (err: any) {
@@ -94,7 +94,7 @@ async function getNotificationByIdHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Retrieved notification: ${notificationId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: notification,
+      body: notification,
       message: "Notification retrieved successfully",
     });
   } catch (err: any) {
@@ -131,7 +131,7 @@ async function updateNotificationHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Notification updated: ${notificationId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: notification,
+      body: notification,
       message: "Notification updated successfully",
     });
   } catch (err: any) {
@@ -163,7 +163,7 @@ async function approveNotificationHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Notification approved: ${notificationId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: notification,
+      body: notification,
       message: "Notification approved successfully",
     });
   } catch (err: any) {
@@ -202,7 +202,7 @@ async function rejectNotificationHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Notification rejected: ${notificationId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: notification,
+      body: notification,
       message: "Notification rejected successfully",
     });
   } catch (err: any) {
@@ -233,7 +233,7 @@ async function deleteNotificationHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Notification deleted: ${notificationId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: result,
+      body: result,
       message: "Notification deleted successfully",
     });
   } catch (err: any) {
@@ -257,7 +257,7 @@ async function markAsReadHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] Notification marked as read: ${notificationId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: notification,
+      body: notification,
       message: "Notification marked as read",
     });
   } catch (err: any) {
@@ -279,7 +279,7 @@ async function markAllAsReadHandler(req: Request, res: Response) {
     logger.info(`[NOTIFICATION_CONTROLLER] All notifications marked as read for user: ${currUser.userId}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: result,
+      body: result,
       message: "All notifications marked as read",
     });
   } catch (err: any) {

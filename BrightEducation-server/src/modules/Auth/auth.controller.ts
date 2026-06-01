@@ -33,7 +33,7 @@ async function login(req: Request, res: Response) {
       );
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
-        data: null,
+        body: null,
         message: parseResult.error,
       });
     }
@@ -46,7 +46,7 @@ async function login(req: Request, res: Response) {
     logger.info(`[LOGIN] Login successful for user: ${email}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: {
+      body: {
         email,
       },
       message: "Login successful",
@@ -65,7 +65,7 @@ async function me(req: Request, res: Response) {
       logger.error(`[ME] Unable to access the current user from request`);
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         error: true,
-        data: null,
+        body: null,
         message:
           "Unable to access the current user details. Please login again.",
       });
@@ -90,7 +90,7 @@ async function me(req: Request, res: Response) {
     logger.info(`[ME] User details retrieved successfully for: ${currUser.email}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: userData,
+      body: userData,
       message: "User found successfully",
     });
   } catch (err: any) {
@@ -117,7 +117,7 @@ async function logout(req: Request, res: Response) {
     logger.info(`[LOGOUT] User logged out successfully: ${currUser?.email || 'unknown'}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: null,
+      body: null,
       message: "User logout successfully",
     });
   } catch (err: any) {
@@ -135,7 +135,7 @@ async function forgotPasswordHandler(req: Request, res: Response) {
       logger.warn(`[FORGOT_PASSWORD] Email is required`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
-        data: null,
+        body: null,
         message: "Email is required",
       });
     }
@@ -145,7 +145,7 @@ async function forgotPasswordHandler(req: Request, res: Response) {
     logger.info(`[FORGOT_PASSWORD] Forgot password request processed successfully`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: null,
+      body: null,
       message: result.message,
     });
   } catch (err: any) {
@@ -163,7 +163,7 @@ async function resetPasswordRequestHandler(req: Request, res: Response) {
       logger.error(`[RESET_PASSWORD_REQUEST] User not authenticated`);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         error: true,
-        data: null,
+        body: null,
         message: "User not authenticated",
       });
     }
@@ -174,7 +174,7 @@ async function resetPasswordRequestHandler(req: Request, res: Response) {
       logger.warn(`[RESET_PASSWORD_REQUEST] Current password and new password are required`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
-        data: null,
+        body: null,
         message: "Current password and new password are required",
       });
     }
@@ -184,7 +184,7 @@ async function resetPasswordRequestHandler(req: Request, res: Response) {
     logger.info(`[RESET_PASSWORD_REQUEST] Password change request processed successfully`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: null,
+      body: null,
       message: result.message,
     });
   } catch (err: any) {
@@ -202,7 +202,7 @@ async function approvePasswordResetHandler(req: Request, res: Response) {
       logger.error(`[APPROVE_PASSWORD_RESET] User not authenticated`);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         error: true,
-        data: null,
+        body: null,
         message: "User not authenticated",
       });
     }
@@ -211,7 +211,7 @@ async function approvePasswordResetHandler(req: Request, res: Response) {
       logger.error(`[APPROVE_PASSWORD_RESET] User is not admin: ${currUser.email}`);
       return res.status(HTTP_STATUS.FORBIDDEN).json({
         error: true,
-        data: null,
+        body: null,
         message: "Only administrators can approve password resets",
       });
     }
@@ -222,7 +222,7 @@ async function approvePasswordResetHandler(req: Request, res: Response) {
       logger.warn(`[APPROVE_PASSWORD_RESET] Notification ID and action are required`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
-        data: null,
+        body: null,
         message: "Notification ID and action are required",
       });
     }
@@ -231,7 +231,7 @@ async function approvePasswordResetHandler(req: Request, res: Response) {
       logger.warn(`[APPROVE_PASSWORD_RESET] Invalid action: ${action}`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         error: true,
-        data: null,
+        body: null,
         message: "Action must be 'approve' or 'reject'",
       });
     }
@@ -241,7 +241,7 @@ async function approvePasswordResetHandler(req: Request, res: Response) {
     logger.info(`[APPROVE_PASSWORD_RESET] Password reset ${action} processed successfully`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      data: null,
+      body: null,
       message: result.message,
     });
   } catch (err: any) {

@@ -9,6 +9,7 @@ export enum NotificationType {
   PROFILE_UPDATE = "PROFILE_UPDATE",
   LOGIN_ALERT = "LOGIN_ALERT",
   SYSTEM_MESSAGE = "SYSTEM_MESSAGE",
+  STUDENT_ENROLLMENT = "STUDENT_ENROLLMENT",
 }
 
 // Notification status

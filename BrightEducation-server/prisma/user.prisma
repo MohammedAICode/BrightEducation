@@ -28,6 +28,7 @@ model User {
     role ROLE_TYPE
 
     isActive IS_ACTIVE @default(CREATED)
+    isEnrolled Boolean @default(false)
 
     student    Student?
     teacher    Teacher?
