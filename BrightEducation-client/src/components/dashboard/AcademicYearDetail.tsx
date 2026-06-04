@@ -1732,8 +1732,30 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                 <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg">
                   {students
                     .filter((s) => {
-                      // Filter by role, active status, and not already enrolled (only check ACTIVE status)
-                      if (s.role !== 'STUDENT' || s.isActive === 'DELETED' || enrollments.some((e) => e.studentId === s.id && e.status === 'ACTIVE')) {
+                      // Filter by role and active status
+                      if (s.role !== 'STUDENT' || s.isActive === 'DELETED') {
+                        return false;
+                      }
+
+                      // Filter by isEnrolled flag - only show students who are not enrolled anywhere
+                      // OR show students who are enrolled but have PAUSED or WRONG_ENTRY status in this academic year
+                      if (s.isEnrolled) {
+                        // Student is enrolled somewhere, check if they have PAUSED or WRONG_ENTRY in this academic year
+                        const studentEnrollment = enrollments.find((e) => e.studentId === s.id && e.academicYearId === yearId);
+                        const allowedStatuses = ['PAUSED', 'WRONG_ENTRY'];
+                        
+                        if (!studentEnrollment || !allowedStatuses.includes(studentEnrollment.status || '')) {
+                          return false;
+                        }
+                      }
+
+                      // Check if student has enrollment in this academic year
+                      const studentEnrollment = enrollments.find((e) => e.studentId === s.id && e.academicYearId === yearId);
+
+                      // If enrolled in this academic year, only show if status is PAUSED or WRONG_ENTRY
+                      // Exclude: ACTIVE, PROMOTED, RETAINED, DROPPED_OUT
+                      const allowedStatuses = ['PAUSED', 'WRONG_ENTRY'];
+                      if (studentEnrollment && !allowedStatuses.includes(studentEnrollment.status || '')) {
                         return false;
                       }
 
@@ -1746,7 +1768,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                         return fullName.includes(query) || admissionNo.includes(query) || email.includes(query);
                       }
-                      
+
                       return true;
                     })
                     .map((student) => (
@@ -1776,7 +1798,29 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                         </div>
                       </label>
                     ))}
-                  {students.filter((s) => s.role === 'STUDENT' && s.isActive !== 'DELETED' && !enrollments.some((e) => e.studentId === s.id && e.status === 'ACTIVE')).length === 0 && (
+                  {students.filter((s) => {
+                    // Filter by role and active status
+                    if (s.role !== 'STUDENT' || s.isActive === 'DELETED') {
+                      return false;
+                    }
+
+                    // Filter by isEnrolled flag
+                    if (s.isEnrolled) {
+                      const studentEnrollment = enrollments.find((e) => e.studentId === s.id && e.academicYearId === yearId);
+                      const allowedStatuses = ['PAUSED', 'WRONG_ENTRY'];
+                      
+                      if (!studentEnrollment || !allowedStatuses.includes(studentEnrollment.status || '')) {
+                        return false;
+                      }
+                    }
+
+                    // Check if student has enrollment in this academic year
+                    const studentEnrollment = enrollments.find((e) => e.studentId === s.id && e.academicYearId === yearId);
+
+                    // If enrolled in this academic year, only show if status is PAUSED or WRONG_ENTRY
+                    const allowedStatuses = ['PAUSED', 'WRONG_ENTRY'];
+                    return !studentEnrollment || allowedStatuses.includes(studentEnrollment.status || '');
+                  }).length === 0 && (
                     <p className="px-4 py-8 text-center text-gray-500 text-sm">No students available for enrollment</p>
                   )}
                 </div>

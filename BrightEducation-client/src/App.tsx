@@ -6,6 +6,7 @@ import AdminDashboardLayout from './layouts/DashboardLayout'
 import UserDashboardLayout from './layouts/UserDashboardLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import { useAppSelector } from './store/hooks'
+import { SystemSettingsProvider } from './contexts/SystemSettingsContext'
 
 const App = () => {
   return (
@@ -17,7 +18,9 @@ const App = () => {
         path="/dashboard/*"
         element={
           <ProtectedRoute>
-            <DashboardRouter />
+            <SystemSettingsProvider>
+              <DashboardRouter />
+            </SystemSettingsProvider>
           </ProtectedRoute>
         }
       />

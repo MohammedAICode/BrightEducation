@@ -22,6 +22,7 @@ import staffTenureRouter from "./modules/StaffTenure/staffTenure.routes";
 import managementTenureRouter from "./modules/ManagementTenure/managementTenure.routes";
 import profileUpdateRouter from "./modules/ProfileUpdate/profileUpdate.routes";
 import sectionManagementRouter from "./modules/SectionManagement/sectionManagement.routes";
+import systemSettingsRouter from "./modules/SystemSettings/systemSettings.routes";
 
 // Register event listeners
 import "./events/listeners/studentEnrollmentListener";
@@ -68,6 +69,7 @@ app.use("/api/v1/staff-tenure", staffTenureRouter);
 app.use("/api/v1/management-tenure", managementTenureRouter);
 app.use("/api/v1/profile-update", profileUpdateRouter);
 app.use("/api/v1/section-management", sectionManagementRouter);
+app.use("/api/v1/system-settings", systemSettingsRouter);
 
 
 app.get("/", (_req, res) => {

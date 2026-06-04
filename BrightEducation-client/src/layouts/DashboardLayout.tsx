@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiMenu, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiUser, FiLogOut, FiClock, FiAlertTriangle } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from '../components/common/Sidebar';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -17,6 +17,9 @@ import Staff from '../components/dashboard/Incharges';
 import UserAvatar from '../components/common/UserAvatar';
 import NotificationBell from '../components/common/NotificationBell';
 import Notifications from '../components/dashboard/Notifications';
+import { Settings } from '../components/dashboard/Settings';
+import axiosInstance from '../lib/axios';
+import { useSystemSettings } from '../contexts/SystemSettingsContext';
 
 /**
  * Generate page title from active tab
@@ -60,6 +63,8 @@ function renderContent(activeTab: string): React.ReactNode {
       return <Profile />;
     case 'profile-update-requests':
       return <ProfileUpdateRequests />;
+    case 'settings':
+      return <Settings />;
     default:
       return <Overview />;
   }
@@ -72,6 +77,9 @@ function renderContent(activeTab: string): React.ReactNode {
 export default function AdminDashboardLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [systemTimezone, setSystemTimezone] = useState('Asia/Kolkata');
+  const { isLoading: settingsLoading, isConfigured } = useSystemSettings();
 
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
@@ -103,10 +111,82 @@ export default function AdminDashboardLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Fetch system timezone on mount
+  useEffect(() => {
+    const fetchSystemTimezone = async () => {
+      try {
+        const response = await axiosInstance.get('/system-settings');
+        setSystemTimezone(response.data.body.timezone);
+      } catch (error) {
+        console.error('Failed to fetch system timezone:', error);
+      }
+    };
+    fetchSystemTimezone();
+  }, []);
+
+  // Update time every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Format time in system timezone
+  const formattedTime = new Intl.DateTimeFormat('en-US', {
+    timeZone: systemTimezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).format(currentTime);
+
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: systemTimezone,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }).format(currentTime);
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
   };
+
+  // Show fallback message if system not configured
+  if (settingsLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50 items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isConfigured) {
+    return (
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+          <FiAlertTriangle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            System Not Configured
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Please contact the administrator to configure the system timezone.
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            This is required for fee calculations and notifications to work correctly.
+          </p>
+          {user?.role === 'ADMIN' && (
+            <button
+              onClick={() => setActiveTab('settings')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Configure Now
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans">
@@ -133,6 +213,16 @@ export default function AdminDashboardLayout() {
             </div>
 
             <div className="flex items-center gap-4">
+              {/* System Time Display */}
+              <div className="flex items-center space-x-3 text-sm bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <FiClock className="w-4 h-4 text-blue-600" />
+                  <span className="font-semibold text-gray-900">{formattedTime}</span>
+                </div>
+                <div className="h-4 w-px bg-gray-200"></div>
+                <span className="text-xs text-gray-500">{formattedDate}</span>
+              </div>
+
               {/* Notification Bell */}
               <NotificationBell />
 

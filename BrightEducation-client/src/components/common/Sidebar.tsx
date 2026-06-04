@@ -8,6 +8,7 @@ import {
   FiBell,
   FiChevronDown,
   FiChevronRight,
+  FiSettings,
 } from 'react-icons/fi';
 import { useAppSelector } from '../../store/hooks';
 import type { MenuItem } from '../../types';
@@ -30,6 +31,7 @@ const menuConfig: Partial<Record<string, MenuItem[]>> = {
     { id: 'students', label: 'Students', icon: <FiUser className="w-5 h-5" /> },
     { id: 'staff', label: 'Staff', icon: <FiUsers className="w-5 h-5" /> },
     { id: 'profile-update-requests', label: 'Profile Updates', icon: <FiUser className="w-5 h-5" /> },
+    { id: 'settings', label: 'Settings', icon: <FiSettings className="w-5 h-5" /> },
   ],
   MANAGEMENT: [
     { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
