@@ -31,6 +31,7 @@ export const profileUpdateRequestSchema = z.object({
   parentName: z.string().optional(),
   parentPhone: z.string().optional(),
   parentOccupation: z.string().optional(),
+  profileImgKey: z.string().optional(),
 });
 
 // Schema for approving/rejecting a request

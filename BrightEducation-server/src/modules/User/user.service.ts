@@ -309,6 +309,16 @@ export async function getAllUsers(
         updatedAt: true,
         lastLogin: true,
         createdById: true,
+        student: {
+          select: {
+            admissionNo: true,
+            admissionDate: true,
+            rollNumber: true,
+            classGrade: true,
+            section: true,
+            academicYearId: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",

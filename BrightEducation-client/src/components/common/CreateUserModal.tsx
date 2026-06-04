@@ -42,12 +42,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         
         let email = '';
         
+        // Helper function to sanitize ID (lowercase and remove special chars)
+        const sanitizeId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]/g, '');
+        
         if (role === 'STUDENT' && firstname && admissionNo) {
-          email = `${firstname.toLowerCase()}.${admissionNo}@bright.com`;
+          email = `${firstname.toLowerCase()}.${sanitizeId(admissionNo)}@bright.com`;
         } else if ((role === 'MANAGEMENT' || role === 'STAFF') && firstname && employeeId) {
-          email = `${firstname.toLowerCase()}.${employeeId}@bright.com`;
+          email = `${firstname.toLowerCase()}.${sanitizeId(employeeId)}@bright.com`;
         } else if (role === 'TEACHER' && firstname && employeeId) {
-          email = `${firstname.toLowerCase()}.${employeeId}@bright.com`;
+          email = `${firstname.toLowerCase()}.${sanitizeId(employeeId)}@bright.com`;
         }
         
         return email ? { ...prev, email } : prev;

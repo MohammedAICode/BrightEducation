@@ -22,8 +22,8 @@ router.get('/', getAllSectionTenuresHandler);
 // GET /api/v1/section-tenure/:id - Get a specific section tenure by ID
 router.get('/:id', getSectionTenureByIdHandler);
 
-// PUT /api/v1/section-tenure/:id - Update a section tenure (Admin only)
-router.put('/:id', updateSectionTenureHandler);
+// PATCH /api/v1/section-tenure/:id - Update a section tenure (Admin only)
+router.patch('/:id', updateSectionTenureHandler);
 
 // DELETE /api/v1/section-tenure/:id - Delete a section tenure (Admin only)
 router.delete('/:id', deleteSectionTenureHandler);

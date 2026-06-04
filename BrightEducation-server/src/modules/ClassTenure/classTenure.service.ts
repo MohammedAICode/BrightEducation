@@ -89,10 +89,17 @@ export const getClassTenureById = async (id: string) => {
   }
 };
 
-export const updateClassTenure = async (id: string, data: { name?: string }) => {
+export const updateClassTenure = async (id: string, data: { name?: string; rollNoPrefix?: string }) => {
   try {
     const existingClass = await prisma.classTenure.findUnique({
       where: { id },
+      include: {
+        sectionTenures: {
+          include: {
+            studentEnrollments: true,
+          },
+        },
+      },
     });
 
     if (!existingClass) {

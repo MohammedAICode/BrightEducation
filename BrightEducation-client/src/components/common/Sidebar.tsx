@@ -74,7 +74,7 @@ interface AcademicYear {
  * Uses Redux for authentication state.
  */
 export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen }: SidebarProps) {
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.auth.user) as any;
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [isAcademicYearExpanded, setIsAcademicYearExpanded] = useState(false);
 

@@ -1,11 +1,11 @@
-import { FiUser, FiMail, FiShield, FiCalendar, FiMapPin, FiDroplet, FiGlobe, FiBriefcase, FiAlertCircle, FiLock, FiEye, FiEyeOff, FiEdit, FiX } from 'react-icons/fi';
+import { FiUser, FiMail, FiShield, FiCalendar, FiMapPin, FiDroplet, FiGlobe, FiBriefcase, FiAlertCircle, FiLock, FiEye, FiEyeOff, FiEdit, FiX, FiCamera } from 'react-icons/fi';
 import { useAppSelector } from '../../store/hooks';
 import UserAvatar from '../common/UserAvatar';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axiosInstance from '../../lib/axios';
 
 const Profile: React.FC = () => {
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.auth.user) as any;
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -14,7 +14,8 @@ const Profile: React.FC = () => {
     confirmPassword: '',
   });
   const [editData, setEditData] = useState<Record<string, string>>({});
-  const [myRequests, setMyRequests] = useState<any[]>([]);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -22,23 +23,14 @@ const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    fetchMyRequests();
-  }, []);
-
-  const fetchMyRequests = async () => {
-    try {
-      const response = await axiosInstance.get('/profile-update/my-requests');
-      setMyRequests(response.data.body || []);
-    } catch (err) {
-      console.error('Failed to fetch requests:', err);
-    }
-  };
-
   const handleProfileEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
+    // Create FormData for file upload
+    const formData = new FormData();
+    let hasChanges = false;
 
     // Compare with original user data and only include changed fields
     const changedFields: Record<string, string> = {};
@@ -59,7 +51,19 @@ const Profile: React.FC = () => {
       }
     });
 
-    if (Object.keys(changedFields).length === 0) {
+    // Add changed fields to FormData
+    Object.entries(changedFields).forEach(([key, value]) => {
+      formData.append(key, value);
+      hasChanges = true;
+    });
+
+    // Add profile image if selected
+    if (profileImage) {
+      formData.append('profileImg', profileImage);
+      hasChanges = true;
+    }
+
+    if (!hasChanges) {
       setError('No changes detected. Please modify at least one field to update.');
       return;
     }
@@ -67,16 +71,44 @@ const Profile: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await axiosInstance.post('/profile-update', changedFields);
+      await axiosInstance.post('/profile-update', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       setSuccess(true);
       setEditData({});
+      setProfileImage(null);
+      setProfileImagePreview(null);
       setShowEditModal(false);
-      fetchMyRequests();
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to submit profile update request');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size should be less than 5MB');
+        return;
+      }
+      setProfileImage(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -98,6 +130,8 @@ const Profile: React.FC = () => {
       parentPhone: user?.parentPhone || '',
       parentOccupation: user?.parentOccupation || '',
     });
+    setProfileImage(null);
+    setProfileImagePreview(null);
     setShowEditModal(true);
   };
 
@@ -459,6 +493,40 @@ const Profile: React.FC = () => {
             )}
 
             <form onSubmit={handleProfileEdit} className="space-y-4">
+              {/* Profile Image Upload */}
+              <div className="flex flex-col items-center mb-6">
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 bg-gray-100">
+                    {profileImagePreview ? (
+                      <img src={profileImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : user?.profileImg ? (
+                      <img src={user.profileImg} alt="Current" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <FiUser className="w-16 h-16" />
+                      </div>
+                    )}
+                  </div>
+                  <label
+                    htmlFor="profile-image-upload"
+                    className="absolute bottom-0 right-0 bg-green-600 hover:bg-green-700 text-white p-2 rounded-full cursor-pointer transition shadow-lg"
+                  >
+                    <FiCamera className="w-5 h-5" />
+                    <input
+                      id="profile-image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Click camera icon to change profile picture</p>
+                {profileImage && (
+                  <p className="text-sm text-green-600 mt-1">New image selected: {profileImage.name}</p>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>

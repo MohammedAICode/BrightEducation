@@ -13,6 +13,7 @@ model AcademicYear {
     managementTenures ManagementTenure[]
     classTeacherTenures ClassTeacherTenure[]
     subjectTeacherTenures SubjectTeacherTenure[]
+    studentFees    StudentFee[]
     
     @@index([isActive])
 }

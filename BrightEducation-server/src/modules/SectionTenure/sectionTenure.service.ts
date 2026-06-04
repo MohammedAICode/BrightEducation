@@ -1,7 +1,7 @@
 import { AppError } from '../../config/Error/AppError';
 import { prisma } from '../../libs/prisma';
 
-export const createSectionTenure = async (data: { academicYearId: string; classTenureId: string; name: string; capacity: number }) => {
+export const createSectionTenure = async (data: { academicYearId: string; classTenureId: string; name: string; capacity: number; rollNoPrefix?: string }) => {
   try {
     // Check if academic year exists
     const academicYear = await prisma.academicYear.findUnique({
@@ -110,7 +110,7 @@ export const getSectionTenureById = async (id: string) => {
   }
 };
 
-export const updateSectionTenure = async (id: string, data: { name?: string; capacity?: number }) => {
+export const updateSectionTenure = async (id: string, data: { name?: string; capacity?: number; rollNoPrefix?: string }) => {
   try {
     const existingSection = await prisma.sectionTenure.findUnique({
       where: { id },

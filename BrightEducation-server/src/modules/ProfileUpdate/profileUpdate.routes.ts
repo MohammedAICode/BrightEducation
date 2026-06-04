@@ -9,6 +9,7 @@ import {
   deleteProfileUpdateRequestHandler,
 } from "./profileUpdate.controller";
 import { authenticate } from "../../config/middleware/authenticate";
+import { uploadProfile } from "../../config/Multer/multer";
 
 const profileUpdateRouter = Router();
 
@@ -16,7 +17,7 @@ const profileUpdateRouter = Router();
 profileUpdateRouter.use(authenticate);
 
 // Create a profile update request (any authenticated user)
-profileUpdateRouter.post("/", createProfileUpdateRequestHandler);
+profileUpdateRouter.post("/", uploadProfile.single('profileImg'), createProfileUpdateRequestHandler);
 
 // Get my profile update requests (any authenticated user)
 profileUpdateRouter.get("/my-requests", getMyProfileUpdateRequestsHandler);

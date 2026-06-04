@@ -26,7 +26,7 @@ export async function createSectionTenureHandler(req: Request, res: Response) {
       return res.status(403).json(response);
     }
 
-    const { academicYearId, classTenureId, name, capacity } = req.body;
+    const { academicYearId, classTenureId, name, capacity, rollNoPrefix } = req.body;
 
     if (!academicYearId || !classTenureId || !name || !capacity) {
       const response: ApiResponse = {
@@ -37,7 +37,17 @@ export async function createSectionTenureHandler(req: Request, res: Response) {
       return res.status(400).json(response);
     }
 
-    const sectionTenure = await createSectionTenure({ academicYearId, classTenureId, name, capacity });
+    // Validate roll number prefix format if provided
+    if (rollNoPrefix && !/^[A-Z]{1,3}-$/.test(rollNoPrefix)) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Roll number prefix must be 1-3 uppercase letters followed by a hyphen (e.g., A-, B-, SEC-)',
+      };
+      return res.status(400).json(response);
+    }
+
+    const sectionTenure = await createSectionTenure({ academicYearId, classTenureId, name, capacity, rollNoPrefix });
 
     const response: ApiResponse = {
       error: false,
@@ -113,7 +123,7 @@ export async function updateSectionTenureHandler(req: Request, res: Response) {
     }
 
     const { id } = req.params;
-    const { name, capacity } = req.body;
+    const { name, capacity, rollNoPrefix } = req.body;
 
     if (!name && capacity === undefined) {
       const response: ApiResponse = {
@@ -124,7 +134,17 @@ export async function updateSectionTenureHandler(req: Request, res: Response) {
       return res.status(400).json(response);
     }
 
-    const sectionTenure = await updateSectionTenure(id as string, { name, capacity });
+    // Validate roll number prefix format if provided
+    if (rollNoPrefix && !/^[A-Z]{1,3}-$/.test(rollNoPrefix)) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Roll number prefix must be 1-3 uppercase letters followed by a hyphen (e.g., A-, B-, SEC-)',
+      };
+      return res.status(400).json(response);
+    }
+
+    const sectionTenure = await updateSectionTenure(id as string, { name, capacity, rollNoPrefix });
 
     const response: ApiResponse = {
       error: false,

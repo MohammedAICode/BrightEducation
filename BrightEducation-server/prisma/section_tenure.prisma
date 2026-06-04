@@ -4,6 +4,8 @@ model SectionTenure {
     classTenureId  String
     name           String       // "A", "B", "Morning"
     capacity       Int         // Maximum students allowed
+    rollNoPrefix   String?      // "A-", "B-", "M-" for auto-generating roll numbers
+    rollNoCounter  Int          @default(0) // Auto-increment counter for roll numbers
     
     academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
     classTenure    ClassTenure  @relation(fields: [classTenureId], references: [id], onDelete: Cascade)

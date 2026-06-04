@@ -7,8 +7,10 @@ model Student {
     admissionDate DateTime
     rollNumber    String?
     classGrade    String?
-    section       String   @default("A")
+    section       String?
+    academicYearId String?
     prevSchool     String?
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    fees StudentFee[]
 }

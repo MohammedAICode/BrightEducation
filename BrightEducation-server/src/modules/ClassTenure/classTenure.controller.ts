@@ -110,18 +110,32 @@ export async function updateClassTenureHandler(req: Request, res: Response) {
     }
 
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, rollNoPrefix } = req.body;
 
-    if (!name) {
+    if (!name && rollNoPrefix === undefined) {
       const response: ApiResponse = {
         error: true,
         body: null,
-        message: 'Name is required',
+        message: 'At least one field (name or rollNoPrefix) is required for update',
       };
       return res.status(400).json(response);
     }
 
-    const classTenure = await updateClassTenure(id as string, { name });
+    // Validate roll number prefix format if provided
+    if (rollNoPrefix && !/^[A-Z]{1,3}-$/.test(rollNoPrefix)) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Roll number prefix must be 1-3 uppercase letters followed by a hyphen (e.g., P-, PP-, SEC-)',
+      };
+      return res.status(400).json(response);
+    }
+
+    const updateData: { name?: string; rollNoPrefix?: string } = {};
+    if (name) updateData.name = name;
+    if (rollNoPrefix !== undefined) updateData.rollNoPrefix = rollNoPrefix;
+
+    const classTenure = await updateClassTenure(id as string, updateData);
 
     const response: ApiResponse = {
       error: false,

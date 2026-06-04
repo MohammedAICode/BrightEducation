@@ -3,10 +3,11 @@ import { prisma } from "../../libs/prisma";
 import { AppError } from "../../config/Error/AppError";
 import { HTTP_STATUS } from "../../config/Error/ErrorConstant";
 import { REQUEST_STATUS } from "./profileUpdate.schema";
+import { createNotification, NotificationType, NotificationStatus, NotificationPriority } from "../Notification/notification.service";
 
 export async function createProfileUpdateRequest(
   userId: string,
-  data: Prisma.ProfileUpdateRequestCreateInput,
+  data: Partial<Prisma.ProfileUpdateRequestUncheckedCreateInput>,
 ): Promise<ProfileUpdateRequest> {
   // Check if user exists
   const user = await prisma.user.findUnique({
@@ -160,6 +161,7 @@ export async function approveProfileUpdateRequest(
   if (request.parentName !== null) updateData.parentName = request.parentName;
   if (request.parentPhone !== null) updateData.parentPhone = request.parentPhone;
   if (request.parentOccupation !== null) updateData.parentOccupation = request.parentOccupation;
+  if (request.profileImgKey !== null) updateData.profileImgKey = request.profileImgKey;
 
   // Update the user's profile
   await prisma.user.update({
@@ -168,13 +170,35 @@ export async function approveProfileUpdateRequest(
   });
 
   // Update the request status
-  return await prisma.profileUpdateRequest.update({
+  const updatedRequest = await prisma.profileUpdateRequest.update({
     where: { id },
     data: {
       status: REQUEST_STATUS.APPROVED,
       approvedById: adminId,
     },
   });
+
+  // Send notification to user
+  try {
+    await createNotification({
+      type: NotificationType.PROFILE_UPDATE,
+      status: NotificationStatus.COMPLETED,
+      userId: request.userId,
+      relatedUserId: adminId,
+      title: "Profile Update Approved",
+      message: "Your profile update request has been approved by the administrator. Your changes are now live.",
+      priority: NotificationPriority.NORMAL,
+      data: {
+        requestId: id,
+        approvedBy: adminId,
+      },
+    });
+  } catch (notifError: any) {
+    // Log error but don't fail the approval
+    console.error("Failed to send notification:", notifError);
+  }
+
+  return updatedRequest;
 }
 
 export async function rejectProfileUpdateRequest(
@@ -199,7 +223,7 @@ export async function rejectProfileUpdateRequest(
   }
 
   // Update the request status
-  return await prisma.profileUpdateRequest.update({
+  const updatedRequest = await prisma.profileUpdateRequest.update({
     where: { id },
     data: {
       status: REQUEST_STATUS.REJECTED,
@@ -207,6 +231,31 @@ export async function rejectProfileUpdateRequest(
       rejectionReason,
     },
   });
+
+  // Send notification to user
+  try {
+    await createNotification({
+      type: NotificationType.PROFILE_UPDATE,
+      status: NotificationStatus.REJECTED,
+      userId: request.userId,
+      relatedUserId: adminId,
+      title: "Profile Update Rejected",
+      message: rejectionReason 
+        ? `Your profile update request has been rejected. Reason: ${rejectionReason}`
+        : "Your profile update request has been rejected by the administrator.",
+      priority: NotificationPriority.NORMAL,
+      data: {
+        requestId: id,
+        rejectedBy: adminId,
+        rejectionReason,
+      },
+    });
+  } catch (notifError: any) {
+    // Log error but don't fail the rejection
+    console.error("Failed to send notification:", notifError);
+  }
+
+  return updatedRequest;
 }
 
 export async function deleteProfileUpdateRequest(

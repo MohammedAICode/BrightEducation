@@ -14,6 +14,7 @@ import classTenureRouter from "./modules/ClassTenure/classTenure.routes";
 import sectionTenureRouter from "./modules/SectionTenure/sectionTenure.routes";
 import classSubjectRouter from "./modules/ClassSubject/classSubject.routes";
 import studentEnrollmentRouter from "./modules/StudentEnrollment/studentEnrollment.routes";
+import studentFeeRouter from "./modules/StudentFee/studentFee.routes";
 import classTeacherTenureRouter from "./modules/ClassTeacherTenure/classTeacherTenure.routes";
 import subjectTeacherTenureRouter from "./modules/SubjectTeacherTenure/subjectTeacherTenure.routes";
 import teacherTenureRouter from "./modules/TeacherTenure/teacherTenure.routes";
@@ -21,6 +22,9 @@ import staffTenureRouter from "./modules/StaffTenure/staffTenure.routes";
 import managementTenureRouter from "./modules/ManagementTenure/managementTenure.routes";
 import profileUpdateRouter from "./modules/ProfileUpdate/profileUpdate.routes";
 import sectionManagementRouter from "./modules/SectionManagement/sectionManagement.routes";
+
+// Register event listeners
+import "./events/listeners/studentEnrollmentListener";
 
 
 const app = express();
@@ -56,6 +60,7 @@ app.use("/api/v1/class-tenure", classTenureRouter);
 app.use("/api/v1/section-tenure", sectionTenureRouter);
 app.use("/api/v1/class-subject", classSubjectRouter);
 app.use("/api/v1/student-enrollment", studentEnrollmentRouter);
+app.use("/api/v1/student-fee", studentFeeRouter);
 app.use("/api/v1/class-teacher-tenure", classTeacherTenureRouter);
 app.use("/api/v1/subject-teacher-tenure", subjectTeacherTenureRouter);
 app.use("/api/v1/teacher-tenure", teacherTenureRouter);

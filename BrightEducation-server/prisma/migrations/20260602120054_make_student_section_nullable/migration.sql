@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Student" ALTER COLUMN "section" DROP NOT NULL,
+ALTER COLUMN "section" DROP DEFAULT;

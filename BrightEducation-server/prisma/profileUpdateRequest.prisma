@@ -21,6 +21,7 @@ model ProfileUpdateRequest {
     parentName               String?
     parentPhone              String?
     parentOccupation         String?
+    profileImgKey            String?
 
     // Approval status
     status REQUEST_STATUS @default(PENDING)

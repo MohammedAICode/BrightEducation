@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FiBookOpen, FiUsers, FiCalendar, FiDollarSign, FiGrid, FiPlus, FiTrash2, FiX, FiEdit, FiBook } from 'react-icons/fi';
+import { FiBookOpen, FiUsers, FiCalendar, FiGrid, FiPlus, FiTrash2, FiX, FiEdit, FiBook, FiAlertCircle, FiSearch } from 'react-icons/fi';
 import axiosInstance from '../../lib/axios';
+import { LuReceiptIndianRupee } from 'react-icons/lu';
 
 interface ClassTenure {
   id: string;
@@ -30,6 +31,7 @@ interface StudentEnrollment {
   studentId: string;
   academicYearId: string;
   sectionTenureId: string;
+  rollNumber?: string;
   status?: string;
 }
 
@@ -100,17 +102,51 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
   const [newClassName, setNewClassName] = useState('');
   const [newSectionName, setNewSectionName] = useState('');
   const [newSectionCapacity, setNewSectionCapacity] = useState('');
+  const [newSectionRollPrefix, setNewSectionRollPrefix] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
   const [enrollingStudent, setEnrollingStudent] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState('');
-  const [rollNumber, setRollNumber] = useState('');
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
+  const [tuitionMonthlyFee, setTuitionMonthlyFee] = useState('');
+  const [selectedFeeType, setSelectedFeeType] = useState<'SCHOOL' | 'TUITION' | ''>('');
+  const [annualFee, setAnnualFee] = useState('');
+  const [examFee, setExamFee] = useState('0');
+  const [miscellaneousFee, setMiscellaneousFee] = useState('0');
+  const [labFee, setLabFee] = useState('0');
+  const [includeInMonthlyCalculation, setIncludeInMonthlyCalculation] = useState(false);
+  const [percentageOption, setPercentageOption] = useState('0');
+  const [studentFees, setStudentFees] = useState<any[]>([]);
+  const [isRecordPaymentModalOpen, setIsRecordPaymentModalOpen] = useState(false);
+  const [selectedFeeForPayment, setSelectedFeeForPayment] = useState<any>(null);
+  const [paymentMonth, setPaymentMonth] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [paymentNotes, setPaymentNotes] = useState('');
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [unenrollEnrollmentId, setUnenrollEnrollmentId] = useState('');
-  const [unenrollStatus, setUnenrollStatus] = useState<'PROMOTED' | 'RETAINED' | 'DROPPED_OUT'>('PROMOTED');
-  const [enrollmentStatus, setEnrollmentStatus] = useState<'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'WITHDRAWN'>('ACTIVE');
+  const [unenrollStatus, setUnenrollStatus] = useState<'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT'>('PROMOTED');
+  const [selectedEnrolledStudentIds, setSelectedEnrolledStudentIds] = useState<string[]>([]);
+  const [isBulkStatusModalOpen, setIsBulkStatusModalOpen] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT'>('PROMOTED');
+  const [isUpdateFeeModalOpen, setIsUpdateFeeModalOpen] = useState(false);
+  const [selectedStudentForFeeUpdate, setSelectedStudentForFeeUpdate] = useState<any>(null);
+  const [updateFeeType, setUpdateFeeType] = useState<'SCHOOL' | 'TUITION' | ''>('');
+  const [updateAnnualFee, setUpdateAnnualFee] = useState('');
+  const [updateExamFee, setUpdateExamFee] = useState('0');
+  const [updateMiscellaneousFee, setUpdateMiscellaneousFee] = useState('0');
+  const [updateLabFee, setUpdateLabFee] = useState('0');
+  const [updateIncludeInMonthlyCalculation, setUpdateIncludeInMonthlyCalculation] = useState(false);
+  const [updatePercentageOption, setUpdatePercentageOption] = useState('0');
+  const [updateTuitionMonthlyFee, setUpdateTuitionMonthlyFee] = useState('');
+  const [isFetchingFeeData, setIsFetchingFeeData] = useState(false);
+  // Store original values to check for changes
+  const [originalFeeValues, setOriginalFeeValues] = useState<any>(null);
+  // Modal message state
+  const [updateFeeMessage, setUpdateFeeMessage] = useState<{ type: 'error' | 'success' | 'info'; text: string } | null>(null);
 
   // Edit states
   const [isEditClassModalOpen, setIsEditClassModalOpen] = useState(false);
@@ -122,6 +158,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
   const [editClassName, setEditClassName] = useState('');
   const [editSectionName, setEditSectionName] = useState('');
   const [editSectionCapacity, setEditSectionCapacity] = useState('');
+  const [editSectionRollPrefix, setEditSectionRollPrefix] = useState('');
   const [editSubjectName, setEditSubjectName] = useState('');
 
   useEffect(() => {
@@ -130,6 +167,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
       fetchStudents();
       fetchEnrollments();
       fetchSubjects();
+      fetchStudentFees();
     }
   }, [yearId]);
 
@@ -205,6 +243,15 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
     }
   };
 
+  const fetchStudentFees = async () => {
+    try {
+      const response = await axiosInstance.get(`/student-fee/academic-year/${yearId}`);
+      setStudentFees(response.data.body || []);
+    } catch (error) {
+      console.error('Failed to fetch student fees:', error);
+    }
+  };
+
   const fetchAvailableTeachers = async () => {
     try {
       // Try the section-management endpoint first
@@ -275,8 +322,10 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
       });
       setNewClassName('');
       fetchClasses();
-    } catch (error) {
-      console.error('Failed to create class:', error);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Failed to create class';
+      setError(errorMsg);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -290,35 +339,102 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
         classTenureId: selectedClass,
         academicYearId: yearId,
         capacity: parseInt(newSectionCapacity),
+        rollNoPrefix: newSectionRollPrefix || undefined,
       });
       setNewSectionName('');
       setNewSectionCapacity('');
+      setNewSectionRollPrefix('');
       fetchSections(selectedClass);
-    } catch (error) {
-      console.error('Failed to create section:', error);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Failed to create section';
+      setError(errorMsg);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
-  const handleEnrollStudent = async (studentId: string) => {
-    if (!selectedSection) return;
+  const handleEnrollStudents = async () => {
+    if (!selectedSection || selectedStudentIds.length === 0) return;
 
     try {
       setEnrollingStudent(true);
-      await axiosInstance.post('/student-enrollment', {
-        studentId,
-        sectionTenureId: selectedSection,
+      setEnrollmentError(null);
+
+      // Prepare fee data if fee type is selected
+      let feeData = null;
+      if (selectedFeeType === 'SCHOOL') {
+        const annualAmount = annualFee ? parseInt(annualFee) : 0;
+        const examAmount = examFee ? parseInt(examFee) : 0;
+        const miscAmount = miscellaneousFee ? parseInt(miscellaneousFee) : 0;
+        const labAmount = labFee ? parseInt(labFee) : 0;
+        const discount = percentageOption ? parseInt(percentageOption) : 0;
+
+        let totalSchoolFee = annualAmount + examAmount + miscAmount + labAmount;
+        totalSchoolFee = totalSchoolFee - Math.floor(totalSchoolFee * (discount / 100));
+
+        let monthlySchoolFee;
+        if (includeInMonthlyCalculation) {
+          monthlySchoolFee = totalSchoolFee > 0 ? Math.ceil(totalSchoolFee / 12) : 0;
+        } else {
+          const annualWithDiscount = annualAmount - Math.floor(annualAmount * (discount / 100));
+          monthlySchoolFee = annualWithDiscount > 0 ? Math.ceil(annualWithDiscount / 12) : 0;
+        }
+
+        feeData = {
+          monthlyAmount: monthlySchoolFee,
+          totalAmount: totalSchoolFee,
+          annualFee: annualAmount,
+          examFee: examAmount,
+          miscellaneousFee: miscAmount,
+          labFee: labAmount,
+          includeInMonthlyCalculation: includeInMonthlyCalculation,
+          discountPercentage: discount,
+        };
+      } else if (selectedFeeType === 'TUITION' && tuitionMonthlyFee) {
+        const currentMonth = new Date().getMonth();
+        const monthsRemaining = 12 - currentMonth;
+        const monthlyAmount = parseInt(tuitionMonthlyFee);
+        const totalAmount = monthlyAmount * monthsRemaining;
+
+        feeData = {
+          monthlyAmount: monthlyAmount,
+          totalAmount: totalAmount,
+        };
+      }
+
+      // Single API call for batch enrollment with fees
+      const response = await axiosInstance.post('/student-enrollment/batch', {
+        studentIds: selectedStudentIds,
         academicYearId: yearId,
-        rollNumber: rollNumber || undefined,
-        status: enrollmentStatus,
+        sectionTenureId: selectedSection,
+        feeType: selectedFeeType || undefined,
+        feeData: feeData || undefined,
       });
+
+      const result = response.data.body;
+      
+      if (result.failed.length > 0) {
+        setEnrollmentError(`${result.successful.length} students enrolled successfully. ${result.failed.length} failed.`);
+      }
+
       fetchEnrollments(); // Refresh enrollments after enrolling
       setIsEnrollModalOpen(false);
-      setSelectedStudentId('');
-      setRollNumber('');
-      setEnrollmentStatus('ACTIVE');
-    } catch (error) {
-      console.error('Failed to enroll student:', error);
-      alert('Failed to enroll student');
+      setSelectedStudentIds([]);
+      setStudentSearchQuery('');
+      setEnrollmentError(null);
+      setSelectedFeeType('');
+      setAnnualFee('');
+      setExamFee('0');
+      setMiscellaneousFee('0');
+      setLabFee('0');
+      setIncludeInMonthlyCalculation(false);
+      setPercentageOption('0');
+      setTuitionMonthlyFee('');
+      setSuccess(`${selectedStudentIds.length} student(s) enrolled successfully`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error: any) {
+      console.error('Failed to enroll students:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to enroll students';
+      setEnrollmentError(errorMessage);
     } finally {
       setEnrollingStudent(false);
     }
@@ -352,6 +468,103 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
     setIsUnenrollModalOpen(true);
   };
 
+  const handleOpenUpdateFeeModal = async (student: any) => {
+    setSelectedStudentForFeeUpdate(student);
+    setIsFetchingFeeData(true);
+    setIsUpdateFeeModalOpen(true);
+    setUpdateFeeMessage(null);
+
+    // Reset form first
+    setUpdateFeeType('');
+    setUpdateAnnualFee('');
+    setUpdateExamFee('0');
+    setUpdateMiscellaneousFee('0');
+    setUpdateLabFee('0');
+    setUpdateIncludeInMonthlyCalculation(false);
+    setUpdatePercentageOption('0');
+    setUpdateTuitionMonthlyFee('');
+    setOriginalFeeValues(null);
+
+    try {
+      // Get the student's ACTIVE enrollment for the current academic year
+      const activeEnrollment = enrollments.find(
+        (e) => e.studentId === student.id && e.academicYearId === yearId && e.status === 'ACTIVE'
+      );
+
+      if (!activeEnrollment) {
+        console.log('No active enrollment found for student');
+        setIsFetchingFeeData(false);
+        return;
+      }
+
+      // Fetch fee details for this specific student
+      const response = await axiosInstance.get(`/student-fee/student/${student.id}`);
+      const fees = response.data.body;
+
+      if (fees && fees.length > 0) {
+        // Get the most recent fee for the current academic year (to handle duplicates temporarily)
+        // In the future, we should filter by enrollment ID or add enrollmentId to fee records
+        const academicYearFees = fees.filter((f: any) => f.academicYearId === yearId);
+        const studentFee = academicYearFees[academicYearFees.length - 1]; // Get the most recent one
+
+        console.log('Student fee data:', studentFee);
+        console.log('Fee type:', studentFee.feeType);
+        console.log('Active enrollment:', activeEnrollment);
+
+        // Set fee type
+        setUpdateFeeType(studentFee.feeType || '');
+
+        // Store original values for comparison
+        const originalValues = {
+          feeType: studentFee.feeType,
+          annualFee: studentFee.annualFee?.toString() || '',
+          examFee: studentFee.examFee?.toString() || '0',
+          miscellaneousFee: studentFee.miscellaneousFee?.toString() || '0',
+          labFee: studentFee.labFee?.toString() || '0',
+          includeInMonthlyCalculation: studentFee.includeInMonthlyCalculation || false,
+          discountPercentage: studentFee.discountPercentage?.toString() || '0',
+          monthlyAmount: studentFee.monthlyAmount?.toString() || '',
+          totalAmount: studentFee.totalAmount?.toString() || '',
+        };
+        setOriginalFeeValues(originalValues);
+
+        if (studentFee.feeType === 'SCHOOL') {
+          // Populate form with individual fee components for SCHOOL
+          setUpdateAnnualFee(studentFee.annualFee?.toString() || '');
+          setUpdateExamFee(studentFee.examFee?.toString() || '0');
+          setUpdateMiscellaneousFee(studentFee.miscellaneousFee?.toString() || '0');
+          setUpdateLabFee(studentFee.labFee?.toString() || '0');
+          setUpdateIncludeInMonthlyCalculation(studentFee.includeInMonthlyCalculation || false);
+          setUpdatePercentageOption(studentFee.discountPercentage?.toString() || '0');
+          setUpdateTuitionMonthlyFee('');
+        } else if (studentFee.feeType === 'TUITION') {
+          // Populate form with monthly fee for TUITION
+          setUpdateTuitionMonthlyFee(studentFee.monthlyAmount?.toString() || '');
+          setUpdateAnnualFee('');
+          setUpdateExamFee('0');
+          setUpdateMiscellaneousFee('0');
+          setUpdateLabFee('0');
+          setUpdateIncludeInMonthlyCalculation(false);
+          setUpdatePercentageOption('0');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch student fee:', error);
+      // Reset form on error
+      setUpdateFeeType('');
+      setUpdateAnnualFee('');
+      setUpdateExamFee('0');
+      setUpdateMiscellaneousFee('0');
+      setUpdateLabFee('0');
+      setUpdateIncludeInMonthlyCalculation(false);
+      setUpdatePercentageOption('0');
+      setUpdateTuitionMonthlyFee('');
+      setOriginalFeeValues(null);
+    } finally {
+      setIsFetchingFeeData(false);
+    }
+  };
+
   const handleConfirmUnenroll = async () => {
     try {
       await axiosInstance.patch(`/student-enrollment/${unenrollEnrollmentId}`, {
@@ -364,6 +577,37 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
     } catch (error) {
       console.error('Failed to update enrollment status:', error);
       setError('Failed to update enrollment status');
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleBulkStatusUpdate = async () => {
+    try {
+      const sectionEnrollments = enrollments.filter(
+        (e) => e.sectionTenureId === selectedSection && e.status === 'ACTIVE'
+      );
+
+      const enrollmentIds = sectionEnrollments
+        .filter((e) => selectedEnrolledStudentIds.includes(e.studentId))
+        .map((e) => e.id);
+
+      await Promise.all(
+        enrollmentIds.map((id) =>
+          axiosInstance.patch(`/student-enrollment/${id}`, {
+            status: bulkStatus,
+          })
+        )
+      );
+
+      setSuccess(`${selectedEnrolledStudentIds.length} students updated to ${bulkStatus}`);
+      setTimeout(() => setSuccess(null), 3000);
+      setIsBulkStatusModalOpen(false);
+      setSelectedEnrolledStudentIds([]);
+      setBulkStatus('PROMOTED');
+      fetchEnrollments();
+    } catch (error) {
+      console.error('Failed to bulk update enrollment status:', error);
+      setError('Failed to bulk update enrollment status');
       setTimeout(() => setError(null), 3000);
     }
   };
@@ -397,6 +641,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
     setEditingSection(section);
     setEditSectionName(section.name);
     setEditSectionCapacity(section.capacity.toString());
+    setEditSectionRollPrefix((section as any).rollNoPrefix || '');
     setIsEditSectionModalOpen(true);
   };
 
@@ -408,11 +653,13 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
       await axiosInstance.patch(`/section-tenure/${editingSection.id}`, {
         name: editSectionName,
         capacity: parseInt(editSectionCapacity),
+        rollNoPrefix: editSectionRollPrefix || undefined,
       });
       setIsEditSectionModalOpen(false);
       setEditingSection(null);
       setEditSectionName('');
       setEditSectionCapacity('');
+      setEditSectionRollPrefix('');
       fetchSections(selectedClass);
     } catch (error) {
       console.error('Failed to update section:', error);
@@ -554,7 +801,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
     { id: 'subjects' as TabType, label: 'Subjects', icon: <FiBook className="w-5 h-5" /> },
     { id: 'students' as TabType, label: 'Students', icon: <FiUsers className="w-5 h-5" /> },
     { id: 'attendance' as TabType, label: 'Attendance', icon: <FiCalendar className="w-5 h-5" /> },
-    { id: 'fees' as TabType, label: 'Fees', icon: <FiDollarSign className="w-5 h-5" /> },
+    { id: 'fees' as TabType, label: 'Fees', icon: <LuReceiptIndianRupee className="w-5 h-5" /> },
   ];
 
   return (
@@ -645,6 +892,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                       onChange={(e) => setNewClassName(e.target.value)}
                       placeholder="Enter class name (e.g., Class 10)"
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
                     />
                     <button
                       type="submit"
@@ -738,29 +986,45 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                 {/* Create Section Form */}
                 {selectedClass && (
                   <form onSubmit={handleCreateSection} className="mb-6 bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="text"
-                        value={newSectionName}
-                        onChange={(e) => setNewSectionName(e.target.value)}
-                        placeholder="Enter section name (e.g., A)"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <input
-                        type="number"
-                        value={newSectionCapacity}
-                        onChange={(e) => setNewSectionCapacity(e.target.value)}
-                        placeholder="Capacity"
-                        min="1"
-                        className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <button
-                        type="submit"
-                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        <FiPlus className="w-4 h-4" />
-                        <span>Add Section</span>
-                      </button>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="text"
+                          value={newSectionName}
+                          onChange={(e) => setNewSectionName(e.target.value)}
+                          placeholder="Section name (e.g., A)"
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                        <input
+                          type="number"
+                          value={newSectionCapacity}
+                          onChange={(e) => setNewSectionCapacity(e.target.value)}
+                          placeholder="Capacity"
+                          min="1"
+                          className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                        <input
+                          type="text"
+                          value={newSectionRollPrefix}
+                          onChange={(e) => setNewSectionRollPrefix(e.target.value.toUpperCase())}
+                          placeholder="Roll prefix (e.g., A-, B-)"
+                          pattern="^[A-Z]{1,3}-$"
+                          title="1-3 uppercase letters followed by hyphen"
+                          className="w-40 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="submit"
+                          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <FiPlus className="w-4 h-4" />
+                          <span>Add Section</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Roll prefix will be used to auto-generate student roll numbers for this section (e.g., A-01, A-02)
+                      </p>
                     </div>
                   </form>
                 )}
@@ -1175,14 +1439,24 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">Students</h2>
-                  <button
-                    onClick={() => setIsEnrollModalOpen(true)}
-                    disabled={!selectedClass || !selectedSection}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <FiPlus className="w-4 h-4" />
-                    <span>Enroll Student</span>
-                  </button>
+                  <div className="flex items-center space-x-3">
+                    {selectedEnrolledStudentIds.length > 0 && (
+                      <button
+                        onClick={() => setIsBulkStatusModalOpen(true)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        <span>Update Status ({selectedEnrolledStudentIds.length})</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setIsEnrollModalOpen(true)}
+                      disabled={!selectedClass || !selectedSection}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FiPlus className="w-4 h-4" />
+                      <span>Enroll Student</span>
+                    </button>
+                  </div>
                 </div>
 
                 {!selectedClass || !selectedSection ? (
@@ -1202,6 +1476,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-gray-200">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700 w-10">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedEnrolledStudentIds.length === enrolledStudents.length && enrolledStudents.length > 0}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedEnrolledStudentIds(enrolledStudents.map(s => s.id));
+                                    } else {
+                                      setSelectedEnrolledStudentIds([]);
+                                    }
+                                  }}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                              </th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Roll Number</th>
                               <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
                               <th className="text-left py-3 px-4 font-medium text-gray-700">Email</th>
                               <th className="text-left py-3 px-4 font-medium text-gray-700">Enrolled</th>
@@ -1213,31 +1502,58 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                             {enrolledStudents.map((student) => {
                               const enrollment = enrollments.find((e) => e.studentId === student.id && e.sectionTenureId === selectedSection);
                               return (
-                                <tr key={student.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                <tr
+                                  key={student.id}
+                                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                                >
                                   <td className="py-3 px-4">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedEnrolledStudentIds.includes(student.id)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSelectedEnrolledStudentIds([...selectedEnrolledStudentIds, student.id]);
+                                        } else {
+                                          setSelectedEnrolledStudentIds(selectedEnrolledStudentIds.filter(id => id !== student.id));
+                                        }
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                  </td>
+                                  <td className="py-3 px-4" onClick={() => handleOpenUpdateFeeModal(student)}>
+                                    {enrollment?.rollNumber ? (
+                                      <span className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
+                                        {enrollment.rollNumber}
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm text-gray-400">N/A</span>
+                                    )}
+                                  </td>
+                                  <td className="py-3 px-4" onClick={() => handleOpenUpdateFeeModal(student)}>
                                     <div className="flex items-center space-x-3">
-                                      <div className="p-2 bg-green-100 rounded-lg">
-                                        <FiUsers className="w-4 h-4 text-green-600" />
-                                      </div>
                                       <span className="font-medium text-gray-900">
                                         {student.firstname} {student.lastname}
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="py-3 px-4 text-sm text-gray-500">{student.email}</td>
-                                  <td className="py-3 px-4 text-sm">
+                                  <td className="py-3 px-4 text-sm text-gray-500" onClick={() => handleOpenUpdateFeeModal(student)}>{student.email}</td>
+                                  <td className="py-3 px-4 text-sm" onClick={() => handleOpenUpdateFeeModal(student)}>
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${student.isEnrolled ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
                                       {student.isEnrolled ? 'Yes' : 'No'}
                                     </span>
                                   </td>
-                                  <td className="py-3 px-4 text-sm">
+                                  <td className="py-3 px-4 text-sm" onClick={() => handleOpenUpdateFeeModal(student)}>
                                     <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                                       {enrollment?.status || 'ACTIVE'}
                                     </span>
                                   </td>
                                   <td className="py-3 px-4 text-right">
                                     <button
-                                      onClick={() => enrollment && handleUnenrollStudent(enrollment.id)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        enrollment && handleUnenrollStudent(enrollment.id);
+                                      }}
                                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                       title="Unenroll student"
                                     >
@@ -1273,7 +1589,88 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                 {!selectedClass || !selectedSection ? (
                   <p className="text-gray-500">Please select both class and section to view fees.</p>
                 ) : (
-                  <p className="text-gray-500">Fee records will be displayed here for the selected class and section.</p>
+                  <>
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setIsRecordPaymentModalOpen(true)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <LuReceiptIndianRupee className="w-4 h-4" />
+                        <span>Record Payment</span>
+                      </button>
+                    </div>
+                    {(() => {
+                      // Get enrollments for selected section
+                      const sectionEnrollments = enrollments.filter((e) => e.sectionTenureId === selectedSection);
+                      const sectionStudentIds = sectionEnrollments.map((e) => e.studentId);
+                      const sectionFees = studentFees.filter((f) => sectionStudentIds.includes(f.studentId));
+
+                      if (sectionFees.length === 0) {
+                        return <p className="text-gray-500">No fee records found for this section.</p>;
+                      }
+
+                      return (
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-gray-200">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Student</th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Fee Type</th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Monthly</th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Total</th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Paid</th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Balance</th>
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                              <th className="text-right py-3 px-4 font-medium text-gray-700">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sectionFees.map((fee) => (
+                              <tr key={fee.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                <td className="py-3 px-4">
+                                  <span className="font-medium text-gray-900">
+                                    {fee.student?.user?.firstname} {fee.student?.user?.lastname}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${fee.feeType === 'SCHOOL' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
+                                    {fee.feeType}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-sm text-gray-500">₹{Number(fee.monthlyAmount).toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm text-gray-500">₹{Number(fee.totalAmount).toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm text-gray-500">₹{Number(fee.paidAmount).toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm text-gray-500">₹{Number(fee.balanceAmount).toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    fee.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
+                                    fee.paymentStatus === 'PARTIAL' ? 'bg-yellow-100 text-yellow-700' :
+                                    'bg-gray-100 text-gray-700'
+                                  }`}>
+                                    {fee.paymentStatus}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-right">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedFeeForPayment(fee);
+                                      setPaymentMonth('');
+                                      setPaymentAmount('');
+                                      setPaymentMethod('CASH');
+                                      setPaymentNotes('');
+                                      setIsRecordPaymentModalOpen(true);
+                                    }}
+                                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+                                  >
+                                    Record Payment
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      );
+                    })()}
+                  </>
                 )}
               </div>
             )}
@@ -1283,87 +1680,283 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
       {/* Enroll Student Modal */}
       {isEnrollModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Enroll Student</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Enroll Students</h3>
               <button
+                type="button"
                 onClick={() => {
                   setIsEnrollModalOpen(false);
-                  setSelectedStudentId('');
-                  setRollNumber('');
-                  setEnrollmentStatus('ACTIVE');
+                  setSelectedStudentIds([]);
+                  setStudentSearchQuery('');
+                  setEnrollmentError(null);
+                  setSelectedFeeType('');
+                  setAnnualFee('');
+                  setExamFee('0');
+                  setMiscellaneousFee('0');
+                  setLabFee('0');
+                  setIncludeInMonthlyCalculation(false);
+                  setPercentageOption('0');
+                  setTuitionMonthlyFee('');
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-4">
+
+            {enrollmentError && (
+              <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                <FiAlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700">{enrollmentError}</p>
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
-                <select
-                  value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select a student</option>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Select Students</label>
+                
+                {/* Search Bar */}
+                <div className="relative mb-3">
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={studentSearchQuery}
+                    onChange={(e) => setStudentSearchQuery(e.target.value)}
+                    placeholder="Search by name, admission no, or email..."
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg">
                   {students
-                    .filter((s) => s.role === 'STUDENT' && s.isActive !== 'DELETED' && !enrollments.some((e) => e.studentId === s.id))
+                    .filter((s) => {
+                      // Filter by role, active status, and not already enrolled (only check ACTIVE status)
+                      if (s.role !== 'STUDENT' || s.isActive === 'DELETED' || enrollments.some((e) => e.studentId === s.id && e.status === 'ACTIVE')) {
+                        return false;
+                      }
+
+                      // Filter by search query
+                      if (studentSearchQuery.trim()) {
+                        const query = studentSearchQuery.toLowerCase();
+                        const fullName = `${s.firstname} ${s.lastname}`.toLowerCase();
+                        const admissionNo = ((s as any).student?.admissionNo || '').toLowerCase();
+                        const email = s.email.toLowerCase();
+
+                        return fullName.includes(query) || admissionNo.includes(query) || email.includes(query);
+                      }
+                      
+                      return true;
+                    })
                     .map((student) => (
-                      <option key={student.id} value={student.id}>
-                        {student.firstname} {student.lastname} ({student.email})
-                      </option>
+                      <label
+                        key={student.id}
+                        className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedStudentIds.includes(student.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStudentIds([...selectedStudentIds, student.id]);
+                            } else {
+                              setSelectedStudentIds(selectedStudentIds.filter(id => id !== student.id));
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <div className="ml-3 flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {student.firstname} {student.lastname}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Admission No: {(student as any).student?.admissionNo || 'N/A'} • {student.email}
+                          </p>
+                        </div>
+                      </label>
                     ))}
-                </select>
+                  {students.filter((s) => s.role === 'STUDENT' && s.isActive !== 'DELETED' && !enrollments.some((e) => e.studentId === s.id && e.status === 'ACTIVE')).length === 0 && (
+                    <p className="px-4 py-8 text-center text-gray-500 text-sm">No students available for enrollment</p>
+                  )}
+                </div>
+                {selectedStudentIds.length > 0 && (
+                  <p className="mt-2 text-sm text-blue-600">
+                    {selectedStudentIds.length} student(s) selected
+                  </p>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number (Optional)</label>
-                <input
-                  type="text"
-                  value={rollNumber}
-                  onChange={(e) => setRollNumber(e.target.value)}
-                  placeholder="Enter roll number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+
+              {/* Fee Inputs */}
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Fee Details</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fee Type</label>
+                    <select
+                      value={selectedFeeType}
+                      onChange={(e) => setSelectedFeeType(e.target.value as 'SCHOOL' | 'TUITION' | '')}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Fee Type</option>
+                      <option value="SCHOOL">School</option>
+                      <option value="TUITION">Tuition</option>
+                    </select>
+                  </div>
+
+                  {selectedFeeType === 'SCHOOL' && (
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Annual Fees (₹)</label>
+                          <input
+                            type="number"
+                            value={annualFee}
+                            onChange={(e) => setAnnualFee(e.target.value)}
+                            placeholder="20000"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Exam Fees (₹)</label>
+                          <input
+                            type="number"
+                            value={examFee}
+                            onChange={(e) => setExamFee(e.target.value)}
+                            placeholder="5000"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Miscellaneous (₹)</label>
+                          <input
+                            type="number"
+                            value={miscellaneousFee}
+                            onChange={(e) => setMiscellaneousFee(e.target.value)}
+                            placeholder="1000"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Lab Fees (₹)</label>
+                          <input
+                            type="number"
+                            value={labFee}
+                            onChange={(e) => setLabFee(e.target.value)}
+                            placeholder="2000"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2 pt-2 border-t border-gray-200">
+                          {(() => {
+                            const annualAmount = annualFee ? parseInt(annualFee) : 0;
+                            const examAmount = examFee ? parseInt(examFee) : 0;
+                            const miscAmount = miscellaneousFee ? parseInt(miscellaneousFee) : 0;
+                            const labAmount = labFee ? parseInt(labFee) : 0;
+                            const discount = percentageOption ? parseInt(percentageOption) : 0;
+
+                            let total, monthly;
+
+                            if (includeInMonthlyCalculation) {
+                              // Include all fees in monthly calculation
+                              total = annualAmount + examAmount + miscAmount + labAmount;
+                              // Apply discount
+                              total = total - Math.floor(total * (discount / 100));
+                              monthly = total > 0 ? Math.ceil(total / 12) : 0;
+                            } else {
+                              // Only annual fee in monthly, others are one-time
+                              total = annualAmount + examAmount + miscAmount + labAmount;
+                              // Apply discount
+                              total = total - Math.floor(total * (discount / 100));
+                              monthly = annualAmount > 0 ? Math.ceil((annualAmount - Math.floor(annualAmount * (discount / 100))) / 12) : 0;
+                            }
+
+                            return (
+                              <div className="flex justify-between items-center">
+                                <p className="text-sm font-medium text-gray-700">
+                                  Total: ₹{total.toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-500">Monthly: ₹{monthly.toLocaleString()}</p>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 pt-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="includeMonthly"
+                            checked={includeInMonthlyCalculation}
+                            onChange={(e) => setIncludeInMonthlyCalculation(e.target.checked)}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <label htmlFor="includeMonthly" className="text-sm text-gray-700">
+                            Include all fees in monthly calculation
+                          </label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm text-gray-700">Discount (%):</label>
+                          <input
+                            type="number"
+                            value={percentageOption}
+                            onChange={(e) => setPercentageOption(e.target.value)}
+                            placeholder="0"
+                            className="w-20 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {selectedFeeType === 'TUITION' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Tuition Monthly Fee (₹)</label>
+                      <input
+                        type="number"
+                        value={tuitionMonthlyFee}
+                        onChange={(e) => setTuitionMonthlyFee(e.target.value)}
+                        placeholder="e.g., 3000"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Calculated based on enrollment month</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  value={enrollmentStatus}
-                  onChange={(e) => setEnrollmentStatus(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                  <option value="GRADUATED">Graduated</option>
-                  <option value="WITHDRAWN">Withdrawn</option>
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  onClick={() => {
-                    setIsEnrollModalOpen(false);
-                    setSelectedStudentId('');
-                    setRollNumber('');
-                    setEnrollmentStatus('ACTIVE');
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    if (selectedStudentId) {
-                      handleEnrollStudent(selectedStudentId);
-                    }
-                  }}
-                  disabled={!selectedStudentId || enrollingStudent}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {enrollingStudent ? 'Enrolling...' : 'Enroll'}
-                </button>
-              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 p-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEnrollModalOpen(false);
+                  setSelectedStudentIds([]);
+                  setStudentSearchQuery('');
+                  setEnrollmentError(null);
+                  setSelectedFeeType('');
+                  setAnnualFee('');
+                  setExamFee('0');
+                  setMiscellaneousFee('0');
+                  setLabFee('0');
+                  setIncludeInMonthlyCalculation(false);
+                  setPercentageOption('0');
+                  setTuitionMonthlyFee('');
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleEnrollStudents}
+                disabled={selectedStudentIds.length === 0 || enrollingStudent}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {enrollingStudent ? 'Enrolling...' : `Enroll ${selectedStudentIds.length > 0 ? `(${selectedStudentIds.length})` : ''}`}
+              </button>
             </div>
           </div>
         </div>
@@ -1394,9 +1987,11 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                 <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Status</label>
                 <select
                   value={unenrollStatus}
-                  onChange={(e) => setUnenrollStatus(e.target.value as 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT')}
+                  onChange={(e) => setUnenrollStatus(e.target.value as 'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
+                  <option value="PAUSED">Paused - Temporary pause (can re-enroll)</option>
+                  <option value="WRONG_ENTRY">Wrong Entry - Incorrect section (can re-enroll)</option>
                   <option value="PROMOTED">Promoted - Student moved to next grade</option>
                   <option value="RETAINED">Retained - Student repeating this grade</option>
                   <option value="DROPPED_OUT">Dropped Out - Student left school</option>
@@ -1420,6 +2015,379 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                   Update Status
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Status Update Modal */}
+      {isBulkStatusModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Bulk Update Enrollment Status</h3>
+              <button
+                onClick={() => {
+                  setIsBulkStatusModalOpen(false);
+                  setSelectedEnrolledStudentIds([]);
+                  setBulkStatus('PROMOTED');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Update the status for {selectedEnrolledStudentIds.length} selected students. The enrollment records will be kept for historical tracking.
+              </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Status</label>
+                <select
+                  value={bulkStatus}
+                  onChange={(e) => setBulkStatus(e.target.value as 'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="PAUSED">Paused - Temporary pause (can re-enroll)</option>
+                  <option value="WRONG_ENTRY">Wrong Entry - Incorrect section (can re-enroll)</option>
+                  <option value="PROMOTED">Promoted - Student moved to next grade</option>
+                  <option value="RETAINED">Retained - Student repeating this grade</option>
+                  <option value="DROPPED_OUT">Dropped Out - Student left school</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={() => {
+                    setIsBulkStatusModalOpen(false);
+                    setSelectedEnrolledStudentIds([]);
+                    setBulkStatus('PROMOTED');
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBulkStatusUpdate}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Update {selectedEnrolledStudentIds.length} Students
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Fee Modal */}
+      {isUpdateFeeModalOpen && selectedStudentForFeeUpdate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Update Fee - {selectedStudentForFeeUpdate.firstname} {selectedStudentForFeeUpdate.lastname}
+              </h3>
+              <button
+                onClick={() => {
+                  setIsUpdateFeeModalOpen(false);
+                  setSelectedStudentForFeeUpdate(null);
+                  setUpdateFeeType('');
+                  setUpdateAnnualFee('');
+                  setUpdateExamFee('0');
+                  setUpdateMiscellaneousFee('0');
+                  setUpdateLabFee('0');
+                  setUpdateIncludeInMonthlyCalculation(false);
+                  setUpdatePercentageOption('0');
+                  setUpdateTuitionMonthlyFee('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {updateFeeMessage && (
+                <div
+                  className={`p-3 rounded-lg text-sm ${
+                    updateFeeMessage.type === 'error'
+                      ? 'bg-red-50 text-red-700 border border-red-200'
+                      : updateFeeMessage.type === 'success'
+                      ? 'bg-green-50 text-green-700 border border-green-200'
+                      : 'bg-blue-50 text-blue-700 border border-blue-200'
+                  }`}
+                >
+                  {updateFeeMessage.text}
+                </div>
+              )}
+              {isFetchingFeeData ? (
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-sm text-gray-500">Loading fee data...</p>
+                </div>
+              ) : updateFeeType === 'SCHOOL' ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Annual Fees (₹)</label>
+                      <input
+                        type="number"
+                        value={updateAnnualFee}
+                        onChange={(e) => setUpdateAnnualFee(e.target.value)}
+                        placeholder="20000"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Exam Fees (₹)</label>
+                      <input
+                        type="number"
+                        value={updateExamFee}
+                        onChange={(e) => setUpdateExamFee(e.target.value)}
+                        placeholder="5000"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Miscellaneous (₹)</label>
+                      <input
+                        type="number"
+                        value={updateMiscellaneousFee}
+                        onChange={(e) => setUpdateMiscellaneousFee(e.target.value)}
+                        placeholder="1000"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Lab Fees (₹)</label>
+                      <input
+                        type="number"
+                        value={updateLabFee}
+                        onChange={(e) => setUpdateLabFee(e.target.value)}
+                        placeholder="2000"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="updateIncludeMonthly"
+                        checked={updateIncludeInMonthlyCalculation}
+                        onChange={(e) => setUpdateIncludeInMonthlyCalculation(e.target.checked)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="updateIncludeMonthly" className="text-sm text-gray-700">
+                        Include all fees in monthly calculation
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-700">Discount (%):</label>
+                      <input
+                        type="number"
+                        value={updatePercentageOption}
+                        onChange={(e) => setUpdatePercentageOption(e.target.value)}
+                        placeholder="0"
+                        className="w-20 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    {(() => {
+                      const annualAmount = updateAnnualFee ? parseInt(updateAnnualFee) : 0;
+                      const examAmount = updateExamFee ? parseInt(updateExamFee) : 0;
+                      const miscAmount = updateMiscellaneousFee ? parseInt(updateMiscellaneousFee) : 0;
+                      const labAmount = updateLabFee ? parseInt(updateLabFee) : 0;
+                      const discount = updatePercentageOption ? parseInt(updatePercentageOption) : 0;
+
+                      let total, monthly;
+
+                      if (updateIncludeInMonthlyCalculation) {
+                        total = annualAmount + examAmount + miscAmount + labAmount;
+                        total = total - Math.floor(total * (discount / 100));
+                        monthly = total > 0 ? Math.ceil(total / 12) : 0;
+                      } else {
+                        total = annualAmount + examAmount + miscAmount + labAmount;
+                        total = total - Math.floor(total * (discount / 100));
+                        monthly = annualAmount > 0 ? Math.ceil((annualAmount - Math.floor(annualAmount * (discount / 100))) / 12) : 0;
+                      }
+
+                      return (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-gray-700">
+                            Total: ₹{total.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-gray-500">Monthly: ₹{monthly.toLocaleString()}</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </>
+              ) : updateFeeType === 'TUITION' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Monthly Tuition Fee (₹)</label>
+                    <input
+                      type="number"
+                      value={updateTuitionMonthlyFee}
+                      onChange={(e) => setUpdateTuitionMonthlyFee(e.target.value)}
+                      placeholder="3000"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    />
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    {(() => {
+                      const monthlyAmount = updateTuitionMonthlyFee ? parseInt(updateTuitionMonthlyFee) : 0;
+                      const currentMonth = new Date().getMonth();
+                      const monthsRemaining = 12 - currentMonth;
+                      const total = monthlyAmount > 0 ? monthlyAmount * monthsRemaining : 0;
+
+                      return (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-gray-700">
+                            Total: ₹{total.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-gray-500">Monthly: ₹{monthlyAmount.toLocaleString()}</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500">No fee data available</p>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 p-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setIsUpdateFeeModalOpen(false);
+                  setSelectedStudentForFeeUpdate(null);
+                  setUpdateFeeType('');
+                  setUpdateAnnualFee('');
+                  setUpdateExamFee('0');
+                  setUpdateMiscellaneousFee('0');
+                  setUpdateLabFee('0');
+                  setUpdateIncludeInMonthlyCalculation(false);
+                  setUpdatePercentageOption('0');
+                  setUpdateTuitionMonthlyFee('');
+                  setOriginalFeeValues(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setUpdateFeeMessage(null);
+
+                  if (!originalFeeValues) {
+                    setUpdateFeeMessage({ type: 'error', text: 'No fee data available to update' });
+                    return;
+                  }
+
+                  // Check if any values have changed
+                  let hasChanges = false;
+
+                  if (updateFeeType === 'SCHOOL') {
+                    if (
+                      updateAnnualFee !== originalFeeValues.annualFee ||
+                      updateExamFee !== originalFeeValues.examFee ||
+                      updateMiscellaneousFee !== originalFeeValues.miscellaneousFee ||
+                      updateLabFee !== originalFeeValues.labFee ||
+                      updateIncludeInMonthlyCalculation !== originalFeeValues.includeInMonthlyCalculation ||
+                      updatePercentageOption !== originalFeeValues.discountPercentage
+                    ) {
+                      hasChanges = true;
+                    }
+                  } else if (updateFeeType === 'TUITION') {
+                    if (updateTuitionMonthlyFee !== originalFeeValues.monthlyAmount) {
+                      hasChanges = true;
+                    }
+                  }
+
+                  if (!hasChanges) {
+                    setUpdateFeeMessage({ type: 'info', text: 'No values updated. Please modify at least one field before updating.' });
+                    return;
+                  }
+
+                  // Calculate new values
+                  let monthlyAmount, totalAmount;
+
+                  if (updateFeeType === 'SCHOOL') {
+                    const annualAmount = updateAnnualFee ? parseInt(updateAnnualFee) : 0;
+                    const examAmount = updateExamFee ? parseInt(updateExamFee) : 0;
+                    const miscAmount = updateMiscellaneousFee ? parseInt(updateMiscellaneousFee) : 0;
+                    const labAmount = updateLabFee ? parseInt(updateLabFee) : 0;
+                    const discount = updatePercentageOption ? parseInt(updatePercentageOption) : 0;
+
+                    totalAmount = annualAmount + examAmount + miscAmount + labAmount;
+                    totalAmount = totalAmount - Math.floor(totalAmount * (discount / 100));
+
+                    if (updateIncludeInMonthlyCalculation) {
+                      monthlyAmount = totalAmount > 0 ? Math.ceil(totalAmount / 12) : 0;
+                    } else {
+                      const annualWithDiscount = annualAmount - Math.floor(annualAmount * (discount / 100));
+                      monthlyAmount = annualWithDiscount > 0 ? Math.ceil(annualWithDiscount / 12) : 0;
+                    }
+                  } else if (updateFeeType === 'TUITION') {
+                    monthlyAmount = updateTuitionMonthlyFee ? parseInt(updateTuitionMonthlyFee) : 0;
+                    const currentMonth = new Date().getMonth();
+                    const monthsRemaining = 12 - currentMonth;
+                    totalAmount = monthlyAmount > 0 ? monthlyAmount * monthsRemaining : 0;
+                  }
+
+                  // Get the fee record ID to update
+                  const response = await axiosInstance.get(`/student-fee/student/${selectedStudentForFeeUpdate.id}`);
+                  const fees = response.data.body;
+                  const academicYearFees = fees.filter((f: any) => f.academicYearId === yearId);
+                  const studentFee = academicYearFees[academicYearFees.length - 1];
+
+                  if (!studentFee) {
+                    setUpdateFeeMessage({ type: 'error', text: 'No fee record found to update' });
+                    return;
+                  }
+
+                  // Update the fee record
+                  try {
+                    await axiosInstance.patch(`/student-fee/${studentFee.id}`, {
+                      monthlyAmount,
+                      totalAmount,
+                      annualFee: updateFeeType === 'SCHOOL' ? (updateAnnualFee ? parseInt(updateAnnualFee) : null) : null,
+                      examFee: updateFeeType === 'SCHOOL' ? (updateExamFee ? parseInt(updateExamFee) : 0) : 0,
+                      miscellaneousFee: updateFeeType === 'SCHOOL' ? (updateMiscellaneousFee ? parseInt(updateMiscellaneousFee) : 0) : 0,
+                      labFee: updateFeeType === 'SCHOOL' ? (updateLabFee ? parseInt(updateLabFee) : 0) : 0,
+                      includeInMonthlyCalculation: updateFeeType === 'SCHOOL' ? updateIncludeInMonthlyCalculation : false,
+                      discountPercentage: updateFeeType === 'SCHOOL' ? (updatePercentageOption ? parseInt(updatePercentageOption) : 0) : 0,
+                    });
+
+                    setUpdateFeeMessage({ type: 'success', text: 'Fee updated successfully' });
+                    setTimeout(() => {
+                      setIsUpdateFeeModalOpen(false);
+                      setSelectedStudentForFeeUpdate(null);
+                      setUpdateFeeType('');
+                      setUpdateAnnualFee('');
+                      setUpdateExamFee('0');
+                      setUpdateMiscellaneousFee('0');
+                      setUpdateLabFee('0');
+                      setUpdateIncludeInMonthlyCalculation(false);
+                      setUpdatePercentageOption('0');
+                      setUpdateTuitionMonthlyFee('');
+                      setOriginalFeeValues(null);
+                      setUpdateFeeMessage(null);
+                    }, 1500);
+                  } catch (error) {
+                    setUpdateFeeMessage({ type: 'error', text: 'Failed to update fee. Please try again.' });
+                    console.error('Failed to update fee:', error);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Update Fee
+              </button>
             </div>
           </div>
         </div>
@@ -1489,6 +2457,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                   setEditingSection(null);
                   setEditSectionName('');
                   setEditSectionCapacity('');
+                  setEditSectionRollPrefix('');
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -1518,6 +2487,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number Prefix</label>
+                  <input
+                    type="text"
+                    value={editSectionRollPrefix}
+                    onChange={(e) => setEditSectionRollPrefix(e.target.value.toUpperCase())}
+                    placeholder="e.g., A-, B-, SEC-"
+                    pattern="^[A-Z]{1,3}-$"
+                    title="1-3 uppercase letters followed by hyphen"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave empty to keep existing prefix. Format: 1-3 uppercase letters followed by hyphen (e.g., A-, B-)
+                  </p>
+                </div>
               </div>
               <div className="flex justify-end space-x-3 mt-4">
                 <button
@@ -1527,6 +2511,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                     setEditingSection(null);
                     setEditSectionName('');
                     setEditSectionCapacity('');
+                    setEditSectionRollPrefix('');
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
@@ -1589,6 +2574,155 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Record Payment Modal */}
+      {isRecordPaymentModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Record Payment</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRecordPaymentModalOpen(false);
+                  setSelectedFeeForPayment(null);
+                  setPaymentMonth('');
+                  setPaymentAmount('');
+                  setPaymentMethod('CASH');
+                  setPaymentNotes('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {selectedFeeForPayment && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Student:</span> {selectedFeeForPayment.student?.user?.firstname} {selectedFeeForPayment.student?.user?.lastname}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Fee Type:</span> {selectedFeeForPayment.feeType}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Balance:</span> ₹{Number(selectedFeeForPayment.balanceAmount).toLocaleString()}
+                </p>
+              </div>
+            )}
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!selectedFeeForPayment) return;
+
+              try {
+                await axiosInstance.post('/student-fee/payment', {
+                  studentFeeId: selectedFeeForPayment.id,
+                  month: paymentMonth,
+                  amount: parseInt(paymentAmount),
+                  paymentMethod,
+                  notes: paymentNotes,
+                });
+
+                setSuccess('Payment recorded successfully');
+                setTimeout(() => setSuccess(null), 3000);
+                setIsRecordPaymentModalOpen(false);
+                setSelectedFeeForPayment(null);
+                setPaymentMonth('');
+                setPaymentAmount('');
+                setPaymentMethod('CASH');
+                setPaymentNotes('');
+                fetchStudentFees();
+              } catch (error: any) {
+                console.error('Failed to record payment:', error);
+                setError(error.response?.data?.message || 'Failed to record payment');
+              }
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                  <select
+                    value={paymentMonth}
+                    onChange={(e) => setPaymentMonth(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select Month</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                  <input
+                    type="number"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="CASH">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                  <textarea
+                    value={paymentNotes}
+                    onChange={(e) => setPaymentNotes(e.target.value)}
+                    placeholder="Add any notes..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={2}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRecordPaymentModalOpen(false);
+                    setSelectedFeeForPayment(null);
+                    setPaymentMonth('');
+                    setPaymentAmount('');
+                    setPaymentMethod('CASH');
+                    setPaymentNotes('');
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Record Payment
                 </button>
               </div>
             </form>

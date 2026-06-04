@@ -5,6 +5,7 @@ import {
   getStudentEnrollmentByIdHandler,
   updateStudentEnrollmentHandler,
   deleteStudentEnrollmentHandler,
+  batchEnrollStudentsHandler,
 } from './studentEnrollment.controller';
 import { authenticate } from '../../config/middleware/authenticate';
 
@@ -12,6 +13,9 @@ const router = Router();
 
 // All routes require authentication
 router.use(authenticate);
+
+// POST /api/v1/student-enrollment/batch - Batch enroll students with fees (Admin only)
+router.post('/batch', batchEnrollStudentsHandler);
 
 // POST /api/v1/student-enrollment - Create a new student enrollment (Admin only)
 router.post('/', createStudentEnrollmentHandler);

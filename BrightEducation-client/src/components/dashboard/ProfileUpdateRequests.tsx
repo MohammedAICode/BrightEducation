@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FiCheck, FiX, FiUser, FiMail, FiClock, FiAlertCircle } from 'react-icons/fi';
-import axiosInstance from '../../lib/axios';
+import { FiCheck, FiX, FiUser, FiMail, FiClock, FiAlertCircle, FiImage } from 'react-icons/fi';
+import axiosInstance, { getProfileImageUrl } from '../../lib/axios';
 import { useAppSelector } from '../../store/hooks';
 
 interface ProfileUpdateRequest {
@@ -37,10 +37,11 @@ interface ProfileUpdateRequest {
   parentName?: string;
   parentPhone?: string;
   parentOccupation?: string;
+  profileImgKey?: string;
 }
 
 const ProfileUpdateRequests: React.FC = () => {
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.auth.user) as any;
   const [requests, setRequests] = useState<ProfileUpdateRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +127,7 @@ const ProfileUpdateRequests: React.FC = () => {
     if (request.parentName) fields.push('Parent Name');
     if (request.parentPhone) fields.push('Parent Phone');
     if (request.parentOccupation) fields.push('Parent Occupation');
+    if (request.profileImgKey) fields.push('Profile Image');
     return fields;
   };
 
@@ -228,6 +230,34 @@ const ProfileUpdateRequests: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {request.profileImgKey && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm font-medium text-blue-800 mb-2">New Profile Image:</p>
+                  <div className="flex items-center gap-3">
+                    {(() => {
+                      const imageUrl = getProfileImageUrl(request.profileImgKey);
+                      return imageUrl ? (
+                        <img 
+                          src={imageUrl}
+                          alt="New profile" 
+                          className="w-16 h-16 rounded-full object-cover border-2 border-blue-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null;
+                    })()}
+                    <div className="hidden w-16 h-16 rounded-full bg-blue-200 items-center justify-center border-2 border-blue-300">
+                      <FiImage className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="text-sm text-blue-700">User has uploaded a new profile picture</p>
+                  </div>
+                </div>
+              )}
 
               {request.rejectionReason && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">

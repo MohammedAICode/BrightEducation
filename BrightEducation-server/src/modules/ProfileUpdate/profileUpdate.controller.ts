@@ -44,9 +44,22 @@ export async function createProfileUpdateRequestHandler(
       });
     }
 
+    // Handle profile image upload
+    let profileImgKey: string | undefined;
+    if (req.file) {
+      const { getProfileImgKey } = await import('../../config/Multer/multer');
+      profileImgKey = getProfileImgKey(req.file.filename);
+    }
+
+    // Merge validated data with profile image key
+    const updateData = {
+      ...validate.data,
+      ...(profileImgKey && { profileImgKey }),
+    };
+
     // Ensure at least one field is being updated
-    const hasUpdates = Object.keys(validate.data).some(
-      (key) => validate.data[key as keyof typeof validate.data] !== undefined
+    const hasUpdates = Object.keys(updateData).some(
+      (key) => updateData[key as keyof typeof updateData] !== undefined
     );
 
     if (!hasUpdates) {
@@ -58,7 +71,7 @@ export async function createProfileUpdateRequestHandler(
       return res.status(400).json(response);
     }
 
-    const request = await createProfileUpdateRequest(req.user.userId, validate.data);
+    const request = await createProfileUpdateRequest(req.user.userId, updateData);
 
     const response: ApiResponse = {
       error: false,
@@ -168,7 +181,7 @@ export async function getMyProfileUpdateRequestsHandler(
       return res.status(401).json(response);
     }
 
-    const requests = await getMyProfileUpdateRequests(req.user.id);
+    const requests = await getMyProfileUpdateRequests(req.user.userId);
 
     const response: ApiResponse = {
       error: false,
@@ -243,7 +256,7 @@ export async function rejectProfileUpdateRequestHandler(
 
     const request = await rejectProfileUpdateRequest(
       Array.isArray(id) ? id[0] : id,
-      req.user.id,
+      req.user.userId,
       rejectionReason
     );
 

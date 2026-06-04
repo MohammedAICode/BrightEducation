@@ -5,6 +5,7 @@ import {
   getStudentEnrollmentById,
   updateStudentEnrollment,
   deleteStudentEnrollment,
+  batchEnrollStudents,
 } from './studentEnrollment.service';
 import { AppError } from '../../config/Error/AppError';
 
@@ -179,6 +180,62 @@ export async function deleteStudentEnrollmentHandler(req: Request, res: Response
       error: true,
       body: null,
       message: error.message || 'Failed to delete student enrollment',
+    };
+    return res.status(error.statusCode || 500).json(response);
+  }
+}
+
+export async function batchEnrollStudentsHandler(req: Request, res: Response) {
+  try {
+    // Only admin can batch enroll students
+    if (!req.user || req.user.role !== 'ADMIN') {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Only administrators can batch enroll students',
+      };
+      return res.status(403).json(response);
+    }
+
+    const { studentIds, academicYearId, sectionTenureId, feeType, feeData } = req.body;
+
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Student IDs array is required and must not be empty',
+      };
+      return res.status(400).json(response);
+    }
+
+    if (!academicYearId || !sectionTenureId) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Academic year ID and section tenure ID are required',
+      };
+      return res.status(400).json(response);
+    }
+
+    const result = await batchEnrollStudents({
+      studentIds,
+      academicYearId,
+      sectionTenureId,
+      feeType,
+      feeData,
+    });
+
+    const response: ApiResponse = {
+      error: false,
+      body: result,
+      message: `Batch enrollment completed: ${result.successful.length} successful, ${result.failed.length} failed`,
+    };
+    return res.status(201).json(response);
+  } catch (error: any) {
+    const response: ApiResponse = {
+      error: true,
+      body: null,
+      message: error.message || 'Failed to batch enroll students',
     };
     return res.status(error.statusCode || 500).json(response);
   }

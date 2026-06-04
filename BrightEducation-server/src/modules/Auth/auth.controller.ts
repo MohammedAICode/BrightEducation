@@ -13,6 +13,7 @@ import {
   approvePasswordReset
 } from "./auth.service";
 import { userExists } from "../User/user.service";
+import { getProfileImgUrl } from "../../config/Multer/multer";
 import { cookieOptions, COOKIE_NAMES } from "../../config/cookieConfig";
 import { prisma } from "../../libs/prisma";
 
@@ -87,10 +88,16 @@ async function me(req: Request, res: Response) {
     // fetching only the user details, but we need to fetch the respective details as well.
     const { id, ...userData } = result;
 
+    // Transform profileImgKey to profileImg URL
+    const userDataWithImg = {
+      ...userData,
+      profileImg: userData.profileImgKey ? getProfileImgUrl(userData.profileImgKey) : null,
+    };
+
     logger.info(`[ME] User details retrieved successfully for: ${currUser.email}`);
     return res.status(HTTP_STATUS.OK).json({
       error: false,
-      body: userData,
+      body: userDataWithImg,
       message: "User found successfully",
     });
   } catch (err: any) {
