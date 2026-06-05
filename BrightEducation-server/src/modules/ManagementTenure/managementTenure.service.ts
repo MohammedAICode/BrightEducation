@@ -201,3 +201,35 @@ export const deleteManagementTenure = async (id: string) => {
     throw new AppError('Failed to delete management tenure', 500);
   }
 };
+
+export const getManagementByType = async (manageType: string) => {
+  try {
+    const managementUsers = await prisma.management.findMany({
+      where: {
+        manageType: manageType as any,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return managementUsers.map((m) => ({
+      id: m.user.id,
+      firstname: m.user.firstname,
+      lastname: m.user.lastname,
+      email: m.user.email,
+      role: m.user.role,
+      manageType: m.manageType,
+    }));
+  } catch (error) {
+    throw new AppError('Failed to fetch management by type', 500);
+  }
+};

@@ -5,6 +5,7 @@ import {
   getManagementTenureByIdHandler,
   updateManagementTenureHandler,
   deleteManagementTenureHandler,
+  getManagementByTypeHandler,
 } from './managementTenure.controller';
 import { authenticate } from '../../config/middleware/authenticate';
 
@@ -27,5 +28,8 @@ router.put('/:id', updateManagementTenureHandler);
 
 // DELETE /api/v1/management-tenure/:id - Delete a management tenure (Admin only)
 router.delete('/:id', deleteManagementTenureHandler);
+
+// GET /api/v1/management-tenure/type/:manageType - Get management users by type
+router.get('/type/:manageType', getManagementByTypeHandler);
 
 export default router;

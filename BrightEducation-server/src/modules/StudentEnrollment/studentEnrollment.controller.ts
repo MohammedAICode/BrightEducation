@@ -64,11 +64,18 @@ export async function createStudentEnrollmentHandler(req: Request, res: Response
 
 export async function getAllStudentEnrollmentsHandler(req: Request, res: Response) {
   try {
-    const { academicYearId, sectionTenureId, status } = req.query;
+    const { academicYearId, sectionTenureId, status, page = '1', limit = '50' } = req.query;
+    
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
     const studentEnrollments = await getAllStudentEnrollments(
       academicYearId as string,
       sectionTenureId as string,
-      status as string
+      status as string,
+      skip,
+      limitNum
     );
 
     const response: ApiResponse = {

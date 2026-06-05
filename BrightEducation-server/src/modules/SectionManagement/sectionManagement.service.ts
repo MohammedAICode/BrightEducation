@@ -170,14 +170,25 @@ export async function assignSubjectTeacher(
     throw new AppError('Subject does not belong to this class', HTTP_STATUS.BAD_REQUEST);
   }
 
-  // Verify teacher exists and is active
-  const teacher = await prisma.user.findUnique({
+  // Verify user exists and is active
+  const user = await prisma.user.findUnique({
     where: { id: teacherId },
-    include: { teacher: true },
+    include: {
+      teacher: true,
+      management: true,
+    },
   });
 
-  if (!teacher || teacher.role !== 'TEACHER' || teacher.isActive !== 'ACTIVE') {
-    throw new AppError('Teacher not found or inactive', HTTP_STATUS.BAD_REQUEST);
+  if (!user || user.isActive !== 'ACTIVE') {
+    throw new AppError('User not found or inactive', HTTP_STATUS.BAD_REQUEST);
+  }
+
+  // Check if user is either a TEACHER or MANAGEMENT
+  const isTeacher = user.role === 'TEACHER' && user.teacher;
+  const isManagement = user.role === 'MANAGEMENT' && user.management;
+
+  if (!isTeacher && !isManagement) {
+    throw new AppError('User must be a teacher or management member', HTTP_STATUS.BAD_REQUEST);
   }
 
   // Check if assignment already exists
@@ -195,21 +206,23 @@ export async function assignSubjectTeacher(
     throw new AppError('This subject already has a teacher assigned', HTTP_STATUS.CONFLICT);
   }
 
-  // Create teacher tenure if doesn't exist
-  await prisma.teacherTenure.upsert({
-    where: {
-      teacherId_academicYearId: {
+  // Create teacher tenure if doesn't exist (only for TEACHER role)
+  if (isTeacher) {
+    await prisma.teacherTenure.upsert({
+      where: {
+        teacherId_academicYearId: {
+          teacherId,
+          academicYearId: section.academicYearId,
+        },
+      },
+      create: {
         teacherId,
         academicYearId: section.academicYearId,
+        status: 'ACTIVE',
       },
-    },
-    create: {
-      teacherId,
-      academicYearId: section.academicYearId,
-      status: 'ACTIVE',
-    },
-    update: {},
-  });
+      update: {},
+    });
+  }
 
   // Create subject teacher assignment
   const assignment = await prisma.subjectTeacherTenure.create({
@@ -257,31 +270,24 @@ export async function assignClassTeacher(sectionTenureId: string, teacherId: str
     throw new AppError('This section already has a class teacher', HTTP_STATUS.CONFLICT);
   }
 
-  // Verify teacher exists and is active
-  const teacher = await prisma.user.findUnique({
+  // Verify user exists and is active
+  const user = await prisma.user.findUnique({
     where: { id: teacherId },
-    include: { teacher: true },
+    include: {
+      management: true,
+    },
   });
 
-  if (!teacher || teacher.role !== 'TEACHER' || teacher.isActive !== 'ACTIVE') {
-    throw new AppError('Teacher not found or inactive', HTTP_STATUS.BAD_REQUEST);
+  if (!user || user.isActive !== 'ACTIVE') {
+    throw new AppError('User not found or inactive', HTTP_STATUS.BAD_REQUEST);
   }
 
-  // Create teacher tenure if doesn't exist
-  await prisma.teacherTenure.upsert({
-    where: {
-      teacherId_academicYearId: {
-        teacherId,
-        academicYearId: section.academicYearId,
-      },
-    },
-    create: {
-      teacherId,
-      academicYearId: section.academicYearId,
-      status: 'ACTIVE',
-    },
-    update: {},
-  });
+  // Check if user is MANAGEMENT with CLASS_TEACHER type
+  const isClassTeacher = user.role === 'MANAGEMENT' && user.management?.manageType === 'CLASS_TEACHER';
+
+  if (!isClassTeacher) {
+    throw new AppError('User must be a management member with CLASS_TEACHER role', HTTP_STATUS.BAD_REQUEST);
+  }
 
   // Assign class teacher
   const assignment = await prisma.classTeacherTenure.create({

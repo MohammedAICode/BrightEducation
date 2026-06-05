@@ -23,7 +23,7 @@ interface RoleData {
   [key: string]: any;
 }
 
-const Teachers: React.FC = () => {
+const Staff: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedRoleData, setSelectedRoleData] = useState<RoleData | null>(null);
@@ -45,12 +45,12 @@ const Teachers: React.FC = () => {
     setError(null);
     try {
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
-      const response = await axiosInstance.get(`/user/all?page=${page}&limit=${limit}&role=TEACHER${searchParam}`);
+      const response = await axiosInstance.get(`/user/all?page=${page}&limit=${limit}&role=STAFF${searchParam}`);
       const usersData = response.data.body?.users || [];
       setUsers(Array.isArray(usersData) ? usersData : []);
       setTotalPages(response.data.body?.pagination?.totalPages || 1);
     } catch (err: any) {
-      setError('Failed to fetch teachers');
+      setError('Failed to fetch staff');
     } finally {
       setLoading(false);
     }
@@ -91,13 +91,13 @@ const Teachers: React.FC = () => {
   };
 
   const handleDeleteSelected = async (selectedIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} teacher(s)?`)) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} staff member(s)?`)) return;
     
     try {
       await Promise.all(selectedIds.map(id => axiosInstance.delete(`/user/${id}`)));
       fetchUsers();
     } catch (err: any) {
-      console.error('Failed to delete teachers:', err);
+      console.error('Failed to delete staff:', err);
     }
   };
 
@@ -176,7 +176,7 @@ const Teachers: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Teachers</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Staff</h1>
       </div>
 
       <BulkManagementTable
@@ -204,9 +204,9 @@ const Teachers: React.FC = () => {
         onRowClick={handleRowClick}
         loading={loading}
         error={error}
-        emptyMessage="No teachers found"
+        emptyMessage="No staff found"
         primaryAction={{
-          label: 'Create Teacher',
+          label: 'Create Staff',
           icon: <FiPlus className="w-4 h-4" />,
           onClick: () => setIsCreateModalOpen(true),
         }}
@@ -239,11 +239,11 @@ const Teachers: React.FC = () => {
       <CreateUserModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        role="TEACHER"
+        role="STAFF"
         onSuccess={handleCreateSuccess}
       />
     </div>
   );
 };
 
-export default Teachers;
+export default Staff;

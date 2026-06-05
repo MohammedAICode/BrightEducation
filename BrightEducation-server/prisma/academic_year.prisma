@@ -1,19 +1,38 @@
 model AcademicYear {
+
     id              String                    @id @default(uuid())
+
     name            String                    @unique
+
     startDate       DateTime
+
     endDate         DateTime
+
     isActive        Boolean                   @default(false)
+
     
+
     classTenures    ClassTenure[]
+
     sectionTenures  SectionTenure[]
+
     studentEnrollments StudentEnrollment[]
+
     teacherTenures  TeacherTenure[]
+
     staffTenures    StaffTenure[]
+
     managementTenures ManagementTenure[]
+
     classTeacherTenures ClassTeacherTenure[]
+
     subjectTeacherTenures SubjectTeacherTenure[]
+
     studentFees    StudentFee[]
+
     
+
     @@index([isActive])
+
 }
+

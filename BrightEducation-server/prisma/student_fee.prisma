@@ -1,29 +1,58 @@
 model StudentFee {
+
   id String @id @default(uuid())
+
   studentId String
+
   academicYearId String
+
   feeType String // "SCHOOL" or "TUITION"
+
   monthlyAmount Decimal @db.Decimal(10, 2)
-  totalAmount Decimal @db.Decimal(10, 2)
+
+  totalAmount Decimal? @db.Decimal(10, 2)
+
   paidAmount Decimal @default(0) @db.Decimal(10, 2)
-  balanceAmount Decimal @db.Decimal(10, 2)
+
+  balanceAmount Decimal? @db.Decimal(10, 2)
+
   paymentStatus String @default("PENDING") // "PENDING", "PARTIAL", "PAID"
+
   // Individual fee components for SCHOOL fee type
+
   annualFee Decimal? @db.Decimal(10, 2)
+
   examFee Decimal? @default(0) @db.Decimal(10, 2)
+
   miscellaneousFee Decimal? @default(0) @db.Decimal(10, 2)
+
   labFee Decimal? @default(0) @db.Decimal(10, 2)
+
   // Fee calculation options
+
   includeInMonthlyCalculation Boolean @default(false)
+
   discountPercentage Int @default(0)
+
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 
+
+
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
   payments FeePayment[]
 
+
+
   @@index([studentId])
+
   @@index([academicYearId])
+
   @@index([feeType])
+
 }
+

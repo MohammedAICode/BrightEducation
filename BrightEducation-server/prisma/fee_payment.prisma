@@ -1,16 +1,42 @@
 model FeePayment {
+
   id String @id @default(uuid())
+
   studentFeeId String
+
   month String // "April", "May", "June", etc.
+
+  monthIndex Int // 1, 2, 3, etc. for ordering
+
   amount Decimal @db.Decimal(10, 2)
+
   paymentDate DateTime
-  paymentMethod String // "CASH", "UPI", "BANK_TRANSFER"
+
+  paymentMethod String // "CASH", "UPI", "BANK_TRANSFER", "CARD", "CHEQUE"
+
+  status String @default("PENDING") // "PENDING", "PAID", "PAUSED", "WAIVED_OFF"
+
+  acceptedBy String? // userId of management user who accepted payment
+
+  reason String? // reason for PAUSED or WAIVED_OFF status
+
   notes String?
+
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
+
+
 
   studentFee StudentFee @relation(fields: [studentFeeId], references: [id], onDelete: Cascade)
 
+
+
   @@index([studentFeeId])
+
   @@index([month])
+
+  @@index([status])
+
 }
+

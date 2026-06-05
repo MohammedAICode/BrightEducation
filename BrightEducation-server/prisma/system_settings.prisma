@@ -1,8 +1,16 @@
 model SystemSettings {
+
   id              String   @id @default(uuid())
+
   timezone        String   @default("Asia/Kolkata")
+
   testModeEnabled Boolean  @default(false)
+
   testDate        DateTime?
+
   createdAt       DateTime @default(now())
+
   updatedAt       DateTime @updatedAt
+
 }
+

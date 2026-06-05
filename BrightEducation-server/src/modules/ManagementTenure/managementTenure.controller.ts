@@ -5,6 +5,7 @@ import {
   getManagementTenureById,
   updateManagementTenure,
   deleteManagementTenure,
+  getManagementByType,
 } from './managementTenure.service';
 import { AppError } from '../../config/Error/AppError';
 
@@ -173,6 +174,37 @@ export async function deleteManagementTenureHandler(req: Request, res: Response)
       error: true,
       body: null,
       message: error.message || 'Failed to delete management tenure',
+    };
+    return res.status(error.statusCode || 500).json(response);
+  }
+}
+
+export async function getManagementByTypeHandler(req: Request, res: Response) {
+  try {
+    const { manageType } = req.params;
+
+    if (!manageType) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Management type is required',
+      };
+      return res.status(400).json(response);
+    }
+
+    const managementUsers = await getManagementByType(manageType as string);
+
+    const response: ApiResponse = {
+      error: false,
+      body: managementUsers,
+      message: 'Management users fetched successfully',
+    };
+    return res.status(200).json(response);
+  } catch (error: any) {
+    const response: ApiResponse = {
+      error: true,
+      body: null,
+      message: error.message || 'Failed to fetch management users',
     };
     return res.status(error.statusCode || 500).json(response);
   }
