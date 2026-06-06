@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { FiBookOpen, FiUsers, FiCalendar, FiGrid, FiPlus, FiTrash2, FiX, FiEdit, FiBook, FiAlertCircle, FiSearch } from 'react-icons/fi';
 
@@ -448,21 +448,25 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
 
 
-  const fetchClasses = async () => {
+  const fetchClasses = useCallback(async () => {
 
     try {
 
       setLoading(true);
 
-      const response = await axiosInstance.get('/class-tenure');
+      const response = await axiosInstance.get('/class-tenure', {
+        params: { academicYearId: yearId }
+      });
 
-      const filteredClasses = response.data.body.filter((cls: ClassTenure) => cls.academicYearId === yearId);
+      const data = response.data.body;
+      // Filter client-side as fallback if server doesn't support the param
+      const filteredClasses = Array.isArray(data) ? data.filter((cls: ClassTenure) => cls.academicYearId === yearId) : [];
 
       setClasses(filteredClasses);
 
     } catch (error) {
 
-      console.error('Failed to fetch classes:', error);
+      // Failed to fetch classes
 
     } finally {
 
@@ -470,27 +474,30 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
     }
 
-  };
+  }, [yearId]);
 
 
 
-  const fetchSections = async (classId: string) => {
+  const fetchSections = useCallback(async (classId: string) => {
 
     try {
 
-      const response = await axiosInstance.get('/section-tenure');
+      const response = await axiosInstance.get('/section-tenure', {
+        params: { classTenureId: classId }
+      });
 
-      const filteredSections = response.data.body.filter((sec: SectionTenure) => sec.classTenureId === classId);
+      const data = response.data.body;
+      const filteredSections = Array.isArray(data) ? data.filter((sec: SectionTenure) => sec.classTenureId === classId) : [];
 
       setSections(filteredSections);
 
     } catch (error) {
 
-      console.error('Failed to fetch sections:', error);
+      // Failed to fetch sections
 
     }
 
-  };
+  }, []);
 
 
 
@@ -550,8 +557,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
         };
       });
 
-      console.log(enrollmentsWithFees);
-      console.log('Fees from API:', fees);
+      // enrollments and fees merged successfully
       
       setEnrollments(enrollmentsWithFees);
 
@@ -629,7 +635,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
 
 
-  const fetchSubjects = async () => {
+  const fetchSubjects = useCallback(async () => {
 
     try {
 
@@ -639,19 +645,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
     } catch (error) {
 
-      console.error('Failed to fetch subjects:', error);
+      // Failed to fetch subjects
 
     }
 
-  };
+  }, []);
 
 
 
-  const fetchSubjectTeacherTenures = async () => {
+  const fetchSubjectTeacherTenures = useCallback(async () => {
 
     try {
 
-      const response = await axiosInstance.get('/subject-teacher-tenure');
+      const response = await axiosInstance.get('/subject-teacher-tenure', {
+        params: { academicYearId: yearId }
+      });
 
       const filteredTenures = (response.data.body || []).filter(
 
@@ -663,19 +671,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
     } catch (error) {
 
-      console.error('Failed to fetch subject teacher tenures:', error);
+      // Failed to fetch subject teacher tenures
 
     }
 
-  };
+  }, [yearId]);
 
 
 
-  const fetchClassTeacherTenures = async () => {
+  const fetchClassTeacherTenures = useCallback(async () => {
 
     try {
 
-      const response = await axiosInstance.get('/class-teacher-tenure');
+      const response = await axiosInstance.get('/class-teacher-tenure', {
+        params: { academicYearId: yearId }
+      });
 
       const filteredTenures = (response.data.body || []).filter(
 
@@ -687,11 +697,11 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
     } catch (error) {
 
-      console.error('Failed to fetch class teacher tenures:', error);
+      // Failed to fetch class teacher tenures
 
     }
 
-  };
+  }, [yearId]);
 
 
 
@@ -1117,11 +1127,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
 
 
-        console.log('Student fee data:', studentFee);
-
-        console.log('Fee type:', studentFee.feeType);
-
-        console.log('Active enrollment:', activeEnrollment);
+        // Fee data loaded for student
 
 
 
@@ -1716,9 +1722,9 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
       <div className="mb-6">
 
-        <h1 className="text-2xl font-bold text-gray-900">Academic Year Details</h1>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Academic Year Details</h1>
 
-        <p className="text-gray-600 mt-1">Manage classes, sections, students, attendance, and fees</p>
+        <p className="text-gray-500 mt-1 text-sm">Manage classes, sections, students, attendance, and fees</p>
 
       </div>
 
@@ -1726,7 +1732,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
       {/* Tabs */}
 
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+      <div className="flex space-x-1 bg-gray-100/80 p-1 rounded-xl mb-6 border border-gray-200/50">
 
         {tabs.map((tab) => (
 
@@ -1736,13 +1742,13 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
             onClick={() => setActiveTab(tab.id)}
 
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
+            className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
 
               activeTab === tab.id
 
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600 shadow-sm font-semibold border border-gray-100'
 
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
 
             }`}
 
@@ -1750,7 +1756,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
             {tab.icon}
 
-            <span className="font-medium">{tab.label}</span>
+            <span className="text-sm">{tab.label}</span>
 
           </button>
 
@@ -1778,7 +1784,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                 onChange={(e) => setSelectedClass(e.target.value)}
 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
               >
 
@@ -1810,7 +1816,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                 disabled={!selectedClass}
 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
 
               >
 
@@ -1840,13 +1846,13 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
       {/* Content Area */}
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100/80 p-6">
 
         {loading ? (
 
           <div className="flex items-center justify-center py-12">
 
-            <div className="text-gray-500">Loading...</div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
 
           </div>
 
@@ -1882,7 +1888,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       placeholder="Enter class name (e.g., Class 10)"
 
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                       required
 
@@ -1934,13 +1940,15 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     <tbody>
 
-                      {classes.map((cls) => {
+                      {classes.map((cls: any) => {
 
-                        const classSections = sections.filter((s) => s.classTenureId === cls.id);
+                        // Use data directly from API response instead of separate state arrays
+                        const sectionCount = cls._count?.sectionTenures ?? cls.sectionTenures?.length ?? 0;
 
-                        const classSectionIds = classSections.map((s) => s.id);
-
-                        const enrolledCount = enrollments.filter((e) => classSectionIds.includes(e.sectionTenureId)).length;
+                        const enrolledCount = (cls.sectionTenures || []).reduce(
+                          (total: number, section: any) => total + (section._count?.studentEnrollments ?? 0),
+                          0
+                        );
 
                         return (
 
@@ -1962,7 +1970,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             </td>
 
-                            <td className="py-3 px-4 text-sm text-gray-500">{classSections.length}</td>
+                            <td className="py-3 px-4 text-sm text-gray-500">{sectionCount}</td>
 
                             <td className="py-3 px-4 text-sm text-gray-500">{enrolledCount}</td>
 
@@ -2044,7 +2052,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     onChange={(e) => setSelectedClass(e.target.value)}
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                   >
 
@@ -2086,7 +2094,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="Section name (e.g., A)"
 
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                           required
 
@@ -2104,7 +2112,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           min="1"
 
-                          className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-32 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                           required
 
@@ -2124,7 +2132,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           title="1-3 uppercase letters followed by hyphen"
 
-                          className="w-40 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-40 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                         />
 
@@ -2320,7 +2328,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       onChange={(e) => setSelectedClass(e.target.value)}
 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     >
 
@@ -2352,7 +2360,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       disabled={!selectedClass}
 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
 
                     >
 
@@ -2404,7 +2412,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           }}
 
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                         >
 
@@ -2514,7 +2522,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="Enter custom subject name"
 
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                         />
 
@@ -2656,7 +2664,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             onChange={(e) => setSelectedSubjectId(e.target.value)}
 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                           >
 
@@ -2689,7 +2697,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             onChange={(e) => setSelectedTeacherId(e.target.value)}
 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                           >
 
@@ -2850,7 +2858,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                                 onChange={(e) => setSelectedClassTeacherId(e.target.value)}
 
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
 
                               >
 
@@ -3731,7 +3739,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     placeholder="Search by name, admission no, or email..."
 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                   />
 
@@ -3739,7 +3747,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
 
 
-                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg">
+                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl">
 
                   {students
 
@@ -3961,7 +3969,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       onChange={(e) => setSelectedFeeType(e.target.value as 'SCHOOL' | 'TUITION' | '')}
 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     >
 
@@ -3997,7 +4005,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             placeholder="20000"
 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                           />
 
@@ -4017,7 +4025,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             placeholder="5000"
 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                           />
 
@@ -4037,7 +4045,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             placeholder="1000"
 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                           />
 
@@ -4057,7 +4065,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             placeholder="2000"
 
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                           />
 
@@ -4177,7 +4185,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                             placeholder="0"
 
-                            className="w-20 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-20 px-2 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                           />
 
@@ -4207,7 +4215,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                         placeholder="e.g., 3000"
 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                       />
 
@@ -4259,7 +4267,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                 }}
 
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
               >
 
@@ -4345,7 +4353,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   onChange={(e) => setUnenrollStatus(e.target.value as 'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT')}
 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                 >
 
@@ -4377,7 +4385,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   }}
 
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
                 >
 
@@ -4461,7 +4469,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   onChange={(e) => setBulkStatus(e.target.value as 'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT')}
 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                 >
 
@@ -4493,7 +4501,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   }}
 
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
                 >
 
@@ -4659,7 +4667,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       }}
 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                     >
 
@@ -4695,7 +4703,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="20000"
 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                         />
 
@@ -4715,7 +4723,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="5000"
 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                         />
 
@@ -4735,7 +4743,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="1000"
 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                         />
 
@@ -4755,7 +4763,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="2000"
 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                         />
 
@@ -4807,7 +4815,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           placeholder="0"
 
-                          className="w-20 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-20 px-2 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                         />
 
@@ -4897,7 +4905,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       placeholder="3000"
 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm text-sm"
 
                     />
 
@@ -4985,7 +4993,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                 }}
 
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
               >
 
@@ -5335,7 +5343,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   onChange={(e) => setEditClassName(e.target.value)}
 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                   required
 
@@ -5359,7 +5367,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   }}
 
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
                 >
 
@@ -5445,7 +5453,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     onChange={(e) => setEditSectionName(e.target.value)}
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     required
 
@@ -5465,7 +5473,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     onChange={(e) => setEditSectionCapacity(e.target.value)}
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     min="1"
 
@@ -5493,7 +5501,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     title="1-3 uppercase letters followed by hyphen"
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                   />
 
@@ -5527,7 +5535,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   }}
 
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
                 >
 
@@ -5607,7 +5615,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   onChange={(e) => setEditSubjectName(e.target.value)}
 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                   required
 
@@ -5631,7 +5639,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   }}
 
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
                 >
 
@@ -5801,7 +5809,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     onChange={(e) => setPaymentMonth(e.target.value)}
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     required
 
@@ -5851,7 +5859,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     placeholder="Enter amount"
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     required
 
@@ -5869,7 +5877,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     onChange={(e) => setPaymentMethod(e.target.value)}
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     required
 
@@ -5897,7 +5905,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     placeholder="Add any notes..."
 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
                     rows={2}
 
@@ -5929,7 +5937,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                   }}
 
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
 
                 >
 

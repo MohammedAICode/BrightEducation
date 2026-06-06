@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { FiBell, FiClock, FiAlertCircle, FiInfo, FiRefreshCw } from 'react-icons/fi';
 import axiosInstance from '../../lib/axios';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,8 @@ interface Notification {
   };
 }
 
+const POLL_INTERVAL_MS = 60_000; // Refresh unread count every 60 seconds
+
 const NotificationBell: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -34,22 +36,7 @@ const NotificationBell: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/notifications?unreadOnly=true');
@@ -61,7 +48,29 @@ const NotificationBell: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Poll for new notifications
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchAllNotifications = async () => {
     try {
@@ -149,26 +158,26 @@ const NotificationBell: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleBellClick}
-        className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all"
+        className="relative p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200"
       >
         <FiBell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse-dot"></span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-lg border border-gray-100 z-50 animate-in fade-in slide-in-from-top-2 duration-100">
+        <div className="absolute right-0 mt-2 w-96 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100/80 z-[9999] animate-fade-in-up overflow-hidden">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-5 py-3.5 border-b border-gray-100/80 flex items-center justify-between bg-gray-50/50">
             <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchAllNotifications}
-                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Refresh notifications"
               >
-                <FiRefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <FiRefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               </button>
               {unreadCount > 0 && (
                 <button
@@ -188,22 +197,25 @@ const NotificationBell: React.FC = () => {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               </div>
             ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-                <FiBell className="w-8 h-8 mb-2 text-gray-300" />
-                <p className="text-sm">No notifications</p>
+              <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                  <FiBell className="w-6 h-6 text-gray-300" />
+                </div>
+                <p className="text-sm font-medium">No notifications</p>
+                <p className="text-xs text-gray-400 mt-0.5">You're all caught up!</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-50">
                 {notifications.slice(0, 5).map((notification) => (
                   <div
                     key={notification.id}
-                    className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
-                      !notification.isRead ? 'bg-blue-50/30' : ''
+                    className={`px-5 py-3.5 hover:bg-gray-50/80 transition-colors cursor-pointer ${
+                      !notification.isRead ? 'bg-blue-50/20' : ''
                     }`}
                     onClick={() => handleMarkAsRead(notification.id)}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="shrink-0 mt-0.5">{getIcon(notification.type)}</div>
+                      <div className="shrink-0 mt-0.5 p-1.5 rounded-lg bg-gray-50">{getIcon(notification.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
                           <p className="text-sm font-semibold text-gray-900 truncate">{notification.title}</p>
@@ -226,10 +238,10 @@ const NotificationBell: React.FC = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100">
+            <div className="px-5 py-3 border-t border-gray-100/80 bg-gray-50/50">
               <button
                 onClick={() => {
-                  navigate('/notifications');
+                  navigate('/dashboard/notifications');
                   setIsOpen(false);
                 }}
                 className="w-full text-sm font-semibold text-blue-600 hover:text-blue-700 text-center transition-colors"

@@ -61,18 +61,18 @@ const ToastModal: React.FC<ToastModalProps> = ({
     handleClose();
   };
 
-  const getIcon = () => {
+  const getIconWithBg = () => {
     switch (type) {
       case 'success':
-        return <FiCheckCircle className="w-6 h-6 text-green-500" />;
+        return <div className="p-2.5 rounded-xl bg-green-50 border border-green-100"><FiCheckCircle className="w-6 h-6 text-green-500" /></div>;
       case 'warning':
-        return <FiAlertTriangle className="w-6 h-6 text-amber-500" />;
+        return <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-100"><FiAlertTriangle className="w-6 h-6 text-amber-500" /></div>;
       case 'error':
-        return <FiAlertCircle className="w-6 h-6 text-red-500" />;
+        return <div className="p-2.5 rounded-xl bg-red-50 border border-red-100"><FiAlertCircle className="w-6 h-6 text-red-500" /></div>;
       case 'confirm':
-        return <FiAlertCircle className="w-6 h-6 text-blue-500" />;
+        return <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-100"><FiAlertCircle className="w-6 h-6 text-blue-500" /></div>;
       default:
-        return <FiInfo className="w-6 h-6 text-blue-500" />;
+        return <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-100"><FiInfo className="w-6 h-6 text-blue-500" /></div>;
     }
   };
 
@@ -112,7 +112,7 @@ const ToastModal: React.FC<ToastModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200 ${
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
           isVisible ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={handleClose}
@@ -120,8 +120,8 @@ const ToastModal: React.FC<ToastModalProps> = ({
 
       {/* Modal */}
       <div
-        className={`relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border-2 ${getBorderColor()} transition-all duration-200 transform ${
-          isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        className={`relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border ${getBorderColor()} transition-all duration-200 transform ${
+          isVisible ? 'scale-100 opacity-100 animate-modal-enter' : 'scale-95 opacity-0'
         }`}
       >
         {/* Close Button */}
@@ -134,12 +134,12 @@ const ToastModal: React.FC<ToastModalProps> = ({
 
         {/* Icon and Content */}
         <div className="flex items-start gap-4">
-          <div className="shrink-0 mt-0.5">{getIcon()}</div>
+          <div className="shrink-0">{getIconWithBg()}</div>
           <div className="flex-1">
             {title && (
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1.5">{title}</h3>
             )}
-            <p className="text-gray-600 text-sm leading-relaxed">{message}</p>
+            <p className="text-gray-500 text-sm leading-relaxed">{message}</p>
           </div>
         </div>
 
@@ -148,13 +148,13 @@ const ToastModal: React.FC<ToastModalProps> = ({
           <div className="flex justify-end gap-3 mt-6">
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
             >
               {cancelText}
             </button>
             <button
               onClick={handleConfirm}
-              className={`px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors ${getConfirmButtonColor()}`}
+              className={`px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all duration-200 ${getConfirmButtonColor()}`}
             >
               {confirmText}
             </button>

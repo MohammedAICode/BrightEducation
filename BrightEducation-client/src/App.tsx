@@ -7,6 +7,7 @@ import UserDashboardLayout from './layouts/UserDashboardLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import { useAppSelector } from './store/hooks'
 import { SystemSettingsProvider } from './contexts/SystemSettingsContext'
+import FeeReceipt from './components/dashboard/FeeReceipt'
 
 const App = () => {
   return (
@@ -21,6 +22,14 @@ const App = () => {
             <SystemSettingsProvider>
               <DashboardRouter />
             </SystemSettingsProvider>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/receipt"
+        element={
+          <ProtectedRoute>
+            <FeeReceipt />
           </ProtectedRoute>
         }
       />

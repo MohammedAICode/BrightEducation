@@ -22,6 +22,8 @@ import {
 
   deleteFeePaymentController,
 
+  getPaymentReceiptController,
+
 } from './studentFee.controller';
 
 import { authenticate } from '../../config/middleware/authenticate';
@@ -48,7 +50,8 @@ router.post('/', createStudentFeeController);
 
 router.get('/student/:studentId', getStudentFeesController);
 
-
+// GET /api/v1/student-fee/receipt - Get payment receipt (supports both paymentId and studentFeeId+monthIndex via query params)
+router.get('/receipt', getPaymentReceiptController);
 
 // GET /api/v1/student-fee/:id - Get a specific fee record
 
@@ -86,6 +89,9 @@ router.get('/:studentFeeId/calculate-school', calculateSchoolFeeTotalController)
 
 // DELETE /api/v1/student-fee/payment/:studentFeeId - Delete a payment
 router.delete('/payment/:studentFeeId', deleteFeePaymentController);
+
+// GET /api/v1/student-fee/receipt - Get payment receipt (supports both paymentId and studentFeeId+monthIndex)
+router.get('/receipt', getPaymentReceiptController);
 
 
 export default router;

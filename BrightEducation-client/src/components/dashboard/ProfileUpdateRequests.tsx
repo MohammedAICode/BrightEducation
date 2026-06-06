@@ -322,7 +322,7 @@ const ProfileUpdateRequests: React.FC = () => {
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
                 placeholder="Why are you rejecting this request?"
               />
             </div>

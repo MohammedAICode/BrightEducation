@@ -4,6 +4,8 @@ import logger from '../../libs/logger';
 
 import { AppError } from '../../config/Error/AppError';
 
+import { emitEvent, Events, FeePaymentPayload } from '../../events/eventEmitter';
+
 
 
 export async function createStudentFee(data: {
@@ -373,6 +375,22 @@ export async function recordPayment(data: {
 
 
 
+    // Fetch student fee details to get userId and other information for the event
+    const studentFee = await prisma.studentFee.findUnique({
+      where: { id: data.studentFeeId },
+      include: {
+        student: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!studentFee) {
+      throw new AppError('Student fee record not found', 404);
+    }
+
     // Check if payment record already exists for this month
     const existingPayment = await prisma.feePayment.findFirst({
       where: {
@@ -418,14 +436,6 @@ export async function recordPayment(data: {
     // Update student fee totals only if status is PAID
     let updatedFee;
     if (data.status === 'PAID') {
-      const studentFee = await prisma.studentFee.findUnique({
-        where: { id: data.studentFeeId },
-      });
-
-      if (!studentFee) {
-        throw new Error('Student fee record not found');
-      }
-
       const newPaidAmount = Number(studentFee.paidAmount) + data.amount;
       const newBalance = Number(studentFee.totalAmount) - newPaidAmount;
 
@@ -441,6 +451,25 @@ export async function recordPayment(data: {
       logger.info(`[STUDENT_FEE] Fee totals updated: paid=${newPaidAmount}, balance=${newBalance}`);
     }
 
+    // Emit fee payment event for notification
+    if (data.status === 'PAID') {
+      const feePaymentPayload: FeePaymentPayload = {
+        userId: studentFee.student.userId,
+        studentId: studentFee.studentId,
+        studentFeeId: data.studentFeeId,
+        paymentId: payment.id,
+        amount: data.amount,
+        paymentDate: payment.paymentDate,
+        paymentMethod: data.paymentMethod,
+        month: data.month,
+        monthIndex: data.monthIndex,
+        feeType: studentFee.feeType,
+        academicYearId: studentFee.academicYearId,
+      };
+
+      emitEvent(Events.FEE_PAYMENT, feePaymentPayload);
+    }
+
     logger.info(`[STUDENT_FEE] Payment recorded successfully: ${payment.id}`);
 
     return { payment, updatedFee };
@@ -448,6 +477,138 @@ export async function recordPayment(data: {
   } catch (error: any) {
 
     logger.error(`[STUDENT_FEE] Failed to record payment: ${error.message}`);
+
+    throw error;
+
+  }
+
+}
+
+
+
+export async function getPaymentReceipt(paymentId?: string, studentFeeId?: string, monthIndex?: number) {
+
+  try {
+
+    logger.info(`[STUDENT_FEE] Fetching receipt for paymentId: ${paymentId}, studentFeeId: ${studentFeeId}, monthIndex: ${monthIndex}`);
+
+
+
+    let payment;
+
+    if (paymentId) {
+
+      // Fetch school fee payment by paymentId
+      logger.info(`[STUDENT_FEE] Fetching by paymentId: ${paymentId}`);
+      payment = await prisma.feePayment.findUnique({
+
+        where: { id: paymentId },
+
+        include: {
+
+          studentFee: {
+
+            include: {
+
+              student: {
+
+                include: {
+
+                  user: true,
+
+                },
+
+              },
+
+              academicYear: true,
+
+            },
+
+          },
+
+        },
+
+      });
+
+    } else if (studentFeeId && monthIndex !== undefined) {
+
+      // Fetch tuition fee payment by studentFeeId and monthIndex
+      logger.info(`[STUDENT_FEE] Fetching by studentFeeId: ${studentFeeId}, monthIndex: ${monthIndex}`);
+      payment = await prisma.feePayment.findFirst({
+
+        where: {
+
+          studentFeeId,
+
+          monthIndex,
+
+        },
+
+        include: {
+
+          studentFee: {
+
+            include: {
+
+              student: {
+
+                include: {
+
+                  user: true,
+
+                },
+
+              },
+
+              academicYear: true,
+
+            },
+
+          },
+
+        },
+
+      });
+
+      logger.info(`[STUDENT_FEE] Payment found: ${!!payment}`);
+    } else {
+
+      throw new AppError('Either paymentId or (studentFeeId and monthIndex) must be provided', 400);
+
+    }
+
+
+
+    if (!payment) {
+
+      logger.error(`[STUDENT_FEE] Payment not found. paymentId: ${paymentId}, studentFeeId: ${studentFeeId}, monthIndex: ${monthIndex}`);
+      throw new AppError('Payment not found', 404);
+
+    }
+
+    // Fetch acceptedBy user details if exists
+    if (payment.acceptedBy) {
+      const acceptedByUser = await prisma.user.findUnique({
+        where: { id: payment.acceptedBy },
+        select: {
+          id: true,
+          firstname: true,
+          lastname: true,
+        },
+      });
+      if (acceptedByUser) {
+        // Replace the ID with the full name
+        (payment as any).acceptedByName = `${acceptedByUser.firstname} ${acceptedByUser.lastname}`;
+      }
+    }
+
+
+
+    return payment;
+
+  } catch (error: any) {
+
+    logger.error(`[STUDENT_FEE] Failed to fetch receipt: ${error.message}`);
 
     throw error;
 
@@ -700,24 +861,19 @@ export async function deleteFeePayment(studentFeeId: string, data: {
         where: { id: data.paymentId },
       });
 
-      // Recalculate paid amount for the student fee
-      const studentFee = await prisma.studentFee.findUnique({
+      // Recalculate paid amount without re-fetching — use the already-known fee data from line 679
+      const feeRecord = await prisma.studentFee.findUnique({
         where: { id: studentFeeId },
-        include: {
-          payments: true,
-        },
       });
 
-      if (!studentFee) {
+      if (!feeRecord) {
         throw new AppError('Fee record not found', 404);
       }
 
-      const newPaidAmount = studentFee.payments.reduce(
-        (sum, payment) => sum + parseFloat(payment.amount.toString()),
-        0
-      );
-
-      const totalAmount = parseFloat(studentFee.totalAmount?.toString() || '0');
+      const currentPaid = parseFloat(feeRecord.paidAmount?.toString() || '0');
+      const deletedAmount = parseFloat(payment.amount.toString());
+      const newPaidAmount = Math.max(0, currentPaid - deletedAmount);
+      const totalAmount = parseFloat(feeRecord.totalAmount?.toString() || '0');
       const newBalanceAmount = totalAmount - newPaidAmount;
 
       const updatedFee = await prisma.studentFee.update({

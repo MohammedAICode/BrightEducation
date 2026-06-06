@@ -28,134 +28,62 @@ export const createStudentEnrollment = async (data: {
 
   try {
 
-    // Check if student exists and is a student
-
-    const student = await prisma.user.findUnique({
-
-      where: { id: data.studentId },
-
-    });
-
-
+    // Validate student, academic year, and section tenure in parallel (independent queries)
+    const [student, academicYear, sectionTenure] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: data.studentId },
+      }),
+      prisma.academicYear.findUnique({
+        where: { id: data.academicYearId },
+      }),
+      prisma.sectionTenure.findUnique({
+        where: { id: data.sectionTenureId },
+        include: {
+          academicYear: true,
+          studentEnrollments: true,
+          classTenure: true, // Include class tenure for roll number generation
+        },
+      }),
+    ]);
 
     if (!student) {
-
       throw new AppError('Student not found', 404);
-
     }
-
-
 
     if (student.role !== 'STUDENT') {
-
       throw new AppError('User is not a student', 400);
-
     }
-
-
-
-    // Check if academic year exists
-
-    const academicYear = await prisma.academicYear.findUnique({
-
-      where: { id: data.academicYearId },
-
-    });
-
-
 
     if (!academicYear) {
-
       throw new AppError('Academic year not found', 404);
-
     }
-
-
-
-    // Check if section tenure exists
-
-    const sectionTenure = await prisma.sectionTenure.findUnique({
-
-      where: { id: data.sectionTenureId },
-
-      include: {
-
-        academicYear: true,
-
-        studentEnrollments: true,
-
-        classTenure: true, // Include class tenure for roll number generation
-
-      },
-
-    });
-
-
 
     if (!sectionTenure) {
-
       throw new AppError('Section tenure not found', 404);
-
     }
-
-
 
     // Check if section tenure belongs to the same academic year
-
     if (sectionTenure.academicYearId !== data.academicYearId) {
-
       throw new AppError('Section tenure does not belong to the specified academic year', 400);
-
     }
 
-
-
-    // Check if student is already ACTIVE in this academic year
-
-    const existingActiveEnrollment = await prisma.studentEnrollment.findFirst({
-
+    // Check existing enrollments in one query instead of two separate ones
+    const existingEnrollments = await prisma.studentEnrollment.findMany({
       where: {
-
         studentId: data.studentId,
-
         academicYearId: data.academicYearId,
-
-        status: 'ACTIVE',
-
+        status: { in: ['ACTIVE', 'PAUSED', 'WRONG_ENTRY'] },
       },
-
     });
 
-
+    const existingActiveEnrollment = existingEnrollments.find(e => e.status === 'ACTIVE');
+    const existingPausedEnrollment = existingEnrollments.find(e => e.status === 'PAUSED' || e.status === 'WRONG_ENTRY');
 
     if (existingActiveEnrollment) {
-
       throw new AppError('Student is already enrolled in this academic year', 400);
-
     }
 
-
-
-    // Check if student has PAUSED or WRONG_ENTRY enrollment (allow re-enrollment)
-
-    const existingPausedEnrollment = await prisma.studentEnrollment.findFirst({
-
-      where: {
-
-        studentId: data.studentId,
-
-        academicYearId: data.academicYearId,
-
-        status: { in: ['PAUSED', 'WRONG_ENTRY'] },
-
-      },
-
-    });
-
-
-
     if (existingPausedEnrollment) {
-
       // Update existing enrollment instead of creating new
 
       const updatedEnrollment = await prisma.studentEnrollment.update({
@@ -1205,3 +1133,31 @@ export const batchEnrollStudents = async (data: {
 
 };
 
+
+/**
+ * Batch update enrollment status for multiple enrollments at once.
+ * Uses a single prisma.updateMany instead of N individual updates.
+ */
+export const batchUpdateEnrollmentStatus = async (data: {
+  enrollmentIds: string[];
+  status: string;
+}) => {
+  try {
+    logger.info(`[BATCH_STATUS] Updating ${data.enrollmentIds.length} enrollments to status: ${data.status}`);
+
+    const result = await prisma.studentEnrollment.updateMany({
+      where: {
+        id: { in: data.enrollmentIds },
+      },
+      data: {
+        status: data.status as any,
+      },
+    });
+
+    logger.info(`[BATCH_STATUS] Updated ${result.count} enrollment(s)`);
+    return { updated: result.count };
+  } catch (error: any) {
+    logger.error(`[BATCH_STATUS] Failed: ${error.message}`);
+    throw new AppError('Failed to batch update enrollment status', 500);
+  }
+};

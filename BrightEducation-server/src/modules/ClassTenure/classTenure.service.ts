@@ -51,8 +51,23 @@ export const getAllClassTenures = async (academicYearId?: string) => {
       where,
       include: {
         academicYear: true,
-        sectionTenures: true,
+        sectionTenures: {
+          include: {
+            _count: {
+              select: {
+                studentEnrollments: {
+                  where: { status: 'ACTIVE' },
+                },
+              },
+            },
+          },
+        },
         classSubjects: true,
+        _count: {
+          select: {
+            sectionTenures: true,
+          },
+        },
       },
       orderBy: {
         name: 'asc',

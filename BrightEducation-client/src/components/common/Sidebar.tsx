@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   FiGrid,
   FiUsers,
@@ -19,42 +20,53 @@ import axiosInstance from '../../lib/axios';
 /**
  * Menu configuration per role.
  * Defines which menu items are visible for each user role.
+ * Icon config uses string IDs to avoid recreating JSX on every render.
  */
+const iconMap: Record<string, React.ReactNode> = {
+  grid: <FiGrid className="w-5 h-5" />,
+  bell: <FiBell className="w-5 h-5" />,
+  calendar: <FiCalendar className="w-5 h-5" />,
+  clipboard: <FiClipboard className="w-5 h-5" />,
+  users: <FiUsers className="w-5 h-5" />,
+  user: <FiUser className="w-5 h-5" />,
+  settings: <FiSettings className="w-5 h-5" />,
+};
+
 const menuConfig: Partial<Record<string, MenuItem[]>> = {
   ADMIN: [
-    { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
-    { id: 'notifications', label: 'Notifications', icon: <FiBell className="w-5 h-5" /> },
-    { id: 'academic-year', label: 'Academic Year', icon: <FiCalendar className="w-5 h-5" /> },
-    { id: 'attendance', label: 'Attendance', icon: <FiClipboard className="w-5 h-5" /> },
-    { id: 'management', label: 'Management', icon: <FiUsers className="w-5 h-5" /> },
-    { id: 'teachers', label: 'Teachers', icon: <FiUsers className="w-5 h-5" /> },
-    { id: 'students', label: 'Students', icon: <FiUser className="w-5 h-5" /> },
-    { id: 'staff', label: 'Staff', icon: <FiUsers className="w-5 h-5" /> },
-    { id: 'profile-update-requests', label: 'Profile Updates', icon: <FiUser className="w-5 h-5" /> },
-    { id: 'settings', label: 'Settings', icon: <FiSettings className="w-5 h-5" /> },
+    { id: 'overview', label: 'Overview', icon: iconMap.grid },
+    { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
+    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'attendance', label: 'Attendance', icon: iconMap.clipboard },
+    { id: 'management', label: 'Management', icon: iconMap.users },
+    { id: 'teachers', label: 'Teachers', icon: iconMap.users },
+    { id: 'students', label: 'Students', icon: iconMap.user },
+    { id: 'staff', label: 'Staff', icon: iconMap.users },
+    { id: 'profile-update-requests', label: 'Profile Updates', icon: iconMap.user },
+    { id: 'settings', label: 'Settings', icon: iconMap.settings },
   ],
   MANAGEMENT: [
-    { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
-    { id: 'notifications', label: 'Notifications', icon: <FiBell className="w-5 h-5" /> },
-    { id: 'academic-year', label: 'Academic Year', icon: <FiCalendar className="w-5 h-5" /> },
-    { id: 'teachers', label: 'Teachers', icon: <FiUsers className="w-5 h-5" /> },
-    { id: 'students', label: 'Students', icon: <FiUser className="w-5 h-5" /> },
+    { id: 'overview', label: 'Overview', icon: iconMap.grid },
+    { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
+    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'teachers', label: 'Teachers', icon: iconMap.users },
+    { id: 'students', label: 'Students', icon: iconMap.user },
   ],
   TEACHER: [
-    { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
-    { id: 'notifications', label: 'Notifications', icon: <FiBell className="w-5 h-5" /> },
-    { id: 'academic-year', label: 'Academic Year', icon: <FiCalendar className="w-5 h-5" /> },
-    { id: 'students', label: 'Students', icon: <FiUser className="w-5 h-5" /> },
+    { id: 'overview', label: 'Overview', icon: iconMap.grid },
+    { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
+    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'students', label: 'Students', icon: iconMap.user },
   ],
   STUDENT: [
-    { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
-    { id: 'notifications', label: 'Notifications', icon: <FiBell className="w-5 h-5" /> },
-    { id: 'academic-year', label: 'Academic Year', icon: <FiCalendar className="w-5 h-5" /> },
+    { id: 'overview', label: 'Overview', icon: iconMap.grid },
+    { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
+    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
   ],
   STAFF: [
-    { id: 'overview', label: 'Overview', icon: <FiGrid className="w-5 h-5" /> },
-    { id: 'notifications', label: 'Notifications', icon: <FiBell className="w-5 h-5" /> },
-    { id: 'academic-year', label: 'Academic Year', icon: <FiCalendar className="w-5 h-5" /> },
+    { id: 'overview', label: 'Overview', icon: iconMap.grid },
+    { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
+    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
   ],
 };
 
@@ -80,8 +92,13 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [isAcademicYearExpanded, setIsAcademicYearExpanded] = useState(false);
 
-  const menuItems = user ? (menuConfig[user.role] || []) : [];
-  const dashboardTitle = user && user.role ? `${user.role.charAt(0) + user.role.slice(1).toLowerCase()} Dashboard` : 'Dashboard';
+  const menuItems = useMemo(() => {
+    return user ? (menuConfig[user.role] || []) : [];
+  }, [user?.role]);
+
+  const dashboardTitle = useMemo(() => {
+    return user && user.role ? `${user.role.charAt(0) + user.role.slice(1).toLowerCase()} Dashboard` : 'Dashboard';
+  }, [user?.role]);
 
   useEffect(() => {
     fetchAcademicYears();
@@ -125,19 +142,19 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
     <>
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-linear-to-b from-blue-900 to-blue-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 via-blue-950 to-indigo-950 text-white flex flex-col transform transition-transform duration-300 ease-in-out ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <SidebarHeader dashboardTitle={dashboardTitle} onClose={() => setIsMobileOpen(false)} />
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {menuItems.map((item) => (
             <div key={item.id}>
               <MenuButton
@@ -148,21 +165,21 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
                 onToggleExpand={item.id === 'academic-year' ? handleToggleExpand : undefined}
               />
               {item.id === 'academic-year' && isAcademicYearExpanded && academicYears.length > 0 && (
-                <div className="ml-6 mt-1 space-y-1">
+                <div className="ml-6 mt-1 space-y-0.5">
                   {academicYears.map((year) => (
                     <button
                       key={year.id}
                       onClick={() => handleAcademicYearClick(year.id)}
-                      className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-all text-sm ${
+                      className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 text-sm ${
                         activeTab === `academic-year-${year.id}`
-                          ? 'bg-blue-700 text-white'
-                          : 'text-blue-200 hover:bg-blue-700/50'
+                          ? 'bg-white/15 text-white font-medium shadow-sm'
+                          : 'text-blue-200/70 hover:bg-white/8 hover:text-white'
                       }`}
                     >
-                      <FiCalendar className="w-4 h-4" />
+                      <FiCalendar className="w-3.5 h-3.5" />
                       <span>{year.name}</span>
                       {year.isActive && (
-                        <span className="ml-auto w-2 h-2 bg-green-400 rounded-full"></span>
+                        <span className="ml-auto w-2 h-2 bg-emerald-400 rounded-full shadow-sm shadow-emerald-400/50"></span>
                       )}
                     </button>
                   ))}
@@ -171,6 +188,14 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
             </div>
           ))}
         </nav>
+
+        {/* Decorative bottom element */}
+        <div className="p-4 border-t border-white/10">
+          <div className="flex items-center space-x-2 text-blue-300/50 text-xs">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></div>
+            <span>System Online</span>
+          </div>
+        </div>
       </aside>
     </>
   );
@@ -183,10 +208,10 @@ interface SidebarHeaderProps {
 
 function SidebarHeader({ dashboardTitle, onClose }: SidebarHeaderProps) {
   return (
-    <div className="p-6 border-b border-blue-700">
+    <div className="p-6 border-b border-white/10">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="bg-white p-2 rounded-lg">
+          <div className="bg-white/95 p-2 rounded-xl shadow-lg shadow-blue-900/20">
             <img
               src={logo}
               alt="Bright Academy Logo"
@@ -194,11 +219,11 @@ function SidebarHeader({ dashboardTitle, onClose }: SidebarHeaderProps) {
             />
           </div>
           <div>
-            <h2 className="font-bold text-lg">Bright</h2>
-            <p className="text-xs text-blue-300">{dashboardTitle}</p>
+            <h2 className="font-bold text-lg tracking-tight">Bright</h2>
+            <p className="text-xs text-blue-300/60">{dashboardTitle}</p>
           </div>
         </div>
-        <button className="lg:hidden" onClick={onClose}>
+        <button className="lg:hidden text-white/70 hover:text-white transition-colors" onClick={onClose}>
           <FiX className="w-6 h-6" />
         </button>
       </div>
@@ -221,19 +246,21 @@ function MenuButton({ item, isActive, isExpanded = false, onClick, onToggleExpan
     <div className="flex items-center space-x-1">
       <button
         onClick={onClick}
-        className={`flex-1 flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-          isActive ? 'bg-white text-blue-900 shadow-lg' : 'text-blue-100 hover:bg-blue-700'
+        className={`flex-1 flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
+          isActive
+            ? 'bg-white text-blue-950 shadow-lg shadow-blue-900/20 font-semibold'
+            : 'text-blue-100/70 hover:bg-white/8 hover:text-white'
         }`}
       >
-        <div className="flex items-center space-x-3">
-          {item.icon}
-          <span className="font-medium">{item.label}</span>
+        <div className={`flex items-center space-x-3 ${isActive ? '' : 'group-hover:translate-x-0.5 transition-transform duration-200'}`}>
+          <span className={isActive ? 'text-blue-600' : ''}>{item.icon}</span>
+          <span className="font-medium text-sm">{item.label}</span>
         </div>
       </button>
       {hasExpandableChildren && onToggleExpand && (
         <button
           onClick={onToggleExpand}
-          className="p-3 rounded-lg transition-all text-blue-100 hover:bg-blue-700"
+          className="p-2.5 rounded-xl transition-all duration-200 text-blue-100/70 hover:bg-white/8 hover:text-white"
         >
           {isExpanded ? <FiChevronDown className="w-4 h-4" /> : <FiChevronRight className="w-4 h-4" />}
         </button>

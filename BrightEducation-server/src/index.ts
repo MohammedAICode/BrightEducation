@@ -26,6 +26,7 @@ import systemSettingsRouter from "./modules/SystemSettings/systemSettings.routes
 
 // Register event listeners
 import "./events/listeners/studentEnrollmentListener";
+import "./events/listeners/feePaymentListener";
 
 
 const app = express();
@@ -39,7 +40,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
-``;
+
 app.use(express.json());
 app.use(cookieParser());
 app.use((req: Request, res, next) => {

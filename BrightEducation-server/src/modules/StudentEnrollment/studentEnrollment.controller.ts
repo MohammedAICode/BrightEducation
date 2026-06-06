@@ -6,6 +6,7 @@ import {
   updateStudentEnrollment,
   deleteStudentEnrollment,
   batchEnrollStudents,
+  batchUpdateEnrollmentStatus,
 } from './studentEnrollment.service';
 import { AppError } from '../../config/Error/AppError';
 
@@ -243,6 +244,55 @@ export async function batchEnrollStudentsHandler(req: Request, res: Response) {
       error: true,
       body: null,
       message: error.message || 'Failed to batch enroll students',
+    };
+    return res.status(error.statusCode || 500).json(response);
+  }
+}
+
+export async function batchUpdateStatusHandler(req: Request, res: Response) {
+  try {
+    if (!req.user || req.user.role !== 'ADMIN') {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Only administrators can batch update enrollment status',
+      };
+      return res.status(403).json(response);
+    }
+
+    const { enrollmentIds, status } = req.body;
+
+    if (!enrollmentIds || !Array.isArray(enrollmentIds) || enrollmentIds.length === 0) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Enrollment IDs array is required and must not be empty',
+      };
+      return res.status(400).json(response);
+    }
+
+    if (!status) {
+      const response: ApiResponse = {
+        error: true,
+        body: null,
+        message: 'Status is required',
+      };
+      return res.status(400).json(response);
+    }
+
+    const result = await batchUpdateEnrollmentStatus({ enrollmentIds, status });
+
+    const response: ApiResponse = {
+      error: false,
+      body: result,
+      message: `Batch status update completed: ${result.updated} enrollment(s) updated`,
+    };
+    return res.status(200).json(response);
+  } catch (error: any) {
+    const response: ApiResponse = {
+      error: true,
+      body: null,
+      message: error.message || 'Failed to batch update enrollment status',
     };
     return res.status(error.statusCode || 500).json(response);
   }

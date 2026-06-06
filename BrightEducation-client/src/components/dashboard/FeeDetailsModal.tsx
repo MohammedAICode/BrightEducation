@@ -267,24 +267,24 @@ export function FeeDetailsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-backdrop-enter">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-modal-enter border border-gray-100">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <LuReceiptIndianRupee className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-blue-600 rounded-xl">
+              <LuReceiptIndianRupee className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Fee Details</h2>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">Fee Details</h2>
               <p className="text-sm text-gray-500">
-                {student.firstname} {student.lastname} - {academicYearName}
+                {student.firstname} {student.lastname} — {academicYearName}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
           >
             <FiX className="w-5 h-5" />
           </button>
@@ -304,37 +304,37 @@ export function FeeDetailsModal({
             <div className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-4 gap-4">
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="bg-blue-50/80 rounded-xl p-4 border border-blue-100">
                   <div className="flex items-center space-x-2 mb-2">
                     <LuReceiptIndianRupee className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs font-medium text-blue-600 uppercase">Total Amount</span>
+                    <span className="text-xs font-semibold text-blue-600 uppercase">Total Amount</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
                     ₹{feeCalculation.totalAmount.toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="bg-emerald-50/80 rounded-xl p-4 border border-emerald-100">
                   <div className="flex items-center space-x-2 mb-2">
-                    <FiCheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="text-xs font-medium text-green-600 uppercase">Paid Amount</span>
+                    <FiCheckCircle className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-semibold text-emerald-600 uppercase">Paid Amount</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
                     ₹{feeCalculation.paidAmount.toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                <div className="bg-red-50/80 rounded-xl p-4 border border-red-100">
                   <div className="flex items-center space-x-2 mb-2">
                     <FiXCircle className="w-4 h-4 text-red-600" />
-                    <span className="text-xs font-medium text-red-600 uppercase">Balance Due</span>
+                    <span className="text-xs font-semibold text-red-600 uppercase">Balance Due</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
                     ₹{feeCalculation.balanceAmount.toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <div className="bg-purple-50/80 rounded-xl p-4 border border-purple-100">
                   <div className="flex items-center space-x-2 mb-2">
                     <FiClock className="w-4 h-4 text-purple-600" />
-                    <span className="text-xs font-medium text-purple-600 uppercase">Status</span>
+                    <span className="text-xs font-semibold text-purple-600 uppercase">Status</span>
                   </div>
                   <p className="text-lg font-bold text-gray-900">
                     {feeCalculation.paymentStatus}
@@ -344,7 +344,7 @@ export function FeeDetailsModal({
 
               {/* Calculation Details - Only for TUITION fees */}
               {feeType === 'TUITION' && (
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50/80 rounded-xl p-5 border border-gray-100">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Calculation Details</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex justify-between">
@@ -385,7 +385,7 @@ export function FeeDetailsModal({
 
               {/* Fee Components - Only for SCHOOL fees */}
               {feeType === 'SCHOOL' && feeCalculation.feeComponents && (
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50/80 rounded-xl p-5 border border-gray-100">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Fee Components</h3>
                   <div className="space-y-2">
                     {feeCalculation.feeComponents.map((component, index) => (
@@ -400,7 +400,7 @@ export function FeeDetailsModal({
 
               {/* Month-wise Breakdown Table - Only for TUITION fees */}
               {feeType === 'TUITION' && feeCalculation.monthWiseBreakdown && (
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                   <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900">Month-wise Fee Breakdown</h3>
                   </div>
@@ -530,12 +530,12 @@ export function FeeDetailsModal({
 
               {/* Payment History - Only for SCHOOL fees */}
               {feeType === 'SCHOOL' && feeCalculation.paymentHistory && (
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                   <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="text-lg font-semibold text-gray-900">Payment History</h3>
                     <button
                       onClick={() => setIsRecordingPayment(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium"
                     >
                       Record Payment
                     </button>
@@ -619,10 +619,10 @@ export function FeeDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-100">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium"
           >
             Close
           </button>
@@ -631,13 +631,13 @@ export function FeeDetailsModal({
 
       {/* Payment Recording Modal for TUITION fees */}
       {editingMonth && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-modal-enter border border-gray-100">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">Record Payment</h3>
               <button
                 onClick={handleCancelEdit}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
               >
                 <FiX className="w-5 h-5" />
               </button>
@@ -656,7 +656,7 @@ export function FeeDetailsModal({
                 <select
                   value={feeStatus}
                   onChange={(e) => setFeeStatus(e.target.value as 'PENDING' | 'PAID' | 'PAUSED' | 'WAIVED_OFF')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 >
                   <option value="PENDING">Pending</option>
                   <option value="PAID">Paid</option>
@@ -672,7 +672,7 @@ export function FeeDetailsModal({
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Enter reason for pausing or waiving off..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                   />
                 </div>
               )}
@@ -683,7 +683,7 @@ export function FeeDetailsModal({
                     <select
                       value={paymentType}
                       onChange={(e) => setPaymentType(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                     >
                       <option value="CASH">Cash</option>
                       <option value="CARD">Card</option>
@@ -697,7 +697,7 @@ export function FeeDetailsModal({
                     <select
                       value={acceptedBy}
                       onChange={(e) => setAcceptedBy(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                     >
                       <option value="">Select Management User</option>
                       {managementUsers.map((user) => (
@@ -710,16 +710,16 @@ export function FeeDetailsModal({
                 </>
               )}
             </div>
-            <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-5 border-t border-gray-100">
               <button
                 onClick={handleCancelEdit}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveMonth}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium"
               >
                 Save
               </button>
@@ -730,18 +730,18 @@ export function FeeDetailsModal({
 
       {/* Payment Recording Modal for SCHOOL fees */}
       {isRecordingPayment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-modal-enter border border-gray-100">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">Record Payment</h3>
               <button
                 onClick={() => setIsRecordingPayment(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Balance Due</label>
                 <p className="text-sm text-gray-900 font-medium">₹{feeCalculation?.balanceAmount.toLocaleString()}</p>
@@ -753,7 +753,7 @@ export function FeeDetailsModal({
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   placeholder="Enter amount"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 />
               </div>
               <div>
@@ -761,7 +761,7 @@ export function FeeDetailsModal({
                 <select
                   value={paymentType}
                   onChange={(e) => setPaymentType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 >
                   <option value="CASH">Cash</option>
                   <option value="CARD">Card</option>
@@ -775,7 +775,7 @@ export function FeeDetailsModal({
                 <select
                   value={acceptedBy}
                   onChange={(e) => setAcceptedBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 >
                   <option value="">Select Management User</option>
                   {managementUsers.map((user) => (
@@ -786,16 +786,16 @@ export function FeeDetailsModal({
                 </select>
               </div>
             </div>
-            <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-5 border-t border-gray-100">
               <button
                 onClick={() => setIsRecordingPayment(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRecordPayment}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium"
               >
                 Save
               </button>
@@ -806,20 +806,20 @@ export function FeeDetailsModal({
 
       {/* Delete Payment Modal */}
       {isDeletePaymentModalOpen && selectedPaymentForDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-modal-enter border border-gray-100">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">Delete Payment</h3>
               <button
                 onClick={() => setIsDeletePaymentModalOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-sm text-yellow-800">
+            <div className="p-5 space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p className="text-sm text-amber-800">
                   {selectedPaymentForDelete.monthName ? (
                     <>You are about to delete the payment for <strong>{selectedPaymentForDelete.monthName}</strong> of ₹{selectedPaymentForDelete.amount.toLocaleString()}.</>
                   ) : (
@@ -832,7 +832,7 @@ export function FeeDetailsModal({
                 <select
                   value={deleteReasonType}
                   onChange={(e) => setDeleteReasonType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 >
                   <option value="MISTAKENLY_ADDED">Mistakenly Added</option>
                   <option value="WRONG_STUDENT">Wrong Student Added</option>
@@ -846,7 +846,7 @@ export function FeeDetailsModal({
                   onChange={(e) => setDeleteReason(e.target.value)}
                   placeholder="Provide additional details..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 />
               </div>
               <div>
@@ -854,7 +854,7 @@ export function FeeDetailsModal({
                 <select
                   value={deletedBy}
                   onChange={(e) => setDeletedBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
                 >
                   <option value="">Select Management User</option>
                   {managementUsers.map((user) => (
@@ -865,16 +865,16 @@ export function FeeDetailsModal({
                 </select>
               </div>
             </div>
-            <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-5 border-t border-gray-100">
               <button
                 onClick={() => setIsDeletePaymentModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDeletePayment}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-medium"
               >
                 Delete Payment
               </button>
@@ -885,19 +885,19 @@ export function FeeDetailsModal({
 
       {/* View Payment Details Modal */}
       {isViewPaymentModalOpen && selectedPaymentForView && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-modal-enter border border-gray-100">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">Payment Details</h3>
               <button
                 onClick={() => setIsViewPaymentModalOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
               >
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="p-5 space-y-4">
+              <div className="bg-blue-50/80 border border-blue-100 rounded-xl p-4">
                 <div className="space-y-3">
                   {/* Check if it's a tuition payment (MonthWiseBreakdown) or school payment (PaymentHistory) */}
                   {'monthName' in selectedPaymentForView ? (
@@ -978,10 +978,30 @@ export function FeeDetailsModal({
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-end p-4 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-100">
+              {/* Show View Receipt button for paid payments only */}
+              {(selectedPaymentForView as any).status === 'PAID' && (
+                <button
+                  onClick={() => {
+                    // Check if it's a school payment (has id) or tuition payment (has monthIndex)
+                    if ('monthName' in selectedPaymentForView) {
+                      // Tuition payment - use only query params
+                      const monthIndex = (selectedPaymentForView as any).monthIndex;
+                      window.open(`/receipt?studentFeeId=${studentFeeId}&monthIndex=${monthIndex}`, '_blank');
+                    } else {
+                      // School payment - use payment id as query param
+                      const paymentId = (selectedPaymentForView as any).id;
+                      window.open(`/receipt?paymentId=${paymentId}`, '_blank');
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 font-medium"
+                >
+                  View Receipt
+                </button>
+              )}
               <button
                 onClick={() => setIsViewPaymentModalOpen(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium"
               >
                 Close
               </button>

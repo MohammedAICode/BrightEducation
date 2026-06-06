@@ -146,16 +146,26 @@ export async function assignSubjectTeacher(
   teacherId: string
 ) {
   // Verify section exists
-  const section = await prisma.sectionTenure.findUnique({
-    where: { id: sectionTenureId },
-    include: {
-      classTenure: {
-        include: {
-          classSubjects: true,
+  // Run section and user validation queries in parallel (they are independent)
+  const [section, user] = await Promise.all([
+    prisma.sectionTenure.findUnique({
+      where: { id: sectionTenureId },
+      include: {
+        classTenure: {
+          include: {
+            classSubjects: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.user.findUnique({
+      where: { id: teacherId },
+      include: {
+        teacher: true,
+        management: true,
+      },
+    }),
+  ]);
 
   if (!section) {
     throw new AppError('Section not found', HTTP_STATUS.NOT_FOUND);
@@ -170,15 +180,6 @@ export async function assignSubjectTeacher(
     throw new AppError('Subject does not belong to this class', HTTP_STATUS.BAD_REQUEST);
   }
 
-  // Verify user exists and is active
-  const user = await prisma.user.findUnique({
-    where: { id: teacherId },
-    include: {
-      teacher: true,
-      management: true,
-    },
-  });
-
   if (!user || user.isActive !== 'ACTIVE') {
     throw new AppError('User not found or inactive', HTTP_STATUS.BAD_REQUEST);
   }
@@ -191,7 +192,7 @@ export async function assignSubjectTeacher(
     throw new AppError('User must be a teacher or management member', HTTP_STATUS.BAD_REQUEST);
   }
 
-  // Check if assignment already exists
+  // Check if assignment already exists (depends on section.academicYearId from above)
   const existingAssignment = await prisma.subjectTeacherTenure.findUnique({
     where: {
       academicYearId_sectionTenureId_classSubjectId: {

@@ -369,7 +369,7 @@ const Profile: React.FC = () => {
                     type={showCurrentPassword ? 'text' : 'password'}
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                     required
                   />
                   <button
@@ -393,7 +393,7 @@ const Profile: React.FC = () => {
                     type={showNewPassword ? 'text' : 'password'}
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                     required
                     minLength={6}
                   />
@@ -418,7 +418,7 @@ const Profile: React.FC = () => {
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                     required
                     minLength={6}
                   />
@@ -534,7 +534,7 @@ const Profile: React.FC = () => {
                     type="email"
                     value={user?.email || ''}
                     disabled
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed outline-none transition"
                   />
                   <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                 </div>
@@ -544,7 +544,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.firstname || ''}
                     onChange={(e) => setEditData({ ...editData, firstname: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -553,7 +553,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.lastname || ''}
                     onChange={(e) => setEditData({ ...editData, lastname: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -561,7 +561,7 @@ const Profile: React.FC = () => {
                   <select
                     value={editData.gender || ''}
                     onChange={(e) => setEditData({ ...editData, gender: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   >
                     <option value="">Select Gender</option>
                     <option value="MALE">Male</option>
@@ -574,7 +574,7 @@ const Profile: React.FC = () => {
                     type="date"
                     value={editData.dateOfBirth || ''}
                     onChange={(e) => setEditData({ ...editData, dateOfBirth: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -583,7 +583,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.phone || ''}
                     onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -592,7 +592,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.bloodGroup || ''}
                     onChange={(e) => setEditData({ ...editData, bloodGroup: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -601,7 +601,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.nationality || ''}
                     onChange={(e) => setEditData({ ...editData, nationality: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -609,7 +609,7 @@ const Profile: React.FC = () => {
                   <select
                     value={editData.religion || ''}
                     onChange={(e) => setEditData({ ...editData, religion: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   >
                     <option value="">Select Religion</option>
                     <option value="Hindu">Hindu</option>
@@ -628,7 +628,7 @@ const Profile: React.FC = () => {
                   type="text"
                   value={editData.address || ''}
                   onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -638,7 +638,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.emergencyContactRelation || ''}
                     onChange={(e) => setEditData({ ...editData, emergencyContactRelation: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
                 <div>
@@ -647,7 +647,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={editData.emergencyContact || ''}
                     onChange={(e) => setEditData({ ...editData, emergencyContact: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                   />
                 </div>
               </div>
@@ -660,7 +660,7 @@ const Profile: React.FC = () => {
                     <select
                       value={editData.parentRelation || ''}
                       onChange={(e) => setEditData({ ...editData, parentRelation: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                     >
                       <option value="">Select Relation</option>
                       <option value="Father">Father</option>
@@ -673,7 +673,7 @@ const Profile: React.FC = () => {
                       type="text"
                       value={editData.parentName || ''}
                       onChange={(e) => setEditData({ ...editData, parentName: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                     />
                   </div>
                   <div>
@@ -682,7 +682,7 @@ const Profile: React.FC = () => {
                       type="text"
                       value={editData.parentPhone || ''}
                       onChange={(e) => setEditData({ ...editData, parentPhone: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                     />
                   </div>
                   <div>
@@ -691,7 +691,7 @@ const Profile: React.FC = () => {
                       type="text"
                       value={editData.parentOccupation || ''}
                       onChange={(e) => setEditData({ ...editData, parentOccupation: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                     />
                   </div>
                 </div>

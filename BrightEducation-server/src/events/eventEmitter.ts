@@ -16,6 +16,7 @@ export enum Events {
   STUDENT_UNENROLLED = 'student.unenrolled',
   STUDENT_STATUS_UPDATED = 'student.status.updated',
   PROFILE_UPDATED = 'profile.updated',
+  FEE_PAYMENT = 'fee.payment',
 }
 
 // Event payload interfaces
@@ -35,6 +36,20 @@ export interface StudentUnenrolledPayload {
   studentId: string;
   enrollmentId: string;
   status: 'PAUSED' | 'WRONG_ENTRY' | 'PROMOTED' | 'RETAINED' | 'DROPPED_OUT';
+}
+
+export interface FeePaymentPayload {
+  userId: string;
+  studentId: string;
+  studentFeeId: string;
+  paymentId: string;
+  amount: number;
+  paymentDate: Date;
+  paymentMethod: string;
+  month: string;
+  monthIndex: number;
+  feeType: string;
+  academicYearId: string;
 }
 
 // Helper to emit events with error handling

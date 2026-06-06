@@ -372,7 +372,7 @@ const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ academicYear, o
                   type="text"
                   value={editData.name}
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
                 />
               </div>
               <div>
@@ -381,7 +381,7 @@ const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ academicYear, o
                   type="date"
                   value={editData.startDate}
                   onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
                 />
               </div>
               <div>
@@ -390,7 +390,7 @@ const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ academicYear, o
                   type="date"
                   value={editData.endDate}
                   onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
                 />
               </div>
             </div>

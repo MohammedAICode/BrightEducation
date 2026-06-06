@@ -107,16 +107,16 @@ export function StudentDetailsModal({
   );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-backdrop-enter">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col animate-modal-enter border border-gray-100">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <FiUser className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-blue-600 rounded-xl">
+              <FiUser className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">
                 {student.firstname} {student.lastname}
               </h2>
               <p className="text-sm text-gray-500">{student.email}</p>
@@ -124,7 +124,7 @@ export function StudentDetailsModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
           >
             <FiX className="w-5 h-5" />
           </button>
@@ -134,11 +134,11 @@ export function StudentDetailsModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Personal Information */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <FiUser className="w-5 h-5 text-blue-600" />
+            <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center space-x-2 pl-3 border-l-2 border-blue-500">
+              <FiUser className="w-4 h-4 text-blue-600" />
               <span>Personal Information</span>
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-4">
+            <div className="bg-gray-50/80 rounded-xl p-5 grid grid-cols-2 gap-4 border border-gray-100">
               <div>
                 <label className="text-xs font-medium text-gray-500 uppercase">Full Name</label>
                 <p className="text-sm font-medium text-gray-900 mt-1">
@@ -214,11 +214,11 @@ export function StudentDetailsModal({
 
           {/* Enrollment Information */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <FiBook className="w-5 h-5 text-blue-600" />
+            <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center space-x-2 pl-3 border-l-2 border-blue-500">
+              <FiBook className="w-4 h-4 text-blue-600" />
               <span>Enrollment Information</span>
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-4">
+            <div className="bg-gray-50/80 rounded-xl p-5 grid grid-cols-2 gap-4 border border-gray-100">
               <div>
                 <label className="text-xs font-medium text-gray-500 uppercase">Roll Number</label>
                 <p className="text-sm font-medium text-gray-900 mt-1">
@@ -279,17 +279,17 @@ export function StudentDetailsModal({
 
           {/* Fee Information */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <LuReceiptIndianRupee className="w-5 h-5 text-blue-600" />
+            <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center space-x-2 pl-3 border-l-2 border-blue-500">
+              <LuReceiptIndianRupee className="w-4 h-4 text-blue-600" />
               <span>Fee Information</span>
             </h3>
             {loadingFees ? (
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="bg-gray-50/80 rounded-xl p-6 text-center border border-gray-100">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="text-sm text-gray-500 mt-2">Loading fee details...</p>
               </div>
             ) : currentAcademicYearFee ? (
-              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+              <div className="bg-gray-50/80 rounded-xl p-5 space-y-4 border border-gray-100">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-medium text-gray-500 uppercase">Fee Type</label>
@@ -337,7 +337,7 @@ export function StudentDetailsModal({
                           onClose();
                           onShowFeeDetails?.(currentAcademicYearFee.id, currentAcademicYearFee.feeType);
                         }}
-                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200"
                       >
                         <LuReceiptIndianRupee className="w-4 h-4" />
                         <span>Show Fee Details</span>
@@ -351,7 +351,7 @@ export function StudentDetailsModal({
                           onClose();
                           onShowFeeDetails?.(currentAcademicYearFee.id, currentAcademicYearFee.feeType);
                         }}
-                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200"
                       >
                         <LuReceiptIndianRupee className="w-4 h-4" />
                         <span>Show Fee Details</span>
@@ -393,11 +393,11 @@ export function StudentDetailsModal({
                 )}
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <p className="text-sm text-gray-500 mb-3">No fee information available for this academic year</p>
+              <div className="bg-gray-50/80 rounded-xl p-6 text-center border border-gray-100">
+                <p className="text-sm text-gray-500 mb-4">No fee information available for this academic year</p>
                 <button
                   onClick={onUpdateFee}
-                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mx-auto"
+                  className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 mx-auto"
                 >
                   <LuReceiptIndianRupee className="w-4 h-4" />
                   <span>Setup Fees</span>
@@ -408,17 +408,17 @@ export function StudentDetailsModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-100">
           <button
             onClick={onUpdateFee}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200"
           >
             <LuReceiptIndianRupee className="w-4 h-4" />
             <span>Update Fee</span>
           </button>
           <button
             onClick={onUpdateStatus}
-            className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            className="flex items-center space-x-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200"
           >
             <FiClock className="w-4 h-4" />
             <span>Update Status</span>

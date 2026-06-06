@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 import { FiMenu, FiUser, FiLogOut, FiClock, FiAlertTriangle } from 'react-icons/fi';
 
@@ -141,6 +141,50 @@ function renderContent(activeTab: string): React.ReactNode {
 }
 
 
+/**
+ * Isolated Clock component — re-renders every second
+ * without triggering re-render of the entire dashboard layout.
+ */
+function Clock({ timezone }: { timezone: string }) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formattedTime = useMemo(() => {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(currentTime);
+  }, [currentTime, timezone]);
+
+  const formattedDate = useMemo(() => {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }).format(currentTime);
+  }, [currentTime, timezone]);
+
+  return (
+    <div className="flex items-center space-x-3 text-sm bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-xl border border-blue-100/50 shadow-sm">
+      <div className="flex items-center space-x-2">
+        <FiClock className="w-4 h-4 text-blue-600" />
+        <span className="font-semibold text-gray-900 tabular-nums">{formattedTime}</span>
+      </div>
+      <div className="h-4 w-px bg-blue-200/50"></div>
+      <span className="text-xs text-gray-500 font-medium">{formattedDate}</span>
+    </div>
+  );
+}
+
 
 /**
 
@@ -155,8 +199,6 @@ export default function AdminDashboardLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   const [systemTimezone, setSystemTimezone] = useState('Asia/Kolkata');
 
@@ -250,52 +292,6 @@ export default function AdminDashboardLayout() {
 
 
 
-  // Update time every second
-
-  useEffect(() => {
-
-    const interval = setInterval(() => {
-
-      setCurrentTime(new Date());
-
-    }, 1000);
-
-    return () => clearInterval(interval);
-
-  }, []);
-
-
-
-  // Format time in system timezone
-
-  const formattedTime = new Intl.DateTimeFormat('en-US', {
-
-    timeZone: systemTimezone,
-
-    hour: '2-digit',
-
-    minute: '2-digit',
-
-    hour12: true,
-
-  }).format(currentTime);
-
-
-
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
-
-    timeZone: systemTimezone,
-
-    weekday: 'short',
-
-    month: 'short',
-
-    day: 'numeric',
-
-  }).format(currentTime);
-
-
-
   const handleLogout = () => {
 
     dispatch(logout());
@@ -330,7 +326,7 @@ export default function AdminDashboardLayout() {
 
       <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
 
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 text-center max-w-md">
 
           <FiAlertTriangle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
 
@@ -358,7 +354,7 @@ export default function AdminDashboardLayout() {
 
               onClick={() => setActiveTab('settings')}
 
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-lg shadow-blue-600/20"
 
             >
 
@@ -380,7 +376,7 @@ export default function AdminDashboardLayout() {
 
   return (
 
-    <div className="flex h-screen bg-gray-50 font-sans">
+    <div className="flex h-screen bg-gray-50/80">
 
       <Sidebar
 
@@ -398,7 +394,7 @@ export default function AdminDashboardLayout() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        <header className="bg-white border-b border-gray-100 px-6 py-4 shadow-xs">
+        <header className="relative z-50 bg-white/80 backdrop-blur-md border-b border-gray-100/80 px-6 py-3.5 shadow-sm">
 
           <div className="flex items-center justify-between">
 
@@ -406,7 +402,7 @@ export default function AdminDashboardLayout() {
 
               <button 
 
-                className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" 
+                className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors" 
 
                 onClick={() => setIsMobileOpen(true)}
 
@@ -418,7 +414,7 @@ export default function AdminDashboardLayout() {
 
               <div className="flex items-center gap-2">
 
-                <h1 className="text-2xl font-bold text-gray-900 capitalize tracking-tight">{getPageTitle(activeTab)}</h1>
+                <h1 className="text-xl font-bold text-gray-900 capitalize tracking-tight">{getPageTitle(activeTab)}</h1>
 
               </div>
 
@@ -426,27 +422,10 @@ export default function AdminDashboardLayout() {
 
 
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
 
-              {/* System Time Display */}
-
-              <div className="flex items-center space-x-3 text-sm bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
-
-                <div className="flex items-center space-x-2">
-
-                  <FiClock className="w-4 h-4 text-blue-600" />
-
-                  <span className="font-semibold text-gray-900">{formattedTime}</span>
-
-                </div>
-
-                <div className="h-4 w-px bg-gray-200"></div>
-
-                <span className="text-xs text-gray-500">{formattedDate}</span>
-
-              </div>
-
-
+              {/* System Time Display — isolated to avoid full layout re-renders */}
+              <Clock timezone={systemTimezone} />
 
               {/* Notification Bell */}
 
@@ -454,7 +433,7 @@ export default function AdminDashboardLayout() {
 
 
 
-              <div className="h-6 w-px bg-gray-200"></div>
+              <div className="h-6 w-px bg-gray-200/60"></div>
 
 
 
@@ -462,7 +441,7 @@ export default function AdminDashboardLayout() {
 
               {user && (
 
-                <div className="relative pl-2" ref={dropdownRef}>
+                <div className="relative pl-1" ref={dropdownRef}>
 
                   <div 
 
@@ -502,7 +481,7 @@ export default function AdminDashboardLayout() {
 
                   {isDropdownOpen && (
 
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-100">
+                    <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100/80 py-1.5 z-50 animate-fade-in-up">
 
                       <button
 
@@ -514,7 +493,7 @@ export default function AdminDashboardLayout() {
 
                         }}
 
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors font-medium text-left"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors font-medium text-left rounded-lg mx-1 first:mt-0"
 
                       >
 
@@ -524,13 +503,13 @@ export default function AdminDashboardLayout() {
 
                       </button>
 
-                      <div className="h-px bg-gray-100 my-1"></div>
+                      <div className="h-px bg-gray-100 my-1 mx-3"></div>
 
                       <button
 
                         onClick={handleLogout}
 
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium text-left"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium text-left rounded-lg mx-1"
 
                       >
 
@@ -556,7 +535,7 @@ export default function AdminDashboardLayout() {
 
 
 
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
 
           <div className="max-w-7xl mx-auto space-y-6">
 
@@ -573,4 +552,3 @@ export default function AdminDashboardLayout() {
   );
 
 }
-

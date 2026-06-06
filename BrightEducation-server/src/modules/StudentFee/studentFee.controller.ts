@@ -24,6 +24,8 @@ import {
 
   deleteFeePayment,
 
+  getPaymentReceipt,
+
 } from './studentFee.service';
 
 
@@ -472,6 +474,36 @@ export async function deleteFeePaymentController(req: Request, res: Response) {
     return res.status(500).json({
       error: true,
       message: error.message || 'Failed to delete payment',
+    });
+  }
+}
+
+export async function getPaymentReceiptController(req: Request, res: Response) {
+  try {
+    const { paymentId, studentFeeId, monthIndex } = req.query as any;
+
+    const paymentIdStr = paymentId ? String(paymentId) : undefined;
+    const studentFeeIdStr = studentFeeId ? String(studentFeeId) : undefined;
+    const monthIndexNum = monthIndex ? parseInt(String(monthIndex), 10) : undefined;
+
+    logger.info(`[CONTROLLER] Fetching receipt for paymentId: ${paymentIdStr}, studentFeeId: ${studentFeeIdStr}, monthIndex: ${monthIndexNum}`);
+
+    const receipt = await getPaymentReceipt(
+      paymentIdStr,
+      studentFeeIdStr,
+      monthIndexNum
+    );
+
+    return res.status(200).json({
+      error: false,
+      body: receipt,
+      message: 'Receipt fetched successfully',
+    });
+  } catch (error: any) {
+    logger.error(`[CONTROLLER] Failed to fetch receipt: ${error.message}`);
+    return res.status(500).json({
+      error: true,
+      message: error.message || 'Failed to fetch receipt',
     });
   }
 }
