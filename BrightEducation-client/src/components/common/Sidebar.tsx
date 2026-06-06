@@ -48,25 +48,25 @@ const menuConfig: Partial<Record<string, MenuItem[]>> = {
   MANAGEMENT: [
     { id: 'overview', label: 'Overview', icon: iconMap.grid },
     { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
-    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'active-academic-year', label: 'Active Academic Year', icon: iconMap.calendar },
     { id: 'teachers', label: 'Teachers', icon: iconMap.users },
     { id: 'students', label: 'Students', icon: iconMap.user },
   ],
   TEACHER: [
     { id: 'overview', label: 'Overview', icon: iconMap.grid },
     { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
-    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'active-academic-year', label: 'Active Academic Year', icon: iconMap.calendar },
     { id: 'students', label: 'Students', icon: iconMap.user },
   ],
   STUDENT: [
     { id: 'overview', label: 'Overview', icon: iconMap.grid },
     { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
-    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'active-academic-year', label: 'Active Academic Year', icon: iconMap.calendar },
   ],
   STAFF: [
     { id: 'overview', label: 'Overview', icon: iconMap.grid },
     { id: 'notifications', label: 'Notifications', icon: iconMap.bell },
-    { id: 'academic-year', label: 'Academic Year', icon: iconMap.calendar },
+    { id: 'active-academic-year', label: 'Active Academic Year', icon: iconMap.calendar },
   ],
 };
 
@@ -91,10 +91,19 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
   const user = useAppSelector((state) => state.auth.user) as any;
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [isAcademicYearExpanded, setIsAcademicYearExpanded] = useState(false);
+  const [activeAcademicYearId, setActiveAcademicYearId] = useState<string | null>(null);
+  const [activeAcademicYearName, setActiveAcademicYearName] = useState<string>('Active Academic Year');
 
   const menuItems = useMemo(() => {
-    return user ? (menuConfig[user.role] || []) : [];
-  }, [user?.role]);
+    const baseMenu = user ? (menuConfig[user.role] || []) : [];
+    // Update the label for active-academic-year with the actual year name
+    return baseMenu.map(item => {
+      if (item.id === 'active-academic-year' && activeAcademicYearName) {
+        return { ...item, label: activeAcademicYearName };
+      }
+      return item;
+    });
+  }, [user?.role, activeAcademicYearName]);
 
   const dashboardTitle = useMemo(() => {
     return user && user.role ? `${user.role.charAt(0) + user.role.slice(1).toLowerCase()} Dashboard` : 'Dashboard';
@@ -118,14 +127,30 @@ export function Sidebar({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen
   const fetchAcademicYears = async () => {
     try {
       const response = await axiosInstance.get('/academic-year');
-      setAcademicYears(response.data.body || []);
+      const years = response.data.body || [];
+      setAcademicYears(years);
+      
+      // Find and set the active academic year
+      const activeYear = years.find((year: AcademicYear) => year.isActive);
+      setActiveAcademicYearId(activeYear?.id || null);
+      setActiveAcademicYearName(activeYear?.name || 'Active Academic Year');
     } catch (error) {
       // Silent fail - don't show error for sidebar fetch
     }
   };
 
   const handleMenuClick = (id: string) => {
-    setActiveTab(id);
+    // Handle active-academic-year click for non-admin roles
+    if (id === 'active-academic-year') {
+      if (activeAcademicYearId) {
+        setActiveTab(`academic-year-${activeAcademicYearId}`);
+      } else {
+        // If no active year, show alert or handle appropriately
+        alert('No active academic year found. Please contact an administrator.');
+      }
+    } else {
+      setActiveTab(id);
+    }
     setIsMobileOpen(false);
   };
 

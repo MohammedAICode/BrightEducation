@@ -4,6 +4,7 @@ export interface User {
   fullName: string;
   phone?: string;
   role: 'ADMIN' | 'MANAGEMENT' | 'TEACHER' | 'STUDENT' | 'STAFF';
+  manageType?: 'ACCOUNTS' | 'CLASS_TEACHER' | 'INCHARGE';
   firstname?: string;
   lastname?: string;
   address?: string;

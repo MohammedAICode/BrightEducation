@@ -7,15 +7,34 @@ import { logout } from '../store/authSlice';
 import Overview from '../components/dashboard/Overview';
 import Profile from '../components/dashboard/Profile';
 import AcademicYear from '../components/dashboard/AcademicYear';
+import AcademicYearDetail from '../components/dashboard/AcademicYearDetail';
+import Students from '../components/dashboard/Students';
+import Teachers from '../components/dashboard/Teachers';
 import UserAvatar from '../components/common/UserAvatar';
 import NotificationBell from '../components/common/NotificationBell';
 import Notifications from '../components/dashboard/Notifications';
+
+/**
+ * Generate page title from active tab
+ */
+function getPageTitle(activeTab: string): string {
+  if (activeTab.startsWith('academic-year-')) {
+    return 'Academic Year Details';
+  }
+  return activeTab.replace('-', ' ');
+}
 
 /**
  * Content renderer for user dashboard tabs.
  * Maps tab IDs to their corresponding components.
  */
 function renderContent(activeTab: string): React.ReactNode {
+  // Handle specific academic year tabs (e.g., academic-year-123)
+  if (activeTab.startsWith('academic-year-')) {
+    const yearId = activeTab.replace('academic-year-', '');
+    return <AcademicYearDetail yearId={yearId} />;
+  }
+
   switch (activeTab) {
     case 'overview':
       return <Overview />;
@@ -23,6 +42,10 @@ function renderContent(activeTab: string): React.ReactNode {
       return <Notifications />;
     case 'academic-year':
       return <AcademicYear />;
+    case 'students':
+      return <Students />;
+    case 'teachers':
+      return <Teachers />;
     case 'profile':
       return <Profile />;
     default:
@@ -93,7 +116,7 @@ export default function UserDashboardLayout() {
                 <FiMenu className="w-6 h-6" />
               </button>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-gray-900 capitalize tracking-tight">{activeTab.replace('-', ' ')}</h1>
+                <h1 className="text-xl font-bold text-gray-900 capitalize tracking-tight">{getPageTitle(activeTab)}</h1>
               </div>
             </div>
 
@@ -113,7 +136,7 @@ export default function UserDashboardLayout() {
                     <div className="hidden sm:flex flex-col text-right select-none">
                       <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{user.fullName}</span>
                       <span className="text-xs font-medium text-blue-600 tracking-wide uppercase px-2 py-0.5 bg-blue-50 rounded-md border border-blue-100 self-end mt-0.5 transition-all group-hover:bg-blue-100/50">
-                        {user.role}
+                        {user.manageType || user.role}
                       </span>
                     </div>
                     <UserAvatar

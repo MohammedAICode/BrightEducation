@@ -457,7 +457,7 @@ export default function AdminDashboardLayout() {
 
                       <span className="text-xs font-medium text-blue-600 tracking-wide uppercase px-2 py-0.5 bg-blue-50 rounded-md border border-blue-100 self-end mt-0.5 transition-all group-hover:bg-blue-100/50">
 
-                        {user.role}
+                        {(user as any).manageType || user.role}
 
                       </span>
 
