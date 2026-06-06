@@ -18,12 +18,12 @@ interface ApiResponse {
 
 export async function createStudentEnrollmentHandler(req: Request, res: Response) {
   try {
-    // Only admin can create student enrollments
-    if (!req.user || req.user.role !== 'ADMIN') {
+    // Admin and MANAGEMENT roles can create student enrollments
+    if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'MANAGEMENT')) {
       const response: ApiResponse = {
         error: true,
         body: null,
-        message: 'Only administrators can create student enrollments',
+        message: 'Only administrators and management can create student enrollments',
       };
       return res.status(403).json(response);
     }
@@ -195,12 +195,12 @@ export async function deleteStudentEnrollmentHandler(req: Request, res: Response
 
 export async function batchEnrollStudentsHandler(req: Request, res: Response) {
   try {
-    // Only admin can batch enroll students
-    if (!req.user || req.user.role !== 'ADMIN') {
+    // Admin and MANAGEMENT roles can batch enroll students
+    if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'MANAGEMENT')) {
       const response: ApiResponse = {
         error: true,
         body: null,
-        message: 'Only administrators can batch enroll students',
+        message: 'Only administrators and management can batch enroll students',
       };
       return res.status(403).json(response);
     }

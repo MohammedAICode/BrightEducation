@@ -199,12 +199,12 @@ export async function activateAcademicYearHandler(
   res: Response,
 ) {
   try {
-    // Only admin can activate academic years
-    if (!req.user || req.user.role !== "ADMIN") {
+    // Admin and MANAGEMENT roles can activate academic years
+    if (!req.user || (req.user.role !== "ADMIN" && req.user.role !== "MANAGEMENT")) {
       const response: ApiResponse = {
         error: true,
         body: null,
-        message: "Only administrators can activate academic years",
+        message: "Only administrators and management can activate academic years",
       };
       return res.status(403).json(response);
     }

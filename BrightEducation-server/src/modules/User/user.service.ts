@@ -64,8 +64,8 @@ export async function userExists(
   email: string | null,
   id: string | null,
   includePassword: boolean,
-): Promise<User | null> {
-  return await prisma.user.findFirst({
+): Promise<any | null> {
+  const user = await prisma.user.findFirst({
     where: {
       OR: [{ id: id ? id : "" }, { email: email ? email : "" }],
     },
@@ -73,6 +73,23 @@ export async function userExists(
       password: !includePassword,
     },
   });
+
+  if (!user) return null;
+
+  // If user is MANAGEMENT, fetch the management type
+  if (user.role === 'MANAGEMENT') {
+    const management = await prisma.management.findUnique({
+      where: { userId: user.id },
+      select: { manageType: true },
+    });
+
+    return {
+      ...user,
+      manageType: management?.manageType || null,
+    };
+  }
+
+  return user;
 }
 
 export async function createAdminUser(

@@ -34,6 +34,14 @@ export async function createStudentFeeController(req: Request, res: Response) {
 
   try {
 
+    // Admin and MANAGEMENT roles can create student fees
+    if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'MANAGEMENT')) {
+      return res.status(403).json({
+        error: true,
+        message: 'Only administrators and management can create student fees',
+      });
+    }
+
     const { studentId, academicYearId, feeType, monthlyAmount, totalAmount, annualFee, examFee, miscellaneousFee, labFee, includeInMonthlyCalculation, discountPercentage } = req.body;
 
 
@@ -193,6 +201,14 @@ export async function getStudentFeeByIdController(req: Request, res: Response) {
 export async function updateStudentFeeController(req: Request, res: Response) {
 
   try {
+
+    // Admin and MANAGEMENT roles can update student fees
+    if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'MANAGEMENT')) {
+      return res.status(403).json({
+        error: true,
+        message: 'Only administrators and management can update student fees',
+      });
+    }
 
     const { id } = req.params;
 
