@@ -1,9 +1,16 @@
 model ProfileUpdateRequest {
     id String @id @default(uuid())
 
-    // User who requested the update
+    // User whose profile is being updated
     userId String
     user   User   @relation("ProfileUpdateRequester", fields: [userId], references: [id], onDelete: Cascade)
+
+    // User who initiated the request (for management-initiated updates)
+    requesterId String?
+    requester   User?   @relation("ProfileUpdateRequestInitiator", fields: [requesterId], references: [id], onDelete: SetNull)
+
+    // Reason for the update request (mandatory for management-initiated requests)
+    reason String?
 
     // Fields that can be updated (all optional, only changed fields will be included)
     firstname                String?
@@ -38,6 +45,7 @@ model ProfileUpdateRequest {
 
     @@index([userId])
     @@index([status])
+    @@index([requesterId])
 }
 
 enum REQUEST_STATUS {

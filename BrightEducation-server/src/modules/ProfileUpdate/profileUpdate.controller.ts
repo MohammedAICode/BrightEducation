@@ -16,7 +16,7 @@ interface ApiResponse<T = any> {
   message: string;
 }
 
-// Create a profile update request (for authenticated users)
+// Create a profile update request (for authenticated users or management on behalf of others)
 export async function createProfileUpdateRequestHandler(
   req: Request,
   res: Response,
@@ -29,6 +29,22 @@ export async function createProfileUpdateRequestHandler(
         message: "Authentication required",
       };
       return res.status(401).json(response);
+    }
+
+    // Get target user ID from params (for management-initiated requests) or use current user
+    const { userId } = req.params;
+    const targetUserId = (Array.isArray(userId) ? userId[0] : userId) || req.user.userId;
+
+    // If updating another user, verify requester is management or admin
+    if (targetUserId !== req.user.userId) {
+      if (req.user.role !== "MANAGEMENT" && req.user.role !== "ADMIN") {
+        const response: ApiResponse = {
+          error: true,
+          body: null,
+          message: "Only management and admin can update other users",
+        };
+        return res.status(403).json(response);
+      }
     }
 
     // Validate input
@@ -51,10 +67,12 @@ export async function createProfileUpdateRequestHandler(
       profileImgKey = getProfileImgKey(req.file.filename);
     }
 
-    // Merge validated data with profile image key
+    // Merge validated data with profile image key and requester info
     const updateData = {
       ...validate.data,
       ...(profileImgKey && { profileImgKey }),
+      // If updating another user, add requesterId
+      ...(targetUserId !== req.user.userId && { requesterId: req.user.userId }),
     };
 
     // Ensure at least one field is being updated
@@ -71,12 +89,14 @@ export async function createProfileUpdateRequestHandler(
       return res.status(400).json(response);
     }
 
-    const request = await createProfileUpdateRequest(req.user.userId, updateData);
+    const request = await createProfileUpdateRequest(targetUserId, updateData);
 
     const response: ApiResponse = {
       error: false,
       body: request,
-      message: "Profile update request submitted successfully. Please wait for admin approval.",
+      message: targetUserId !== req.user.userId
+        ? "User update request submitted successfully. Please wait for admin approval."
+        : "Profile update request submitted successfully. Please wait for admin approval.",
     };
     res.status(201).json(response);
   } catch (error: any) {

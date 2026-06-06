@@ -16,6 +16,8 @@ export const GENDER = {
 // Schema for creating a profile update request
 // All fields are optional - user only submits fields they want to change
 export const profileUpdateRequestSchema = z.object({
+  requesterId: z.string().optional(),
+  reason: z.string().optional(),
   firstname: z.string().min(1, 'First name is required').optional(),
   lastname: z.string().optional(),
   gender: z.enum([GENDER.MALE, GENDER.FEMALE]).optional(),
@@ -32,6 +34,15 @@ export const profileUpdateRequestSchema = z.object({
   parentPhone: z.string().optional(),
   parentOccupation: z.string().optional(),
   profileImgKey: z.string().optional(),
+}).refine((data) => {
+  // If requesterId is provided (management-initiated request), reason is mandatory
+  if (data.requesterId && !data.reason) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Reason is required when requesting updates on behalf of another user",
+  path: ["reason"],
 });
 
 // Schema for approving/rejecting a request

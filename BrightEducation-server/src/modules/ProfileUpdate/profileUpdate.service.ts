@@ -28,15 +28,32 @@ export async function createProfileUpdateRequest(
 
   if (existingPendingRequest) {
     throw new AppError(
-      "You already have a pending profile update request. Please wait for it to be processed.",
+      "There is already a pending profile update request for this user. Please wait for it to be processed.",
       HTTP_STATUS.CONFLICT,
     );
+  }
+
+  // Filter out undefined/null/empty values - only include fields that are actually being updated
+  const cleanData: any = {};
+  const fieldsToCheck = [
+    'requesterId', 'reason', 'firstname', 'lastname', 'gender', 'dateOfBirth',
+    'phone', 'address', 'emergencyContactRelation', 'emergencyContact', 'bloodGroup',
+    'nationality', 'religion', 'parentRelation', 'parentName', 'parentPhone',
+    'parentOccupation', 'profileImgKey'
+  ];
+
+  for (const field of fieldsToCheck) {
+    const value = data[field as keyof typeof data];
+    // Only include if the value is defined, not null, and not an empty string
+    if (value !== undefined && value !== null && value !== '') {
+      cleanData[field] = value;
+    }
   }
 
   // Create the profile update request
   return await prisma.profileUpdateRequest.create({
     data: {
-      ...data,
+      ...cleanData,
       userId,
       status: REQUEST_STATUS.PENDING,
     },
@@ -56,6 +73,15 @@ export async function getProfileUpdateRequests(
     where,
     include: {
       user: {
+        select: {
+          id: true,
+          firstname: true,
+          lastname: true,
+          email: true,
+          role: true,
+        },
+      },
+      requester: {
         select: {
           id: true,
           firstname: true,
@@ -84,6 +110,15 @@ export async function getProfileUpdateRequestById(
     where: { id },
     include: {
       user: {
+        select: {
+          id: true,
+          firstname: true,
+          lastname: true,
+          email: true,
+          role: true,
+        },
+      },
+      requester: {
         select: {
           id: true,
           firstname: true,

@@ -14,6 +14,8 @@ import BulkManagementTable, { type Column, type Action } from '../common/BulkMan
 
 import ToastModal from '../common/ToastModal';
 
+import { useAppSelector } from '../../store/hooks';
+
 
 
 interface ClassTenure {
@@ -370,6 +372,8 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
   const [editSectionRollPrefix, setEditSectionRollPrefix] = useState('');
 
   const [editSubjectName, setEditSubjectName] = useState('');
+
+  const user = useAppSelector((state) => state.auth.user) as any;
 
 
 
@@ -1978,19 +1982,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                               <div className="flex items-center justify-end gap-2">
 
-                                <button
+                                {user?.role === 'ADMIN' && (
+                                  <button
 
-                                  onClick={() => handleEditClass(cls)}
+                                    onClick={() => handleEditClass(cls)}
 
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 
-                                  title="Edit class"
+                                    title="Edit class"
 
-                                >
+                                  >
 
-                                  <FiEdit className="w-4 h-4" />
+                                    <FiEdit className="w-4 h-4" />
 
-                                </button>
+                                  </button>
+                                )}
 
                                 <button
 
@@ -2228,19 +2234,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                               <div className="flex items-center justify-end gap-2">
 
-                                <button
+                                {user?.role === 'ADMIN' && (
+                                  <button
 
-                                  onClick={() => handleEditSection(sec)}
+                                    onClick={() => handleEditSection(sec)}
 
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 
-                                  title="Edit section"
+                                    title="Edit section"
 
-                                >
+                                  >
 
-                                  <FiEdit className="w-4 h-4" />
+                                    <FiEdit className="w-4 h-4" />
 
-                                </button>
+                                  </button>
+                                )}
 
                                 <button
 
@@ -2590,19 +2598,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                                 <div className="flex items-center justify-end gap-2">
 
-                                  <button
+                                  {user?.role === 'ADMIN' && (
+                                    <button
 
-                                    onClick={() => handleEditSubject(subject)}
+                                      onClick={() => handleEditSubject(subject)}
 
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 
-                                    title="Edit subject"
+                                      title="Edit subject"
 
-                                  >
+                                    >
 
-                                    <FiEdit className="w-4 h-4" />
+                                      <FiEdit className="w-4 h-4" />
 
-                                  </button>
+                                    </button>
+                                  )}
 
                                   <button
 
@@ -2816,19 +2826,21 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                               <div className="flex items-center space-x-2">
 
-                                <button
+                                {user?.role === 'ADMIN' && (
+                                  <button
 
-                                  onClick={() => setSelectedClassTeacherId(classTeacher.teacherId)}
+                                    onClick={() => setSelectedClassTeacherId(classTeacher.teacherId)}
 
-                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 
-                                  title="Edit class teacher"
+                                    title="Edit class teacher"
 
-                                >
+                                  >
 
-                                  <FiEdit className="w-4 h-4" />
+                                    <FiEdit className="w-4 h-4" />
 
-                                </button>
+                                  </button>
+                                )}
 
                                 <button
 
@@ -2992,22 +3004,24 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                                     <div className="flex items-center justify-end space-x-2">
 
-                                      <button
+                                      {user?.role === 'ADMIN' && (
+                                        <button
 
-                                        onClick={() => {
-                                          setSelectedSubjectId(tenure.classSubjectId);
-                                          setSelectedTeacherId(tenure.teacherId);
-                                        }}
+                                          onClick={() => {
+                                            setSelectedSubjectId(tenure.classSubjectId);
+                                            setSelectedTeacherId(tenure.teacherId);
+                                          }}
 
-                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 
-                                        title="Edit teacher"
+                                          title="Edit teacher"
 
-                                      >
+                                        >
 
-                                        <FiEdit className="w-4 h-4" />
+                                          <FiEdit className="w-4 h-4" />
 
-                                      </button>
+                                        </button>
+                                      )}
 
                                       <button
 

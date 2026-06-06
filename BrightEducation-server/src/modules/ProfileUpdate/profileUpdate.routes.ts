@@ -19,6 +19,9 @@ profileUpdateRouter.use(authenticate);
 // Create a profile update request (any authenticated user)
 profileUpdateRouter.post("/", uploadProfile.single('profileImg'), createProfileUpdateRequestHandler);
 
+// Create a profile update request for another user (management/admin only)
+profileUpdateRouter.post("/:userId", uploadProfile.single('profileImg'), createProfileUpdateRequestHandler);
+
 // Get my profile update requests (any authenticated user)
 profileUpdateRouter.get("/my-requests", getMyProfileUpdateRequestsHandler);
 

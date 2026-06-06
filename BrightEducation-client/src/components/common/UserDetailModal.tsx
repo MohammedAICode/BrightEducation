@@ -4,6 +4,7 @@ import axiosInstance from '../../lib/axios';
 import UserAvatar from './UserAvatar';
 import ToastModal from './ToastModal';
 import type { ToastType } from './ToastModal';
+import { useAppSelector } from '../../store/hooks';
 
 interface User {
   id: string;
@@ -61,10 +62,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<User> & Partial<RoleData>>({});
+  const [changedFields, setChangedFields] = useState<Set<string>>(new Set());
   const [editProfileImg, setEditProfileImg] = useState<File | null>(null);
   const [convertToCreated, setConvertToCreated] = useState(false);
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfo | null>(null);
   const [loadingCreator, setLoadingCreator] = useState(false);
+  const [updateReason, setUpdateReason] = useState('');
   const [toastModal, setToastModal] = useState<{
     isOpen: boolean;
     type: ToastType;
@@ -78,6 +81,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     message: '',
     showConfirm: false,
   });
+
+  const currentUser = useAppSelector((state) => state.auth.user) as any;
 
   useEffect(() => {
     if (user) {
@@ -110,6 +115,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   const handleEdit = () => {
     setIsEditing(true);
+    setChangedFields(new Set());
   };
 
   const handleCancel = () => {
@@ -122,22 +128,34 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const handleSave = async () => {
     if (!user?.id) return;
     
+    // If management user, require reason
+    if (currentUser?.role === 'MANAGEMENT' && !updateReason.trim()) {
+      setToastModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Reason Required',
+        message: 'Please provide a reason for this update request.',
+        showConfirm: false,
+      });
+      return;
+    }
+    
     try {
       const formData = new FormData();
       
-      // Add only User fields to form data (not role-specific fields)
-      if (editData.firstname) formData.append('firstname', editData.firstname);
-      if (editData.lastname) formData.append('lastname', editData.lastname);
-      if (editData.gender) formData.append('gender', editData.gender);
-      if (editData.dateOfBirth) formData.append('dateOfBirth', editData.dateOfBirth);
-      if (editData.phone) formData.append('phone', editData.phone);
-      if (editData.address) formData.append('address', editData.address);
-      if (editData.emergencyContact) formData.append('emergencyContact', editData.emergencyContact);
-      if (editData.emergencyContactRelation) formData.append('emergencyContactRelation', editData.emergencyContactRelation);
-      if (editData.bloodGroup) formData.append('bloodGroup', editData.bloodGroup);
-      if (editData.nationality) formData.append('nationality', editData.nationality);
-      if (editData.religion) formData.append('religion', editData.religion);
-      if (editData.email) formData.append('email', editData.email);
+      // Only add fields that have actually been changed (tracked in changedFields set)
+      if (changedFields.has('firstname') && editData.firstname) formData.append('firstname', editData.firstname);
+      if (changedFields.has('lastname') && editData.lastname !== undefined) formData.append('lastname', editData.lastname);
+      if (changedFields.has('gender') && editData.gender) formData.append('gender', editData.gender);
+      if (changedFields.has('dateOfBirth') && editData.dateOfBirth) formData.append('dateOfBirth', editData.dateOfBirth);
+      if (changedFields.has('phone') && editData.phone !== undefined) formData.append('phone', editData.phone);
+      if (changedFields.has('address') && editData.address) formData.append('address', editData.address);
+      if (changedFields.has('emergencyContact') && editData.emergencyContact) formData.append('emergencyContact', editData.emergencyContact);
+      if (changedFields.has('emergencyContactRelation') && editData.emergencyContactRelation) formData.append('emergencyContactRelation', editData.emergencyContactRelation);
+      if (changedFields.has('bloodGroup') && editData.bloodGroup !== undefined) formData.append('bloodGroup', editData.bloodGroup);
+      if (changedFields.has('nationality') && editData.nationality) formData.append('nationality', editData.nationality);
+      if (changedFields.has('religion') && editData.religion !== undefined) formData.append('religion', editData.religion);
+      if (changedFields.has('email') && editData.email) formData.append('email', editData.email);
       
       // Add status field if changed
       if (editData.isActive && editData.isActive !== user.isActive) {
@@ -154,15 +172,32 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         formData.append('profileImg', editProfileImg);
       }
       
-      await axiosInstance.put(`/user/${user.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Add reason for management users
+      if (currentUser?.role === 'MANAGEMENT') {
+        formData.append('reason', updateReason);
+      }
+      
+      // Route based on user role
+      if (currentUser?.role === 'ADMIN') {
+        // Admin can directly update
+        await axiosInstance.put(`/user/${user.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        // Management users submit a profile update request
+        await axiosInstance.post(`/profile-update/${user.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
       
       setIsEditing(false);
       setEditProfileImg(null);
       setConvertToCreated(false);
+      setUpdateReason('');
       
       // Fetch updated user data to get new profile image URL
       const response = await axiosInstance.get(`/user/${user.id}`);
@@ -177,6 +212,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   const handleInputChange = (field: string, value: string) => {
     setEditData((prev) => ({ ...prev, [field]: value }));
+    // Track which fields have been changed
+    if (user && value !== (user as any)[field]) {
+      setChangedFields((prev) => new Set(prev).add(field));
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -198,11 +237,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           if (onDelete) onDelete();
           onClose();
         } catch (err: any) {
+          const errorMessage = err.response?.status === 403
+            ? 'Only administrators can delete users. You do not have permission to perform this action.'
+            : 'Failed to delete user';
           setToastModal({
             isOpen: true,
             type: 'error',
             title: 'Error',
-            message: 'Failed to delete user',
+            message: errorMessage,
             showConfirm: false,
           });
         }
@@ -571,6 +613,26 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               {editProfileImg && (
                 <p className="text-xs font-semibold text-green-600 mt-2.5">Ready to upload: {editProfileImg.name}</p>
               )}
+            </div>
+          )}
+
+          {/* Reason for Update - Only for management users in edit mode */}
+          {isEditing && currentUser?.role === 'MANAGEMENT' && (
+            <div className="mb-8 p-6 bg-amber-50/20 rounded-2xl border border-dashed border-amber-200">
+              <div className="flex items-center gap-2 mb-3">
+                <FiAlertCircle className="w-5 h-5 text-amber-600" />
+                <h3 className="text-base font-bold text-gray-900">Reason for Update</h3>
+                <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Required</span>
+              </div>
+              <textarea
+                value={updateReason}
+                onChange={(e) => setUpdateReason(e.target.value)}
+                placeholder="Please explain why this update is necessary..."
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium text-gray-800 transition-all shadow-2xs resize-none"
+                rows={3}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-2">This reason will be sent to the admin for approval.</p>
             </div>
           )}
 

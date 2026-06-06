@@ -7,6 +7,7 @@ interface ProfileUpdateRequest {
   id: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   rejectionReason: string | null;
+  reason?: string;
   createdAt: string;
   user: {
     id: string;
@@ -15,6 +16,13 @@ interface ProfileUpdateRequest {
     email: string;
     role: string;
   };
+  requester?: {
+    id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    role: string;
+  } | null;
   approvedBy: {
     id: string;
     firstname: string;
@@ -230,6 +238,19 @@ const ProfileUpdateRequests: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {request.reason && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm font-medium text-amber-800">Reason for Update:</p>
+                  <p className="text-sm text-amber-700">{request.reason}</p>
+                </div>
+              )}
+
+              {request.requester && (
+                <div className="mb-4 text-sm text-gray-500">
+                  Requested by: {request.requester.firstname} {request.requester.lastname} ({request.requester.role})
+                </div>
+              )}
 
               {request.profileImgKey && (
                 <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
