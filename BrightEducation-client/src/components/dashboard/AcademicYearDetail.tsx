@@ -2126,11 +2126,11 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                           onChange={(e) => setNewSectionRollPrefix(e.target.value.toUpperCase())}
 
-                          placeholder="Roll prefix (e.g., A-, B-)"
+                          placeholder="Roll prefix (e.g., A-, B-, SEC1-)"
 
-                          pattern="^[A-Z]{1,3}-$"
+                          pattern="^[A-Z0-9]{1,5}-$"
 
-                          title="1-3 uppercase letters followed by hyphen"
+                          title="1-5 alphanumeric characters followed by hyphen"
 
                           className="w-40 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
@@ -5495,11 +5495,11 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                     onChange={(e) => setEditSectionRollPrefix(e.target.value.toUpperCase())}
 
-                    placeholder="e.g., A-, B-, SEC-"
+                    placeholder="e.g., A-, B-, SEC1-"
 
-                    pattern="^[A-Z]{1,3}-$"
+                    pattern="^[A-Z0-9]{1,5}-$"
 
-                    title="1-3 uppercase letters followed by hyphen"
+                    title="1-5 alphanumeric characters followed by hyphen"
 
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 

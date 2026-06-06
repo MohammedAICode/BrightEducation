@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "AcademicYear" ADD COLUMN     "classCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "sectionCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "studentCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "teacherCount" INTEGER NOT NULL DEFAULT 0;

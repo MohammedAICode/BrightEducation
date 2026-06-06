@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
-import { FiX, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiDroplet, FiGlobe, FiAlertCircle, FiShield, FiBriefcase, FiChevronDown } from 'react-icons/fi';
-import axiosInstance from '../../lib/axios';
+import React, { useState } from "react";
+import {
+  FiX,
+  FiUser,
+  FiMail,
+  FiPhone,
+  FiMapPin,
+  FiCalendar,
+  FiDroplet,
+  FiGlobe,
+  FiAlertCircle,
+  FiShield,
+  FiBriefcase,
+  FiChevronDown,
+} from "react-icons/fi";
+import axiosInstance from "../../lib/axios";
 
 interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  role: 'MANAGEMENT' | 'TEACHER' | 'STUDENT' | 'STAFF';
+  role: "MANAGEMENT" | "TEACHER" | "STUDENT" | "STAFF";
   onSuccess?: () => void;
 }
 
@@ -20,7 +33,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [educationLevel, setEducationLevel] = useState<string>('');
+  const [educationLevel, setEducationLevel] = useState<string>("");
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -32,35 +45,44 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         return newErrors;
       });
     }
-    
+
     // Auto-generate email based on role and ID
-    if (field === 'firstname' || field === 'admissionNo' || field === 'employeeId') {
+    if (
+      field === "firstname" ||
+      field === "admissionNo" ||
+      field === "employeeId"
+    ) {
       setFormData((prev) => {
-        const firstname = field === 'firstname' ? value : prev.firstname;
-        const admissionNo = field === 'admissionNo' ? value : prev.admissionNo;
-        const employeeId = field === 'employeeId' ? value : prev.employeeId;
-        
-        let email = '';
-        
+        const firstname = field === "firstname" ? value : prev.firstname;
+        const admissionNo = field === "admissionNo" ? value : prev.admissionNo;
+        const employeeId = field === "employeeId" ? value : prev.employeeId;
+
+        let email = "";
+
         // Helper function to sanitize ID (lowercase and remove special chars)
-        const sanitizeId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]/g, '');
-        
-        if (role === 'STUDENT' && firstname && admissionNo) {
+        const sanitizeId = (id: string) =>
+          id.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+        if (role === "STUDENT" && firstname && admissionNo) {
           email = `${firstname.toLowerCase()}.${sanitizeId(admissionNo)}@bright.com`;
-        } else if ((role === 'MANAGEMENT' || role === 'STAFF') && firstname && employeeId) {
+        } else if (
+          (role === "MANAGEMENT" || role === "STAFF") &&
+          firstname &&
+          employeeId
+        ) {
           email = `${firstname.toLowerCase()}.${sanitizeId(employeeId)}@bright.com`;
-        } else if (role === 'TEACHER' && firstname && employeeId) {
+        } else if (role === "TEACHER" && firstname && employeeId) {
           email = `${firstname.toLowerCase()}.${sanitizeId(employeeId)}@bright.com`;
         }
-        
+
         return email ? { ...prev, email } : prev;
       });
     }
   };
 
   const handlePhoneChange = (field: string, value: string) => {
-    // Only allow numeric characters
-    const numericValue = value.replace(/\D/g, '');
+    // Only allow numeric characters and limit to 10 digits
+    const numericValue = value.replace(/\D/g, "").slice(0, 10);
     setFormData((prev) => ({ ...prev, [field]: numericValue }));
   };
 
@@ -76,69 +98,156 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     setError(null);
     setFieldErrors({});
 
+    // Client-side validation for required fields
+    const errors: Record<string, string> = {};
+
+    if (!formData.firstname || formData.firstname.trim() === "") {
+      errors.firstname = "First name is required";
+    }
+    if (!formData.gender) {
+      errors.gender = "Gender is required";
+    }
+    if (!formData.dateOfBirth) {
+      errors.dateOfBirth = "Date of birth is required";
+    }
+    if (!formData.phone || formData.phone.trim() === "") {
+      errors.phone = "Phone number is required";
+    } else if (formData.phone.length !== 10) {
+      errors.phone = "Phone number must be exactly 10 digits";
+    }
+    if (!formData.address || formData.address.trim() === "") {
+      errors.address = "Address is required";
+    }
+    if (!formData.emergencyContact || formData.emergencyContact.trim() === "") {
+      errors.emergencyContact = "Emergency contact is required";
+    }
+    if (
+      !formData.emergencyContactRelation ||
+      formData.emergencyContactRelation.trim() === ""
+    ) {
+      errors.emergencyContactRelation =
+        "Emergency contact relation is required";
+    }
+    if (!formData.email || formData.email.trim() === "") {
+      errors.email = "Email is required";
+    }
+
+    // Role-specific validation
+    if (role === "STUDENT") {
+      if (!formData.admissionNo || formData.admissionNo.trim() === "") {
+        errors.admissionNo = "Admission number is required";
+      }
+      if (!formData.parentName || formData.parentName.trim() === "") {
+        errors.parentName = "Parent name is required";
+      }
+      if (!formData.parentPhone || formData.parentPhone.trim() === "") {
+        errors.parentPhone = "Parent phone is required";
+      } else if (formData.parentPhone.length !== 10) {
+        errors.parentPhone = "Parent phone must be exactly 10 digits";
+      }
+    } else if (
+      role === "MANAGEMENT" ||
+      role === "TEACHER" ||
+      role === "STAFF"
+    ) {
+      if (!formData.employeeId || formData.employeeId.trim() === "") {
+        errors.employeeId = "Employee ID is required";
+      }
+      if (!formData.joiningDate) {
+        errors.joiningDate = "Joining date is required";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError("Please fill in all required fields");
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = new FormData();
-      
+
       // Add common user fields
-      data.append('role', role);
-      if (formData.firstname) data.append('firstname', formData.firstname);
-      if (formData.lastname) data.append('lastname', formData.lastname);
-      if (formData.gender) data.append('gender', formData.gender);
-      if (formData.dateOfBirth) data.append('dateOfBirth', formData.dateOfBirth);
-      if (formData.phone) data.append('phone', formData.phone);
-      if (formData.address) data.append('address', formData.address);
-      if (formData.emergencyContact) data.append('emergencyContact', formData.emergencyContact);
-      if (formData.emergencyContactRelation) data.append('emergencyContactRelation', formData.emergencyContactRelation);
-      if (formData.bloodGroup) data.append('bloodGroup', formData.bloodGroup);
-      if (formData.nationality) data.append('nationality', formData.nationality || 'Indian');
-      if (formData.religion) data.append('religion', formData.religion);
-      if (formData.email) data.append('email', formData.email);
-      
+      data.append("role", role);
+      if (formData.firstname) data.append("firstname", formData.firstname);
+      if (formData.lastname) data.append("lastname", formData.lastname);
+      if (formData.gender) data.append("gender", formData.gender);
+      if (formData.dateOfBirth)
+        data.append("dateOfBirth", formData.dateOfBirth);
+      if (formData.phone) data.append("phone", formData.phone);
+      if (formData.address) data.append("address", formData.address);
+      if (formData.emergencyContact)
+        data.append("emergencyContact", formData.emergencyContact);
+      if (formData.emergencyContactRelation)
+        data.append(
+          "emergencyContactRelation",
+          formData.emergencyContactRelation,
+        );
+      if (formData.bloodGroup) data.append("bloodGroup", formData.bloodGroup);
+      if (formData.nationality)
+        data.append("nationality", formData.nationality || "Indian");
+      if (formData.religion) data.append("religion", formData.religion);
+      if (formData.email) data.append("email", formData.email);
+
       // Set initial status as CREATED - admin must activate the user
-      data.append('isActive', 'CREATED');
-      
+      data.append("isActive", "CREATED");
+
       // Add profile image if selected
       if (profileImg) {
-        data.append('profileImg', profileImg);
+        data.append("profileImg", profileImg);
       }
 
       // Add role-specific fields
-      if (role === 'MANAGEMENT') {
-        if (formData.employeeId) data.append('employeeId', formData.employeeId);
-        if (formData.joiningDate) data.append('joiningDate', formData.joiningDate);
-        if (formData.expInYrs) data.append('expInYrs', formData.expInYrs);
-        if (formData.manageType) data.append('manageType', formData.manageType);
-      } else if (role === 'TEACHER') {
-        if (formData.employeeId) data.append('employeeId', formData.employeeId);
-        if (formData.joiningDate) data.append('joiningDate', formData.joiningDate);
-        if (formData.expInYrs) data.append('expInYrs', formData.expInYrs);
-        if (formData.annualSalary) data.append('annualSalary', formData.annualSalary);
-        if (formData.qualification) data.append('qualification', formData.qualification);
-        if (formData.subjects) data.append('subjects', formData.subjects);
-        if (formData.resignationDate) data.append('resignationDate', formData.resignationDate);
-      } else if (role === 'STUDENT') {
-        if (formData.admissionNo) data.append('admissionNo', formData.admissionNo);
-        if (formData.admissionDate) data.append('admissionDate', formData.admissionDate);
-        if (formData.rollNumber) data.append('rollNumber', formData.rollNumber);
-        if (formData.classGrade) data.append('classGrade', formData.classGrade);
-        if (formData.section) data.append('section', formData.section || 'A');
-        if (formData.prevSchool) data.append('prevSchool', formData.prevSchool);
+      if (role === "MANAGEMENT") {
+        if (formData.employeeId) data.append("employeeId", formData.employeeId);
+        if (formData.joiningDate)
+          data.append("joiningDate", formData.joiningDate);
+        if (formData.expInYrs) data.append("expInYrs", formData.expInYrs);
+        if (formData.manageType) data.append("manageType", formData.manageType);
+      } else if (role === "TEACHER") {
+        if (formData.employeeId) data.append("employeeId", formData.employeeId);
+        if (formData.joiningDate)
+          data.append("joiningDate", formData.joiningDate);
+        if (formData.expInYrs) data.append("expInYrs", formData.expInYrs);
+        if (formData.annualSalary)
+          data.append("annualSalary", formData.annualSalary);
+        if (formData.qualification)
+          data.append("qualification", formData.qualification);
+        if (formData.subjects) data.append("subjects", formData.subjects);
+        if (formData.resignationDate)
+          data.append("resignationDate", formData.resignationDate);
+      } else if (role === "STUDENT") {
+        if (formData.admissionNo)
+          data.append("admissionNo", formData.admissionNo);
+        if (formData.admissionDate)
+          data.append("admissionDate", formData.admissionDate);
+        if (formData.rollNumber) data.append("rollNumber", formData.rollNumber);
+        if (formData.classGrade) data.append("classGrade", formData.classGrade);
+        if (formData.section) data.append("section", formData.section || "A");
+        if (formData.prevSchool) data.append("prevSchool", formData.prevSchool);
         // Parent fields for students
-        if (formData.parentRelation) data.append('parentRelation', formData.parentRelation);
-        if (formData.parentName) data.append('parentName', formData.parentName);
-        if (formData.parentPhone) data.append('parentPhone', formData.parentPhone);
-        if (formData.parentOccupation) data.append('parentOccupation', formData.parentOccupation);
-      } else if (role === 'STAFF') {
-        if (formData.employeeId) data.append('employeeId', formData.employeeId);
-        if (formData.joiningDate) data.append('joiningDate', formData.joiningDate);
-        if (formData.expInYrs) data.append('expInYrs', formData.expInYrs);
-        if (formData.annualSalary) data.append('annualSalary', formData.annualSalary);
-        if (formData.resignationDate) data.append('resignationDate', formData.resignationDate);
+        if (formData.parentRelation)
+          data.append("parentRelation", formData.parentRelation);
+        if (formData.parentName) data.append("parentName", formData.parentName);
+        if (formData.parentPhone)
+          data.append("parentPhone", formData.parentPhone);
+        if (formData.parentOccupation)
+          data.append("parentOccupation", formData.parentOccupation);
+      } else if (role === "STAFF") {
+        if (formData.employeeId) data.append("employeeId", formData.employeeId);
+        if (formData.joiningDate)
+          data.append("joiningDate", formData.joiningDate);
+        if (formData.expInYrs) data.append("expInYrs", formData.expInYrs);
+        if (formData.annualSalary)
+          data.append("annualSalary", formData.annualSalary);
+        if (formData.resignationDate)
+          data.append("resignationDate", formData.resignationDate);
       }
 
-      await axiosInstance.post('/user/register', data, {
+      await axiosInstance.post("/user/register", data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -155,9 +264,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
           errors[validationError.field] = validationError.message;
         });
         setFieldErrors(errors);
-        setError('Please fix the validation errors below');
+        setError("Please fix the validation errors below");
       } else {
-        setError(err.response?.data?.message || 'Failed to create user');
+        setError(err.response?.data?.message || "Failed to create user");
       }
     } finally {
       setLoading(false);
@@ -175,7 +284,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <FiUser className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight">Create {role}</h2>
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+                Create {role}
+              </h2>
             </div>
           </div>
           <button
@@ -195,13 +306,19 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
           {/* Basic User Information */}
           <div className="mb-6">
-            <h3 className="text-base font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 pl-3 border-l-2 border-blue-500">Basic Information</h3>
+            <h3 className="text-base font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 pl-3 border-l-2 border-blue-500">
+              Basic Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2 mb-4">
                 <div className="p-5 bg-blue-50/25 rounded-xl border border-dashed border-blue-200 text-center flex flex-col items-center justify-center transition-all hover:bg-blue-50/45">
                   <FiUser className="w-8 h-8 text-blue-500 mb-2" />
-                  <p className="text-sm font-bold text-gray-800 mb-0.5">Profile Picture</p>
-                  <p className="text-xs text-gray-400 mb-3.5">PNG, JPG or WEBP up to 5MB</p>
+                  <p className="text-sm font-bold text-gray-800 mb-0.5">
+                    Profile Picture
+                  </p>
+                  <p className="text-xs text-gray-400 mb-3.5">
+                    PNG, JPG or WEBP up to 5MB
+                  </p>
                   <label className="cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm shadow-2xs transition-all inline-flex items-center gap-1.5">
                     Choose Image
                     <input
@@ -212,7 +329,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     />
                   </label>
                   {profileImg && (
-                    <p className="text-xs font-semibold text-green-600 mt-2">Selected: {profileImg.name}</p>
+                    <p className="text-xs font-semibold text-green-600 mt-2">
+                      Selected: {profileImg.name}
+                    </p>
                   )}
                 </div>
               </div>
@@ -224,12 +343,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 <input
                   type="text"
                   required
-                  value={formData.firstname || ''}
-                  onChange={(e) => handleChange('firstname', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.firstname ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                  value={formData.firstname || ""}
+                  onChange={(e) => handleChange("firstname", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.firstname ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                 />
                 {fieldErrors.firstname && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.firstname}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.firstname}
+                  </p>
                 )}
               </div>
               <div>
@@ -239,12 +360,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={formData.lastname || ''}
-                  onChange={(e) => handleChange('lastname', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.lastname ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                  value={formData.lastname || ""}
+                  onChange={(e) => handleChange("lastname", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.lastname ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                 />
                 {fieldErrors.lastname && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.lastname}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.lastname}
+                  </p>
                 )}
               </div>
               <div>
@@ -255,17 +378,19 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 <input
                   type="email"
                   required
-                  value={formData.email || ''}
+                  value={formData.email || ""}
                   readOnly
                   className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-gray-100 text-gray-600 cursor-not-allowed focus:outline-none"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {role === 'STUDENT' 
-                    ? 'Auto-generated: firstname.admissionNo@bright.com' 
-                    : 'Auto-generated: firstname.employeeId@bright.com'}
+                  {role === "STUDENT"
+                    ? "Auto-generated: firstname.admissionNo@bright.com"
+                    : "Auto-generated: firstname.employeeId@bright.com"}
                 </p>
                 {fieldErrors.email && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.email}
+                  </p>
                 )}
               </div>
               <div>
@@ -275,16 +400,18 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </label>
                 <select
                   required
-                  value={formData.gender || ''}
-                  onChange={(e) => handleChange('gender', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.gender ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                  value={formData.gender || ""}
+                  onChange={(e) => handleChange("gender", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.gender ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                 >
                   <option value="">Select Gender</option>
                   <option value="MALE">Male</option>
                   <option value="FEMALE">Female</option>
                 </select>
                 {fieldErrors.gender && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.gender}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.gender}
+                  </p>
                 )}
               </div>
               <div>
@@ -295,25 +422,34 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 <input
                   type="date"
                   required
-                  value={formData.dateOfBirth || ''}
-                  onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.dateOfBirth ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                  value={formData.dateOfBirth || ""}
+                  onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.dateOfBirth ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                 />
                 {fieldErrors.dateOfBirth && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.dateOfBirth}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.dateOfBirth}
+                  </p>
                 )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                   <FiPhone className="w-4 h-4" />
-                  Phone
+                  Phone *
                 </label>
                 <input
                   type="text"
-                  value={formData.phone || ''}
-                  onChange={(e) => handlePhoneChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  maxLength={10}
+                  value={formData.phone || ""}
+                  onChange={(e) => handlePhoneChange("phone", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.phone ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                 />
+                {fieldErrors.phone && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.phone}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -323,51 +459,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 <input
                   type="text"
                   required
-                  value={formData.address || ''}
-                  onChange={(e) => handleChange('address', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.address ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                  value={formData.address || ""}
+                  onChange={(e) => handleChange("address", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.address ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                 />
                 {fieldErrors.address && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.address}</p>
-                )}
-              </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                  <FiAlertCircle className="w-4 h-4" />
-                  Emergency Contact *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.emergencyContact || ''}
-                  onChange={(e) => handlePhoneChange('emergencyContact', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.emergencyContact ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
-                />
-                {fieldErrors.emergencyContact && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.emergencyContact}</p>
-                )}
-              </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                  <FiAlertCircle className="w-4 h-4" />
-                  Emergency Contact Relation *
-                </label>
-                <select
-                  required
-                  value={formData.emergencyContactRelation || ''}
-                  onChange={(e) => handleChange('emergencyContactRelation', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.emergencyContactRelation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
-                >
-                  <option value="">Select Relation</option>
-                  <option value="Father">Father</option>
-                  <option value="Mother">Mother</option>
-                  <option value="Brother">Brother</option>
-                  <option value="Sister">Sister</option>
-                  <option value="Spouse">Spouse</option>
-                  <option value="Other">Other</option>
-                </select>
-                {fieldErrors.emergencyContactRelation && (
-                  <p className="text-xs text-red-600 mt-1">{fieldErrors.emergencyContactRelation}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.address}
+                  </p>
                 )}
               </div>
               <div>
@@ -376,8 +475,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   Blood Group
                 </label>
                 <select
-                  value={formData.bloodGroup || ''}
-                  onChange={(e) => handleChange('bloodGroup', e.target.value)}
+                  value={formData.bloodGroup || ""}
+                  onChange={(e) => handleChange("bloodGroup", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Blood Group</option>
@@ -391,6 +490,54 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   <option value="O-">O-</option>
                 </select>
               </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                  <FiAlertCircle className="w-4 h-4" />
+                  Emergency Contact Relation *
+                </label>
+                <select
+                  required
+                  value={formData.emergencyContactRelation || ""}
+                  onChange={(e) =>
+                    handleChange("emergencyContactRelation", e.target.value)
+                  }
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.emergencyContactRelation ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
+                >
+                  <option value="">Select Relation</option>
+                  <option value="Father">Father</option>
+                  <option value="Mother">Mother</option>
+                  <option value="Brother">Brother</option>
+                  <option value="Sister">Sister</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Other">Other</option>
+                </select>
+                {fieldErrors.emergencyContactRelation && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.emergencyContactRelation}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                  <FiAlertCircle className="w-4 h-4" />
+                  Emergency Contact *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.emergencyContact || ""}
+                  onChange={(e) =>
+                    handlePhoneChange("emergencyContact", e.target.value)
+                  }
+                  className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.emergencyContact ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
+                />
+                {fieldErrors.emergencyContact && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {fieldErrors.emergencyContact}
+                  </p>
+                )}
+              </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                   <FiGlobe className="w-4 h-4" />
@@ -398,8 +545,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={formData.nationality || 'Indian'}
-                  onChange={(e) => handleChange('nationality', e.target.value)}
+                  value={formData.nationality || "Indian"}
+                  onChange={(e) => handleChange("nationality", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -409,8 +556,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   Religion
                 </label>
                 <select
-                  value={formData.religion || 'Muslim'}
-                  onChange={(e) => handleChange('religion', e.target.value)}
+                  value={formData.religion || "Muslim"}
+                  onChange={(e) => handleChange("religion", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Religion</option>
@@ -428,9 +575,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
           {/* Role-Specific Fields */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">{role} Information</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">
+              {role} Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {role === 'MANAGEMENT' && (
+              {role === "MANAGEMENT" && (
                 <>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -440,12 +589,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="text"
                       required
-                      value={formData.employeeId || ''}
-                      onChange={(e) => handleChange('employeeId', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.employeeId || ""}
+                      onChange={(e) =>
+                        handleChange("employeeId", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.employeeId && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.employeeId}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.employeeId}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -456,12 +609,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="date"
                       required
-                      value={formData.joiningDate || ''}
-                      onChange={(e) => handleChange('joiningDate', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.joiningDate || ""}
+                      onChange={(e) =>
+                        handleChange("joiningDate", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.joiningDate && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.joiningDate}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.joiningDate}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -471,12 +628,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="number"
-                      value={formData.expInYrs || '0'}
-                      onChange={(e) => handleChange('expInYrs', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.expInYrs || "0"}
+                      onChange={(e) => handleChange("expInYrs", e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.expInYrs && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.expInYrs}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.expInYrs}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -486,9 +645,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <select
                       required
-                      value={formData.manageType || ''}
-                      onChange={(e) => handleChange('manageType', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.manageType ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.manageType || ""}
+                      onChange={(e) =>
+                        handleChange("manageType", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.manageType ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     >
                       <option value="">Select Type</option>
                       <option value="ACCOUNTS">Accounts</option>
@@ -496,13 +657,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       <option value="INCHARGE">Incharge</option>
                     </select>
                     {fieldErrors.manageType && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.manageType}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.manageType}
+                      </p>
                     )}
                   </div>
                 </>
               )}
 
-              {role === 'TEACHER' && (
+              {role === "TEACHER" && (
                 <>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -512,12 +675,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="text"
                       required
-                      value={formData.employeeId || ''}
-                      onChange={(e) => handleChange('employeeId', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.employeeId || ""}
+                      onChange={(e) =>
+                        handleChange("employeeId", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.employeeId && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.employeeId}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.employeeId}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -528,12 +695,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="date"
                       required
-                      value={formData.joiningDate || ''}
-                      onChange={(e) => handleChange('joiningDate', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.joiningDate || ""}
+                      onChange={(e) =>
+                        handleChange("joiningDate", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.joiningDate && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.joiningDate}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.joiningDate}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -543,12 +714,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="number"
-                      value={formData.expInYrs || '0'}
-                      onChange={(e) => handleChange('expInYrs', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.expInYrs || "0"}
+                      onChange={(e) => handleChange("expInYrs", e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.expInYrs && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.expInYrs}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.expInYrs}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -558,12 +731,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="number"
-                      value={formData.annualSalary || ''}
-                      onChange={(e) => handleChange('annualSalary', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.annualSalary ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.annualSalary || ""}
+                      onChange={(e) =>
+                        handleChange("annualSalary", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.annualSalary ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.annualSalary && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.annualSalary}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.annualSalary}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -573,9 +750,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <select
                       required
-                      value={formData.qualification || ''}
-                      onChange={(e) => handleChange('qualification', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.qualification ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.qualification || ""}
+                      onChange={(e) =>
+                        handleChange("qualification", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.qualification ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     >
                       <option value="">Select Qualification</option>
                       <optgroup label="School Level">
@@ -584,49 +763,93 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       </optgroup>
                       <optgroup label="Diploma">
                         <option value="Diploma">Diploma</option>
-                        <option value="D.Ed">D.Ed (Diploma in Education)</option>
-                        <option value="D.El.Ed">D.El.Ed (Diploma in Elementary Education)</option>
+                        <option value="D.Ed">
+                          D.Ed (Diploma in Education)
+                        </option>
+                        <option value="D.El.Ed">
+                          D.El.Ed (Diploma in Elementary Education)
+                        </option>
                       </optgroup>
                       <optgroup label="Bachelor's Degree">
                         <option value="B.A">B.A (Bachelor of Arts)</option>
                         <option value="B.Sc">B.Sc (Bachelor of Science)</option>
-                        <option value="B.Com">B.Com (Bachelor of Commerce)</option>
-                        <option value="B.Tech">B.Tech (Bachelor of Technology)</option>
-                        <option value="B.E">B.E (Bachelor of Engineering)</option>
-                        <option value="BBA">BBA (Bachelor of Business Administration)</option>
-                        <option value="BCA">BCA (Bachelor of Computer Applications)</option>
-                        <option value="B.Ed">B.Ed (Bachelor of Education)</option>
-                        <option value="B.P.Ed">B.P.Ed (Bachelor of Physical Education)</option>
-                        <option value="B.El.Ed">B.El.Ed (Bachelor of Elementary Education)</option>
+                        <option value="B.Com">
+                          B.Com (Bachelor of Commerce)
+                        </option>
+                        <option value="B.Tech">
+                          B.Tech (Bachelor of Technology)
+                        </option>
+                        <option value="B.E">
+                          B.E (Bachelor of Engineering)
+                        </option>
+                        <option value="BBA">
+                          BBA (Bachelor of Business Administration)
+                        </option>
+                        <option value="BCA">
+                          BCA (Bachelor of Computer Applications)
+                        </option>
+                        <option value="B.Ed">
+                          B.Ed (Bachelor of Education)
+                        </option>
+                        <option value="B.P.Ed">
+                          B.P.Ed (Bachelor of Physical Education)
+                        </option>
+                        <option value="B.El.Ed">
+                          B.El.Ed (Bachelor of Elementary Education)
+                        </option>
                         <option value="LLB">LLB (Bachelor of Laws)</option>
                       </optgroup>
                       <optgroup label="Master's Degree">
                         <option value="M.A">M.A (Master of Arts)</option>
                         <option value="M.Sc">M.Sc (Master of Science)</option>
-                        <option value="M.Com">M.Com (Master of Commerce)</option>
-                        <option value="M.Tech">M.Tech (Master of Technology)</option>
+                        <option value="M.Com">
+                          M.Com (Master of Commerce)
+                        </option>
+                        <option value="M.Tech">
+                          M.Tech (Master of Technology)
+                        </option>
                         <option value="M.E">M.E (Master of Engineering)</option>
-                        <option value="MBA">MBA (Master of Business Administration)</option>
-                        <option value="MCA">MCA (Master of Computer Applications)</option>
+                        <option value="MBA">
+                          MBA (Master of Business Administration)
+                        </option>
+                        <option value="MCA">
+                          MCA (Master of Computer Applications)
+                        </option>
                         <option value="M.Ed">M.Ed (Master of Education)</option>
-                        <option value="M.P.Ed">M.P.Ed (Master of Physical Education)</option>
+                        <option value="M.P.Ed">
+                          M.P.Ed (Master of Physical Education)
+                        </option>
                         <option value="LLM">LLM (Master of Laws)</option>
                       </optgroup>
                       <optgroup label="Doctorate">
-                        <option value="Ph.D">Ph.D (Doctor of Philosophy)</option>
-                        <option value="D.Litt">D.Litt (Doctor of Literature)</option>
+                        <option value="Ph.D">
+                          Ph.D (Doctor of Philosophy)
+                        </option>
+                        <option value="D.Litt">
+                          D.Litt (Doctor of Literature)
+                        </option>
                       </optgroup>
                       <optgroup label="Professional Qualifications">
                         <option value="B.Ed + M.Ed">B.Ed + M.Ed</option>
-                        <option value="NET">NET (National Eligibility Test)</option>
-                        <option value="SET">SET (State Eligibility Test)</option>
-                        <option value="CTET">CTET (Central Teacher Eligibility Test)</option>
-                        <option value="TET">TET (Teacher Eligibility Test)</option>
+                        <option value="NET">
+                          NET (National Eligibility Test)
+                        </option>
+                        <option value="SET">
+                          SET (State Eligibility Test)
+                        </option>
+                        <option value="CTET">
+                          CTET (Central Teacher Eligibility Test)
+                        </option>
+                        <option value="TET">
+                          TET (Teacher Eligibility Test)
+                        </option>
                       </optgroup>
                       <option value="Other">Other</option>
                     </select>
                     {fieldErrors.qualification && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.qualification}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.qualification}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -638,15 +861,18 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          const dropdown = document.getElementById('subjects-dropdown');
+                          const dropdown =
+                            document.getElementById("subjects-dropdown");
                           if (dropdown) {
-                            dropdown.classList.toggle('hidden');
+                            dropdown.classList.toggle("hidden");
                           }
                         }}
-                        className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 text-left flex items-center justify-between ${fieldErrors.subjects ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                        className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 text-left flex items-center justify-between ${fieldErrors.subjects ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                       >
                         <span className="text-sm text-gray-700">
-                          {formData.subjects ? `${formData.subjects.split(',').length} selected` : 'Select subjects'}
+                          {formData.subjects
+                            ? `${formData.subjects.split(",").length} selected`
+                            : "Select subjects"}
                         </span>
                         <FiChevronDown className="w-4 h-4 text-gray-400" />
                       </button>
@@ -656,46 +882,116 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       >
                         {[
                           {
-                            label: 'Core Subjects',
-                            subjects: ['Mathematics', 'English', 'Hindi', 'Science', 'Social Studies', 'Social Science']
+                            label: "Core Subjects",
+                            subjects: [
+                              "Mathematics",
+                              "English",
+                              "Hindi",
+                              "Science",
+                              "Social Studies",
+                              "Social Science",
+                            ],
                           },
                           {
-                            label: 'Languages',
-                            subjects: ['Sanskrit', 'Telugu', 'Tamil', 'Kannada', 'Malayalam', 'Marathi', 'Bengali', 'Gujarati', 'Urdu', 'Punjabi', 'French', 'German', 'Spanish']
+                            label: "Languages",
+                            subjects: [
+                              "Sanskrit",
+                              "Telugu",
+                              "Tamil",
+                              "Kannada",
+                              "Malayalam",
+                              "Marathi",
+                              "Bengali",
+                              "Gujarati",
+                              "Urdu",
+                              "Punjabi",
+                              "French",
+                              "German",
+                              "Spanish",
+                            ],
                           },
                           {
-                            label: 'Sciences',
-                            subjects: ['Physics', 'Chemistry', 'Biology', 'Botany', 'Zoology', 'Environmental Science']
+                            label: "Sciences",
+                            subjects: [
+                              "Physics",
+                              "Chemistry",
+                              "Biology",
+                              "Botany",
+                              "Zoology",
+                              "Environmental Science",
+                            ],
                           },
                           {
-                            label: 'Mathematics & Computer',
-                            subjects: ['Advanced Mathematics', 'Statistics', 'Computer Science', 'Information Technology', 'Artificial Intelligence']
+                            label: "Mathematics & Computer",
+                            subjects: [
+                              "Advanced Mathematics",
+                              "Statistics",
+                              "Computer Science",
+                              "Information Technology",
+                              "Artificial Intelligence",
+                            ],
                           },
                           {
-                            label: 'Commerce & Economics',
-                            subjects: ['Accountancy', 'Business Studies', 'Economics', 'Commerce', 'Entrepreneurship']
+                            label: "Commerce & Economics",
+                            subjects: [
+                              "Accountancy",
+                              "Business Studies",
+                              "Economics",
+                              "Commerce",
+                              "Entrepreneurship",
+                            ],
                           },
                           {
-                            label: 'Humanities & Social Sciences',
-                            subjects: ['History', 'Geography', 'Political Science', 'Sociology', 'Psychology', 'Philosophy', 'Civics']
+                            label: "Humanities & Social Sciences",
+                            subjects: [
+                              "History",
+                              "Geography",
+                              "Political Science",
+                              "Sociology",
+                              "Psychology",
+                              "Philosophy",
+                              "Civics",
+                            ],
                           },
                           {
-                            label: 'Arts & Physical Education',
-                            subjects: ['Physical Education', 'Art & Craft', 'Music', 'Dance', 'Drawing', 'Painting']
+                            label: "Arts & Physical Education",
+                            subjects: [
+                              "Physical Education",
+                              "Art & Craft",
+                              "Music",
+                              "Dance",
+                              "Drawing",
+                              "Painting",
+                            ],
                           },
                           {
-                            label: 'Vocational & Others',
-                            subjects: ['Home Science', 'Agriculture', 'Library Science', 'Moral Science', 'General Knowledge', 'Yoga']
-                          }
+                            label: "Vocational & Others",
+                            subjects: [
+                              "Home Science",
+                              "Agriculture",
+                              "Library Science",
+                              "Moral Science",
+                              "General Knowledge",
+                              "Yoga",
+                            ],
+                          },
                         ].map((category, idx) => (
-                          <div key={idx} className="border-b border-gray-100 last:border-b-0">
+                          <div
+                            key={idx}
+                            className="border-b border-gray-100 last:border-b-0"
+                          >
                             <div className="px-3 py-2 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                               {category.label}
                             </div>
                             <div className="p-2">
                               {category.subjects.map((subject) => {
-                                const selectedSubjects = formData.subjects ? formData.subjects.split(',').map(s => s.trim()) : [];
-                                const isChecked = selectedSubjects.includes(subject);
+                                const selectedSubjects = formData.subjects
+                                  ? formData.subjects
+                                      .split(",")
+                                      .map((s) => s.trim())
+                                  : [];
+                                const isChecked =
+                                  selectedSubjects.includes(subject);
                                 return (
                                   <label
                                     key={subject}
@@ -705,18 +1001,33 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                                       type="checkbox"
                                       checked={isChecked}
                                       onChange={(e) => {
-                                        const currentSubjects = formData.subjects ? formData.subjects.split(',').map(s => s.trim()) : [];
+                                        const currentSubjects =
+                                          formData.subjects
+                                            ? formData.subjects
+                                                .split(",")
+                                                .map((s) => s.trim())
+                                            : [];
                                         let newSubjects;
                                         if (e.target.checked) {
-                                          newSubjects = [...currentSubjects, subject];
+                                          newSubjects = [
+                                            ...currentSubjects,
+                                            subject,
+                                          ];
                                         } else {
-                                          newSubjects = currentSubjects.filter(s => s !== subject);
+                                          newSubjects = currentSubjects.filter(
+                                            (s) => s !== subject,
+                                          );
                                         }
-                                        handleChange('subjects', newSubjects.join(', '));
+                                        handleChange(
+                                          "subjects",
+                                          newSubjects.join(", "),
+                                        );
                                       }}
                                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
-                                    <span className="ml-2 text-sm text-gray-700">{subject}</span>
+                                    <span className="ml-2 text-sm text-gray-700">
+                                      {subject}
+                                    </span>
                                   </label>
                                 );
                               })}
@@ -727,7 +1038,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </div>
                     {formData.subjects && (
                       <div className="mt-2 flex flex-wrap gap-1">
-                        {formData.subjects.split(',').map((subject, idx) => (
+                        {formData.subjects.split(",").map((subject, idx) => (
                           <span
                             key={idx}
                             className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
@@ -736,9 +1047,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                             <button
                               type="button"
                               onClick={() => {
-                                const currentSubjects = formData.subjects.split(',').map(s => s.trim());
-                                const newSubjects = currentSubjects.filter(s => s !== subject.trim());
-                                handleChange('subjects', newSubjects.join(', '));
+                                const currentSubjects = formData.subjects
+                                  .split(",")
+                                  .map((s) => s.trim());
+                                const newSubjects = currentSubjects.filter(
+                                  (s) => s !== subject.trim(),
+                                );
+                                handleChange(
+                                  "subjects",
+                                  newSubjects.join(", "),
+                                );
                               }}
                               className="hover:text-blue-900"
                             >
@@ -749,7 +1067,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       </div>
                     )}
                     {fieldErrors.subjects && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.subjects}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.subjects}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -759,15 +1079,17 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="date"
-                      value={formData.resignationDate || ''}
-                      onChange={(e) => handleChange('resignationDate', e.target.value)}
+                      value={formData.resignationDate || ""}
+                      onChange={(e) =>
+                        handleChange("resignationDate", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </>
               )}
 
-              {role === 'STUDENT' && (
+              {role === "STUDENT" && (
                 <>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -777,12 +1099,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="text"
                       required
-                      value={formData.admissionNo || ''}
-                      onChange={(e) => handleChange('admissionNo', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.admissionNo ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.admissionNo || ""}
+                      onChange={(e) =>
+                        handleChange("admissionNo", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.admissionNo ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.admissionNo && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.admissionNo}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.admissionNo}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -793,12 +1119,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="date"
                       required
-                      value={formData.admissionDate || ''}
-                      onChange={(e) => handleChange('admissionDate', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.admissionDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.admissionDate || ""}
+                      onChange={(e) =>
+                        handleChange("admissionDate", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.admissionDate ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.admissionDate && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.admissionDate}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.admissionDate}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -808,12 +1138,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={formData.rollNumber || ''}
-                      onChange={(e) => handleChange('rollNumber', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.rollNumber ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.rollNumber || ""}
+                      onChange={(e) =>
+                        handleChange("rollNumber", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.rollNumber ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.rollNumber && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.rollNumber}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.rollNumber}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -823,12 +1157,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <select
                       required
-                      value={educationLevel || ''}
+                      value={educationLevel || ""}
                       onChange={(e) => {
                         setEducationLevel(e.target.value);
-                        handleChange('classGrade', e.target.value);
+                        handleChange("classGrade", e.target.value);
                       }}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.classGrade ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.classGrade ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     >
                       <option value="">Select Class Grade</option>
                       <option value="Pre-Primary">Pre-Primary</option>
@@ -846,10 +1180,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       <option value="Degree">Degree</option>
                     </select>
                     {fieldErrors.classGrade && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.classGrade}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.classGrade}
+                      </p>
                     )}
                   </div>
-                  {educationLevel === 'Intermediate' && (
+                  {educationLevel === "Intermediate" && (
                     <div>
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                         <FiBriefcase className="w-4 h-4" />
@@ -857,8 +1193,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       </label>
                       <select
                         required
-                        value={formData.course || ''}
-                        onChange={(e) => handleChange('course', e.target.value)}
+                        value={formData.course || ""}
+                        onChange={(e) => handleChange("course", e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Select Course</option>
@@ -869,7 +1205,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       </select>
                     </div>
                   )}
-                  {educationLevel === 'Degree' && (
+                  {educationLevel === "Degree" && (
                     <div>
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                         <FiBriefcase className="w-4 h-4" />
@@ -877,8 +1213,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       </label>
                       <select
                         required
-                        value={formData.degreeCourse || ''}
-                        onChange={(e) => handleChange('degreeCourse', e.target.value)}
+                        value={formData.degreeCourse || ""}
+                        onChange={(e) =>
+                          handleChange("degreeCourse", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Select Degree Course</option>
@@ -904,8 +1242,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={formData.section || 'A'}
-                      onChange={(e) => handleChange('section', e.target.value)}
+                      value={formData.section || "A"}
+                      onChange={(e) => handleChange("section", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -916,8 +1254,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={formData.prevSchool || ''}
-                      onChange={(e) => handleChange('prevSchool', e.target.value)}
+                      value={formData.prevSchool || ""}
+                      onChange={(e) =>
+                        handleChange("prevSchool", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -928,16 +1268,20 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       Parent Relation *
                     </label>
                     <select
-                      value={formData.parentRelation || ''}
-                      onChange={(e) => handleChange('parentRelation', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentRelation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.parentRelation || ""}
+                      onChange={(e) =>
+                        handleChange("parentRelation", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentRelation ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     >
                       <option value="">Select Relation</option>
                       <option value="Father">Father</option>
                       <option value="Mother">Mother</option>
                     </select>
                     {fieldErrors.parentRelation && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentRelation}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.parentRelation}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -947,12 +1291,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={formData.parentName || ''}
-                      onChange={(e) => handleChange('parentName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.parentName || ""}
+                      onChange={(e) =>
+                        handleChange("parentName", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentName ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.parentName && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentName}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.parentName}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -962,12 +1310,18 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={formData.parentPhone || ''}
-                      onChange={(e) => handlePhoneChange('parentPhone', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentPhone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      required
+                      maxLength={10}
+                      value={formData.parentPhone || ""}
+                      onChange={(e) =>
+                        handlePhoneChange("parentPhone", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentPhone ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.parentPhone && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentPhone}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.parentPhone}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -977,18 +1331,22 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={formData.parentOccupation || ''}
-                      onChange={(e) => handleChange('parentOccupation', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentOccupation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.parentOccupation || ""}
+                      onChange={(e) =>
+                        handleChange("parentOccupation", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.parentOccupation ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.parentOccupation && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.parentOccupation}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.parentOccupation}
+                      </p>
                     )}
                   </div>
                 </>
               )}
 
-              {role === 'STAFF' && (
+              {role === "STAFF" && (
                 <>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -998,12 +1356,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="text"
                       required
-                      value={formData.employeeId || ''}
-                      onChange={(e) => handleChange('employeeId', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.employeeId || ""}
+                      onChange={(e) =>
+                        handleChange("employeeId", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.employeeId ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.employeeId && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.employeeId}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.employeeId}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -1014,12 +1376,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <input
                       type="date"
                       required
-                      value={formData.joiningDate || ''}
-                      onChange={(e) => handleChange('joiningDate', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.joiningDate || ""}
+                      onChange={(e) =>
+                        handleChange("joiningDate", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.joiningDate ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.joiningDate && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.joiningDate}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.joiningDate}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -1029,12 +1395,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="number"
-                      value={formData.expInYrs || '0'}
-                      onChange={(e) => handleChange('expInYrs', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.expInYrs || "0"}
+                      onChange={(e) => handleChange("expInYrs", e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.expInYrs ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.expInYrs && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.expInYrs}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.expInYrs}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -1044,12 +1412,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="number"
-                      value={formData.annualSalary || ''}
-                      onChange={(e) => handleChange('annualSalary', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.annualSalary ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+                      value={formData.annualSalary || ""}
+                      onChange={(e) =>
+                        handleChange("annualSalary", e.target.value)
+                      }
+                      className={`w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 ${fieldErrors.annualSalary ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"}`}
                     />
                     {fieldErrors.annualSalary && (
-                      <p className="text-xs text-red-600 mt-1">{fieldErrors.annualSalary}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {fieldErrors.annualSalary}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -1059,8 +1431,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </label>
                     <input
                       type="date"
-                      value={formData.resignationDate || ''}
-                      onChange={(e) => handleChange('resignationDate', e.target.value)}
+                      value={formData.resignationDate || ""}
+                      onChange={(e) =>
+                        handleChange("resignationDate", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -1082,7 +1456,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               disabled={loading}
               className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              {loading ? 'Creating...' : 'Create'}
+              {loading ? "Creating..." : "Create"}
             </button>
           </div>
         </form>

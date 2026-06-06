@@ -122,11 +122,11 @@ export async function updateClassTenureHandler(req: Request, res: Response) {
     }
 
     // Validate roll number prefix format if provided
-    if (rollNoPrefix && !/^[A-Z]{1,3}-$/.test(rollNoPrefix)) {
+    if (rollNoPrefix && !/^[A-Z0-9]{1,5}-$/.test(rollNoPrefix)) {
       const response: ApiResponse = {
         error: true,
         body: null,
-        message: 'Roll number prefix must be 1-3 uppercase letters followed by a hyphen (e.g., P-, PP-, SEC-)',
+        message: 'Roll number prefix must be 1-5 alphanumeric characters followed by a hyphen (e.g., A-, B-, SEC1-)',
       };
       return res.status(400).json(response);
     }

@@ -35,6 +35,12 @@ function validateUserData(userData: Prisma.UserCreateInput): ValidationError[] {
     errors.push({ field: 'address', message: 'Address is required' });
   }
 
+  if (!userData.phone || userData.phone.trim() === '') {
+    errors.push({ field: 'phone', message: 'Phone number is required' });
+  } else if (!/^\d{10}$/.test(userData.phone)) {
+    errors.push({ field: 'phone', message: 'Phone number must be exactly 10 digits' });
+  }
+
   if (!userData.emergencyContactRelation || userData.emergencyContactRelation.trim() === '') {
     errors.push({ field: 'emergencyContactRelation', message: 'Emergency contact relation is required' });
   }
@@ -53,8 +59,8 @@ function validateUserData(userData: Prisma.UserCreateInput): ValidationError[] {
     errors.push({ field: 'role', message: 'Role is required' });
   }
 
-  if (userData.password && userData.password.length < 6) {
-    errors.push({ field: 'password', message: 'Password must be at least 6 characters' });
+  if (userData.password && userData.password.length < 8) {
+    errors.push({ field: 'password', message: 'Password must be at least 8 characters' });
   }
 
   return errors;
