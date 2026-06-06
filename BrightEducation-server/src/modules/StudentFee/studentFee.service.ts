@@ -391,32 +391,12 @@ export async function recordPayment(data: {
       throw new AppError('Student fee record not found', 404);
     }
 
-    // Check if payment record already exists for this month
-    const existingPayment = await prisma.feePayment.findFirst({
-      where: {
-        studentFeeId: data.studentFeeId,
-        monthIndex: data.monthIndex,
-      },
-    });
-
     let payment;
 
-    if (existingPayment) {
-      // Update existing payment
-      payment = await prisma.feePayment.update({
-        where: { id: existingPayment.id },
-        data: {
-          amount: data.amount,
-          paymentDate: new Date(),
-          paymentMethod: data.paymentMethod,
-          status: data.status,
-          acceptedBy: data.acceptedBy,
-          reason: data.reason,
-          notes: data.notes,
-        },
-      });
-    } else {
-      // Create new payment record
+    // For SCHOOL fee type, always create a new payment record (no month-based updates)
+    // For TUITION fee type, check if payment already exists for this month
+    if (studentFee.feeType === 'SCHOOL') {
+      // Create new payment record for school fees
       payment = await prisma.feePayment.create({
         data: {
           studentFeeId: data.studentFeeId,
@@ -431,6 +411,46 @@ export async function recordPayment(data: {
           notes: data.notes,
         },
       });
+    } else {
+      // For tuition fees, check if payment record already exists for this month
+      const existingPayment = await prisma.feePayment.findFirst({
+        where: {
+          studentFeeId: data.studentFeeId,
+          monthIndex: data.monthIndex,
+        },
+      });
+
+      if (existingPayment) {
+        // Update existing payment
+        payment = await prisma.feePayment.update({
+          where: { id: existingPayment.id },
+          data: {
+            amount: data.amount,
+            paymentDate: new Date(),
+            paymentMethod: data.paymentMethod,
+            status: data.status,
+            acceptedBy: data.acceptedBy,
+            reason: data.reason,
+            notes: data.notes,
+          },
+        });
+      } else {
+        // Create new payment record
+        payment = await prisma.feePayment.create({
+          data: {
+            studentFeeId: data.studentFeeId,
+            month: data.month,
+            monthIndex: data.monthIndex,
+            amount: data.amount,
+            paymentDate: new Date(),
+            paymentMethod: data.paymentMethod,
+            status: data.status,
+            acceptedBy: data.acceptedBy,
+            reason: data.reason,
+            notes: data.notes,
+          },
+        });
+      }
     }
 
     // Update student fee totals only if status is PAID
@@ -968,6 +988,7 @@ export async function calculateSchoolFeeTotal(studentFeeId: string) {
         academicYear: true,
         payments: {
           orderBy: { paymentDate: 'desc' },
+          take: 100, // Ensure we get all payment history
         },
       },
     });
