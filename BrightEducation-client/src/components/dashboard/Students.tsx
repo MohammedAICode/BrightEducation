@@ -15,6 +15,12 @@ interface User {
   email: string;
   profileImg?: string;
   isActive?: string;
+  student?: {
+    rollNumber?: string;
+    classGrade?: string;
+    section?: string;
+    admissionNo?: string;
+  };
 }
 
 interface RoleData {
@@ -137,6 +143,21 @@ const Students: React.FC = () => {
           </div>
         </div>
       ),
+    },
+    {
+      key: 'rollNumber',
+      label: 'Roll Number',
+      render: (user) => <span className="text-sm text-gray-600">{user.student?.rollNumber || 'N/A'}</span>,
+    },
+    {
+      key: 'classGrade',
+      label: 'Class',
+      render: (user) => <span className="text-sm text-gray-600">{user.student?.classGrade || 'N/A'}</span>,
+    },
+    {
+      key: 'section',
+      label: 'Section',
+      render: (user) => <span className="text-sm text-gray-600">{user.student?.section || 'N/A'}</span>,
     },
     {
       key: 'gender',

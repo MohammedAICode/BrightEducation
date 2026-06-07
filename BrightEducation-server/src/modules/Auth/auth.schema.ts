@@ -31,4 +31,5 @@ export type ReqUser = {
   userId: string;
   email: string;
   role: string;
+  manageType?: string | null;
 };

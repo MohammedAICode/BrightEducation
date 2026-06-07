@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiX, FiCheckCircle, FiClock, FiXCircle, FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
 import { LuReceiptIndianRupee } from 'react-icons/lu';
 import axiosInstance from '../../lib/axios';
+import { useAppSelector } from '../../store/hooks';
 
 interface MonthWiseBreakdown {
   monthIndex: number;
@@ -78,6 +79,7 @@ export function FeeDetailsModal({
   academicYearName,
   feeType = 'TUITION',
 }: FeeDetailsModalProps) {
+  const currentUser = useAppSelector((state) => state.auth.user) as any;
   const [feeCalculation, setFeeCalculation] = useState<FeeCalculation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -533,12 +535,16 @@ export function FeeDetailsModal({
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                   <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="text-lg font-semibold text-gray-900">Payment History</h3>
-                    <button
-                      onClick={() => setIsRecordingPayment(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium"
-                    >
-                      Record Payment
-                    </button>
+                    {(currentUser?.role === 'ADMIN' || 
+                      (currentUser?.role === 'MANAGEMENT' && 
+                        (currentUser?.manageType === 'ACCOUNTS' || currentUser?.manageType === 'INCHARGE'))) && (
+                      <button
+                        onClick={() => setIsRecordingPayment(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium"
+                      >
+                        Record Payment
+                      </button>
+                    )}
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
@@ -556,15 +562,17 @@ export function FeeDetailsModal({
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                           </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
+                          {currentUser?.role === 'ADMIN' && (
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          )}
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {feeCalculation.paymentHistory.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="px-6 py-4 text-sm text-gray-500 text-center">
+                            <td colSpan={currentUser?.role === 'ADMIN' ? 5 : 4} className="px-6 py-4 text-sm text-gray-500 text-center">
                               No payments recorded yet
                             </td>
                           </tr>
@@ -589,20 +597,24 @@ export function FeeDetailsModal({
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-center">
                                 <div className="flex items-center justify-center space-x-2">
-                                  <button
-                                    onClick={() => handleViewSchoolPaymentDetails(payment)}
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="View Details"
-                                  >
-                                    <FiEye className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteSchoolPayment(payment)}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Delete Payment"
-                                  >
-                                    <FiTrash2 className="w-4 h-4" />
-                                  </button>
+                                  {currentUser?.role === 'ADMIN' && (
+                                    <>
+                                      <button
+                                        onClick={() => handleViewSchoolPaymentDetails(payment)}
+                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        title="View Details"
+                                      >
+                                        <FiEye className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteSchoolPayment(payment)}
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Delete Payment"
+                                      >
+                                        <FiTrash2 className="w-4 h-4" />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </td>
                             </tr>

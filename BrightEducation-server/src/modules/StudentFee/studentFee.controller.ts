@@ -202,11 +202,11 @@ export async function updateStudentFeeController(req: Request, res: Response) {
 
   try {
 
-    // Admin and MANAGEMENT roles can update student fees
-    if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'MANAGEMENT')) {
+    // Only ADMIN can update student fees
+    if (!req.user || req.user.role !== 'ADMIN') {
       return res.status(403).json({
         error: true,
-        message: 'Only administrators and management can update student fees',
+        message: 'Only administrators can update student fees',
       });
     }
 
@@ -270,6 +270,24 @@ export async function updateStudentFeeController(req: Request, res: Response) {
 export async function recordPaymentController(req: Request, res: Response) {
 
   try {
+
+    // Only ADMIN or MANAGEMENT with ACCOUNTANT/INCHARGE role can record payments
+    if (!req.user) {
+      return res.status(401).json({
+        error: true,
+        message: 'Authentication required',
+      });
+    }
+
+    if (req.user.role !== 'ADMIN') {
+      if (req.user.role !== 'MANAGEMENT' || 
+          (req.user.manageType !== 'ACCOUNTS' && req.user.manageType !== 'INCHARGE')) {
+        return res.status(403).json({
+          error: true,
+          message: 'Only administrators or management users with ACCOUNTS or INCHARGE role can record payments',
+        });
+      }
+    }
 
     const { studentFeeId, month, monthIndex, amount, paymentMethod, status, acceptedBy, reason, notes } = req.body;
 
@@ -469,6 +487,14 @@ export async function calculateSchoolFeeTotalController(req: Request, res: Respo
 
 export async function deleteFeePaymentController(req: Request, res: Response) {
   try {
+    // Only ADMIN users can delete payments
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        error: true,
+        message: 'Only administrators can delete payments',
+      });
+    }
+
     const { studentFeeId } = req.params;
     const { paymentId, monthIndex, reasonType, reason, deletedBy } = req.body;
 

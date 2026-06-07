@@ -51,10 +51,18 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       }
 
       logger.info(`[AUTHENTICATE] Access token valid for user: ${accResult.email}`);
+      
+      // Fetch user from database to get manageType from Management relation
+      const user = await prisma.user.findUnique({
+        where: { id: accResult.userId },
+        include: { management: true },
+      });
+      
       const userData: ReqUser = {
         userId: accResult.userId,
         email: accResult.email,
         role: accResult.role,
+        manageType: user?.management?.manageType || null,
       };
       req.user = userData;
 
@@ -87,10 +95,17 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
           res.cookie(COOKIE_NAMES.REFRESH_TOKEN, refTokens, cookieOptions);
           res.cookie(COOKIE_NAMES.ACCESS_TOKEN, accTokens, cookieOptions);
 
+          // Fetch user from database to get manageType from Management relation
+          const user = await prisma.user.findUnique({
+            where: { id: refResult.userId },
+            include: { management: true },
+          });
+          
           const userData: ReqUser = {
             userId: refResult.userId,
             email: refResult.email,
             role: refResult.role,
+            manageType: user?.management?.manageType || null,
           };
           req.user = userData;
 

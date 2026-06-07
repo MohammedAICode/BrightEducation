@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiX, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBook, FiClock } from 'react-icons/fi';
 import { LuReceiptIndianRupee } from 'react-icons/lu';
 import axiosInstance from '../../lib/axios';
+import { useAppSelector } from '../../store/hooks';
 
 interface Student {
   id: string;
@@ -79,6 +80,7 @@ export function StudentDetailsModal({
   onUpdateStatus,
   onShowFeeDetails,
 }: StudentDetailsModalProps) {
+  const currentUser = useAppSelector((state) => state.auth.user) as any;
   const [studentFees, setStudentFees] = useState<StudentFee[]>([]);
   const [loadingFees, setLoadingFees] = useState(false);
 
@@ -395,13 +397,15 @@ export function StudentDetailsModal({
             ) : (
               <div className="bg-gray-50/80 rounded-xl p-6 text-center border border-gray-100">
                 <p className="text-sm text-gray-500 mb-4">No fee information available for this academic year</p>
-                <button
-                  onClick={onUpdateFee}
-                  className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 mx-auto"
-                >
-                  <LuReceiptIndianRupee className="w-4 h-4" />
-                  <span>Setup Fees</span>
-                </button>
+                {currentUser?.role === 'ADMIN' && (
+                  <button
+                    onClick={onUpdateFee}
+                    className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 mx-auto"
+                  >
+                    <LuReceiptIndianRupee className="w-4 h-4" />
+                    <span>Setup Fees</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -409,20 +413,24 @@ export function StudentDetailsModal({
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-100">
-          <button
-            onClick={onUpdateFee}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200"
-          >
-            <LuReceiptIndianRupee className="w-4 h-4" />
-            <span>Update Fee</span>
-          </button>
-          <button
-            onClick={onUpdateStatus}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200"
-          >
-            <FiClock className="w-4 h-4" />
-            <span>Update Status</span>
-          </button>
+          {currentUser?.role === 'ADMIN' && (
+            <>
+              <button
+                onClick={onUpdateFee}
+                className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200"
+              >
+                <LuReceiptIndianRupee className="w-4 h-4" />
+                <span>Update Fee</span>
+              </button>
+              <button
+                onClick={onUpdateStatus}
+                className="flex items-center space-x-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200"
+              >
+                <FiClock className="w-4 h-4" />
+                <span>Update Status</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

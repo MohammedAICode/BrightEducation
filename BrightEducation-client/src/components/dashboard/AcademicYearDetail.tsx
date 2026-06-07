@@ -3205,7 +3205,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
 
 
-                    const enrolledStudentRowActions: Action<Student & { enrollment?: StudentEnrollment }>[] = [
+                    const enrolledStudentRowActions: Action<Student & { enrollment?: StudentEnrollment }>[] = user?.role === 'ADMIN' ? [
 
                       {
 
@@ -3229,7 +3229,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                       },
 
-                    ];
+                    ] : [];
 
 
 
@@ -5347,7 +5347,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
               <div className="mb-4">
 
-                <label className="block text-sm font-medium text-gray-700 mb-1">Class Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Class Name <span className="text-red-500">*</span></label>
 
                 <input
 
@@ -5356,6 +5356,8 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                   value={editClassName}
 
                   onChange={(e) => setEditClassName(e.target.value)}
+
+                  placeholder="Enter class name (e.g., Class 10)"
 
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
@@ -5457,7 +5459,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Section Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Section Name <span className="text-red-500">*</span></label>
 
                   <input
 
@@ -5466,6 +5468,8 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                     value={editSectionName}
 
                     onChange={(e) => setEditSectionName(e.target.value)}
+
+                    placeholder="Section name (e.g., A)"
 
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
@@ -5477,7 +5481,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Capacity <span className="text-red-500">*</span></label>
 
                   <input
 
@@ -5486,6 +5490,8 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                     value={editSectionCapacity}
 
                     onChange={(e) => setEditSectionCapacity(e.target.value)}
+
+                    placeholder="Capacity"
 
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
@@ -5619,7 +5625,7 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
 
               <div className="mb-4">
 
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name <span className="text-red-500">*</span></label>
 
                 <input
 
@@ -5628,6 +5634,8 @@ export default function AcademicYearDetail({ yearId }: AcademicYearDetailProps) 
                   value={editSubjectName}
 
                   onChange={(e) => setEditSubjectName(e.target.value)}
+
+                  placeholder="Enter subject name"
 
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm font-medium text-gray-800 transition-all shadow-sm"
 
